@@ -1,27 +1,13 @@
-# Base image
-FROM oven/bun:1.2.12 AS builder
+FROM python:3.12-slim
 
-WORKDIR /app
+WORKDIR /app/OpenManus
 
-# Install dependencies (separated for better cache utilization)
-COPY package.json bun.lock ./
-RUN bun install
+RUN apt-get update && apt-get install -y --no-install-recommends git curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && (command -v uv >/dev/null 2>&1 || pip install --no-cache-dir uv)
 
-# Copy source code and build
 COPY . .
-RUN bun next telemetry disable
-RUN bun run build
 
-# Runtime stage
-FROM oven/bun:1.2.12 AS runner
-WORKDIR /app
+RUN uv pip install --system -r requirements.txt
 
-# Copy only necessary files from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/bun.lock ./bun.lock
-COPY --from=builder /app/node_modules ./node_modules
-
-# Start production server
-CMD ["bun", "start", "-H", "0.0.0.0"]
+CMD ["bash"]

@@ -11,6 +11,14 @@ export function SearchToEyeTransition() {
     const [isProcessing, setIsProcessing] = useState(false)
     const [showEye, setShowEye] = useState(false)
     const [searchValue, setSearchValue] = useState("")
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768)
+        checkMobile()
+        window.addEventListener("resize", checkMobile)
+        return () => window.removeEventListener("resize", checkMobile)
+    }, [])
 
     const handleFocus = () => {
         setIsActive(true)
@@ -40,14 +48,14 @@ export function SearchToEyeTransition() {
                 position: "relative",
                 width: "100%",
                 height: "100vh",
-                minHeight: "600px",
+                minHeight: isMobile ? "500px" : "600px",
                 background: "#f5f5f5",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-start",
                 alignItems: "center",
-                padding: "40px 0",
+                padding: isMobile ? "20px 0" : "40px 0",
             }}
         >
             {/* Eye Section - at the top */}
@@ -55,8 +63,8 @@ export function SearchToEyeTransition() {
                 style={{
                     position: "relative",
                     width: "100%",
-                    height: "450px",
-                    marginBottom: "60px",
+                    height: isMobile ? "250px" : "450px",
+                    marginBottom: isMobile ? "30px" : "60px",
                 }}
             >
                 {showEye && <EyeAnimation />}
@@ -67,6 +75,8 @@ export function SearchToEyeTransition() {
                 style={{
                     position: "relative",
                     zIndex: 10,
+                    width: isMobile ? "90%" : "auto",
+                    maxWidth: "600px",
                 }}
             >
                 <form onSubmit={handleSubmit} style={{ position: "relative" }}>
@@ -118,12 +128,19 @@ export function SearchToEyeTransition() {
 
         .finder__outer {
           display: flex;
-          width: 600px;
-          padding: 1.5rem 2rem;
+          width: 100%;
+          max-width: 600px;
+          padding: 1rem 1.2rem;
           border-radius: 12px;
           box-shadow:
             inset 12px 12px 20px -10px rgba(195, 195, 195, 0.6),
             inset -12px -12px 20px -10px rgba(255, 255, 255, 0.8);
+        }
+
+        @media (min-width: 769px) {
+          .finder__outer {
+            padding: 1.5rem 2rem;
+          }
         }
 
         .finder__inner {
@@ -138,9 +155,16 @@ export function SearchToEyeTransition() {
           border: none;
           background-color: transparent;
           outline: none;
-          font-size: 1.5rem;
-          letter-spacing: 0.75px;
+          font-size: 1rem;
+          letter-spacing: 0.5px;
           font-family: inherit;
+        }
+
+        @media (min-width: 769px) {
+          .finder__input {
+            font-size: 1.5rem;
+            letter-spacing: 0.75px;
+          }
         }
 
         .finder__input::placeholder {
@@ -148,12 +172,21 @@ export function SearchToEyeTransition() {
         }
 
         .finder__icon {
-          width: 40px;
-          height: 40px;
-          margin-right: 1rem;
-          box-shadow: inset 0 0 0 20px #2a2a2a;
+          width: 28px;
+          height: 28px;
+          margin-right: 0.75rem;
+          box-shadow: inset 0 0 0 14px #2a2a2a;
           border-radius: 50%;
           position: relative;
+        }
+
+        @media (min-width: 769px) {
+          .finder__icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 1rem;
+            box-shadow: inset 0 0 0 20px #2a2a2a;
+          }
         }
 
         .finder__icon::after,
@@ -165,10 +198,10 @@ export function SearchToEyeTransition() {
 
         /* Inner circle of magnifying glass */
         .finder__icon::after {
-          width: 10px;
-          height: 10px;
+          width: 7px;
+          height: 7px;
           background-color: #2a2a2a;
-          border: 3px solid #ffffff;
+          border: 2px solid #ffffff;
           top: 50%;
           position: absolute;
           transform: translateY(-50%);
@@ -178,27 +211,57 @@ export function SearchToEyeTransition() {
           border-radius: 50%;
         }
 
+        @media (min-width: 769px) {
+          .finder__icon::after {
+            width: 10px;
+            height: 10px;
+            border-width: 3px;
+          }
+        }
+
         .active .finder__icon::after {
-          border-width: 10px;
+          border-width: 7px;
           background-color: #f5f5f5;
+        }
+
+        @media (min-width: 769px) {
+          .active .finder__icon::after {
+            border-width: 10px;
+          }
         }
 
         /* Handle of magnifying glass */
         .finder__icon::before {
-          width: 4px;
-          height: 13px;
+          width: 3px;
+          height: 9px;
           background-color: #f5f5f5;
           top: 50%;
-          left: 20px;
+          left: 14px;
           transform: rotateZ(45deg) translate(-50%, 0);
           transform-origin: 0 0;
-          border-radius: 4px;
+          border-radius: 3px;
+        }
+
+        @media (min-width: 769px) {
+          .finder__icon::before {
+            width: 4px;
+            height: 13px;
+            left: 20px;
+            border-radius: 4px;
+          }
         }
 
         .active .finder__icon::before {
           background-color: #2a2a2a;
-          width: 6px;
-          transform: rotateZ(45deg) translate(-50%, 25px);
+          width: 4px;
+          transform: rotateZ(45deg) translate(-50%, 18px);
+        }
+
+        @media (min-width: 769px) {
+          .active .finder__icon::before {
+            width: 6px;
+            transform: rotateZ(45deg) translate(-50%, 25px);
+          }
         }
 
         .processing .finder__icon {
@@ -300,24 +363,42 @@ function EyeAnimation() {
         }
 
         .eye {
-          width: 332px;
-          height: 332px;
+          width: 200px;
+          height: 200px;
           transform: translate(-50%, -50%) scale(0);
           border-radius: 50%;
           background: #f8f8f8;
-          filter: blur(5px);
-          box-shadow: inset -12px -18px 35px -5px rgba(200, 200, 200, 0.7),
-                      64px 55px 60px -30px rgba(150, 150, 150, 0.4),
-                      20px 18px 40px -5px rgba(160, 160, 160, 0.5),
-                      inset -70px -50px 80px -20px rgba(180, 180, 180, 0.4),
-                      inset -90px -90px 90px -70px rgba(170, 170, 170, 0.3),
-                      inset -70px -50px 120px -30px rgba(190, 190, 190, 0.35),
-                      inset 80px 50px 100px -40px rgba(255, 255, 255, 0.8),
-                      -25px -15px 60px -5px rgba(200, 200, 200, 0.3),
-                      14px -1px 60px -5px rgba(170, 170, 170, 0.4),
-                      1px 9px 60px -5px rgba(175, 175, 175, 0.4);
+          filter: blur(3px);
+          box-shadow: inset -8px -12px 24px -3px rgba(200, 200, 200, 0.7),
+                      40px 35px 40px -20px rgba(150, 150, 150, 0.4),
+                      12px 12px 26px -3px rgba(160, 160, 160, 0.5),
+                      inset -45px -32px 52px -13px rgba(180, 180, 180, 0.4),
+                      inset -55px -55px 58px -45px rgba(170, 170, 170, 0.3),
+                      inset -45px -32px 78px -20px rgba(190, 190, 190, 0.35),
+                      inset 50px 32px 65px -26px rgba(255, 255, 255, 0.8),
+                      -16px -10px 40px -3px rgba(200, 200, 200, 0.3),
+                      9px -1px 40px -3px rgba(170, 170, 170, 0.4),
+                      1px 6px 40px -3px rgba(175, 175, 175, 0.4);
           animation: eyeAppear 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s forwards,
                      eyeAnimation 4s cubic-bezier(1, 0, 1, 1) 2s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .eye {
+            width: 332px;
+            height: 332px;
+            filter: blur(5px);
+            box-shadow: inset -12px -18px 35px -5px rgba(200, 200, 200, 0.7),
+                        64px 55px 60px -30px rgba(150, 150, 150, 0.4),
+                        20px 18px 40px -5px rgba(160, 160, 160, 0.5),
+                        inset -70px -50px 80px -20px rgba(180, 180, 180, 0.4),
+                        inset -90px -90px 90px -70px rgba(170, 170, 170, 0.3),
+                        inset -70px -50px 120px -30px rgba(190, 190, 190, 0.35),
+                        inset 80px 50px 100px -40px rgba(255, 255, 255, 0.8),
+                        -25px -15px 60px -5px rgba(200, 200, 200, 0.3),
+                        14px -1px 60px -5px rgba(170, 170, 170, 0.4),
+                        1px 9px 60px -5px rgba(175, 175, 175, 0.4);
+          }
         }
 
         @keyframes eyeAppear {
@@ -361,15 +442,26 @@ function EyeAnimation() {
         }
 
         .eye::after {
-          width: 160px;
-          height: 160px;
+          width: 96px;
+          height: 96px;
           border-radius: 50%;
-          box-shadow: inset -60px -30px 45px -5px rgba(230, 230, 230, 0.8),
-                      inset 100px 10px 35px -20px rgba(100, 100, 100, 0.6),
-                      0px 0px 15px 10px rgba(220, 220, 220, 0.9),
-                      inset 0px 0px 30px 5px rgba(210, 210, 210, 0.4);
+          box-shadow: inset -36px -18px 27px -3px rgba(230, 230, 230, 0.8),
+                      inset 60px 6px 21px -12px rgba(100, 100, 100, 0.6),
+                      0px 0px 9px 6px rgba(220, 220, 220, 0.9),
+                      inset 0px 0px 18px 3px rgba(210, 210, 210, 0.4);
           animation: pupilAnimationSize 4s cubic-bezier(1, 0, 1, 1) 2s infinite,
                      pupilAnimationView 4s ease 2s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .eye::after {
+            width: 160px;
+            height: 160px;
+            box-shadow: inset -60px -30px 45px -5px rgba(230, 230, 230, 0.8),
+                        inset 100px 10px 35px -20px rgba(100, 100, 100, 0.6),
+                        0px 0px 15px 10px rgba(220, 220, 220, 0.9),
+                        inset 0px 0px 30px 5px rgba(210, 210, 210, 0.4);
+          }
         }
 
         @keyframes pupilAnimationSize {
@@ -406,14 +498,21 @@ function EyeAnimation() {
         }
 
         .circle-1 {
-          width: 475px;
-          height: 475px;
+          width: 285px;
+          height: 285px;
           border-radius: 50%;
           border: 1px solid transparent;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circleFadeIn 0.8s ease 1.5s forwards,
                      circle1AnimationOpacity 4s ease 2.3s infinite,
                      circle1AnimationMove 4s ease 2.3s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .circle-1 {
+            width: 475px;
+            height: 475px;
+          }
         }
 
         @keyframes circleFadeIn {
@@ -436,14 +535,21 @@ function EyeAnimation() {
         }
 
         .circle-2 {
-          width: 475px;
-          height: 475px;
+          width: 285px;
+          height: 285px;
           border-radius: 50%;
           border: 1px solid transparent;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circleFadeIn 0.8s ease 1.6s forwards,
                      circle2AnimationOpacity 4s ease 2.4s infinite,
                      circle2AnimationMove 4s ease 2.4s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .circle-2 {
+            width: 475px;
+            height: 475px;
+          }
         }
 
         @keyframes circle2AnimationMove {
@@ -462,23 +568,39 @@ function EyeAnimation() {
         }
 
         .circle-3 {
-          left: calc(50% + 93px);
-          top: calc(50% - 189px);
-          width: 106px;
-          height: 280px;
+          left: calc(50% + 56px);
+          top: calc(50% - 113px);
+          width: 64px;
+          height: 168px;
           overflow: hidden;
           animation: circleFadeIn 0.8s ease 1.7s forwards;
+        }
+
+        @media (min-width: 769px) {
+          .circle-3 {
+            left: calc(50% + 93px);
+            top: calc(50% - 189px);
+            width: 106px;
+            height: 280px;
+          }
         }
 
         .circle-3::before {
           left: -275%;
           top: -4%;
-          width: 393px;
-          height: 393px;
+          width: 236px;
+          height: 236px;
           border-radius: 50%;
           border: 1px solid transparent;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circle3Animation 4s ease 2.5s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .circle-3::before {
+            width: 393px;
+            height: 393px;
+          }
         }
 
         @keyframes circle3Animation {
@@ -489,8 +611,8 @@ function EyeAnimation() {
         }
 
         .circle-4 {
-          width: 295px;
-          height: 295px;
+          width: 177px;
+          height: 177px;
           border-radius: 50%;
           border: 1px solid transparent;
           border-right-color: rgba(180, 180, 180, 0.7);
@@ -498,6 +620,13 @@ function EyeAnimation() {
           animation: circleFadeIn 0.8s ease 1.8s forwards,
                      circle4AnimationMove 4s cubic-bezier(1, 0, 1, 1) 2.6s infinite,
                      circle4AnimationOpacity 4s ease 2.6s infinite;
+        }
+
+        @media (min-width: 769px) {
+          .circle-4 {
+            width: 295px;
+            height: 295px;
+          }
         }
 
         @keyframes circle4AnimationMove {

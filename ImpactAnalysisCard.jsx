@@ -276,7 +276,6 @@ export function ImpactAnalysisCard(props) {
                                             ? "#1f2937"
                                             : "#9ca3af",
                                     letterSpacing: "0.05em",
-                                    transition: "all 0.3s ease",
                                     flex: "1 1 0",
                                     minWidth: isMobile ? "0" : "140px",
                                     whiteSpace: "nowrap",
@@ -298,10 +297,9 @@ export function ImpactAnalysisCard(props) {
 
                 <div
                     style={{
-                        display: "grid",
-                        gridTemplateColumns: isMobile ? "1fr" : "1.1fr 1.2fr",
-                        gap: isMobile ? "40px" : "60px",
-                        alignItems: "center",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "40px",
                     }}
                 >
                     <div>

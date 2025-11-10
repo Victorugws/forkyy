@@ -45,31 +45,27 @@ export function SearchToEyeTransition() {
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "center",
+                justifyContent: "flex-start",
                 alignItems: "center",
-                gap: "40px",
+                padding: "40px 0",
             }}
         >
-            {/* Eye Background - appears above search */}
-            {showEye && (
-                <div
-                    style={{
-                        position: "relative",
-                        width: "100%",
-                        height: "400px",
-                        opacity: showEye ? 1 : 0,
-                    }}
-                >
-                    <EyeAnimation />
-                </div>
-            )}
-
-            {/* Search Form - stays visible below eye */}
+            {/* Eye Section - at the top */}
             <div
                 style={{
-                    opacity: 1,
-                    transform: "scale(1)",
-                    pointerEvents: "auto",
+                    position: "relative",
+                    width: "100%",
+                    height: "450px",
+                    marginBottom: "60px",
+                }}
+            >
+                {showEye && <EyeAnimation />}
+            </div>
+
+            {/* Search Form - separated below */}
+            <div
+                style={{
+                    position: "relative",
                     zIndex: 10,
                 }}
             >

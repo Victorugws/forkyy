@@ -10,11 +10,13 @@ import {
   Sparkles,
   Globe,
   Image as ImageIcon,
-  Video
+  Video,
+  ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { InfiniteNewsFeed } from '@/components/discover/InfiniteNewsFeed'
+import { BrowserModal } from '@/components/shared/BrowserModal'
 
 type ContentTab = 'all' | 'images' | 'videos' | 'news'
 
@@ -38,6 +40,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true)
   const [imageResults, setImageResults] = useState<any[]>([])
   const [videoResults, setVideoResults] = useState<any[]>([])
+  const [showBrowserFeatured, setShowBrowserFeatured] = useState(false)
 
   useEffect(() => {
     // Load saved interests from localStorage
@@ -213,11 +216,9 @@ export default function DiscoverPage() {
                 </div>
               </div>
             ) : (
-              <a
-                href={featuredArticle.url || `/search?q=${encodeURIComponent(featuredArticle.title)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block group mb-8"
+              <div
+                onClick={() => setShowBrowserFeatured(true)}
+                className="block group mb-8 cursor-pointer"
               >
                 <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
                   <div className="flex-1">
@@ -240,6 +241,17 @@ export default function DiscoverPage() {
                         {featuredArticle.source}
                       </span>
                       <span>Published {featuredArticle.publishedHours} hours ago</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          window.open(featuredArticle.url || `/search?q=${encodeURIComponent(featuredArticle.title)}`, '_blank', 'noopener,noreferrer')
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground ml-auto"
+                        aria-label="Open in new tab"
+                      >
+                        <ExternalLink className="size-4" />
+                        <span className="text-sm">Open</span>
+                      </button>
                     </div>
                   </div>
                   <div className="w-80 h-48 rounded-xl overflow-hidden flex-shrink-0">
@@ -250,7 +262,7 @@ export default function DiscoverPage() {
                     />
                   </div>
                 </div>
-              </a>
+              </div>
             )}
 
             {/* Infinite News Feed */}
@@ -490,6 +502,15 @@ export default function DiscoverPage() {
           </div>
         </div>
       </div>
+
+      {/* Browser Modal for Featured Article */}
+      {showBrowserFeatured && featuredArticle && (
+        <BrowserModal
+          url={featuredArticle.url}
+          title={featuredArticle.title}
+          onClose={() => setShowBrowserFeatured(false)}
+        />
+      )}
     </div>
   )
 }

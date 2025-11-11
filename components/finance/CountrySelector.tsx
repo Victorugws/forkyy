@@ -31,7 +31,41 @@ const COUNTRIES: Country[] = [
   { name: 'Sweden', code: 'SE', flag: '🇸🇪', abbreviation: 'SWE' },
   { name: 'Singapore', code: 'SG', flag: '🇸🇬', abbreviation: 'SGP' },
   { name: 'Hong Kong', code: 'HK', flag: '🇭🇰', abbreviation: 'HKG' },
-  { name: 'South Africa', code: 'ZA', flag: '🇿🇦', abbreviation: 'ZAF' }
+  { name: 'South Africa', code: 'ZA', flag: '🇿🇦', abbreviation: 'ZAF' },
+  { name: 'Russia', code: 'RU', flag: '🇷🇺', abbreviation: 'RUS' },
+  { name: 'Poland', code: 'PL', flag: '🇵🇱', abbreviation: 'POL' },
+  { name: 'Turkey', code: 'TR', flag: '🇹🇷', abbreviation: 'TUR' },
+  { name: 'Indonesia', code: 'ID', flag: '🇮🇩', abbreviation: 'IDN' },
+  { name: 'Thailand', code: 'TH', flag: '🇹🇭', abbreviation: 'THA' },
+  { name: 'Malaysia', code: 'MY', flag: '🇲🇾', abbreviation: 'MYS' },
+  { name: 'Philippines', code: 'PH', flag: '🇵🇭', abbreviation: 'PHL' },
+  { name: 'Vietnam', code: 'VN', flag: '🇻🇳', abbreviation: 'VNM' },
+  { name: 'Argentina', code: 'AR', flag: '🇦🇷', abbreviation: 'ARG' },
+  { name: 'Chile', code: 'CL', flag: '🇨🇱', abbreviation: 'CHL' },
+  { name: 'Colombia', code: 'CO', flag: '🇨🇴', abbreviation: 'COL' },
+  { name: 'Peru', code: 'PE', flag: '🇵🇪', abbreviation: 'PER' },
+  { name: 'Belgium', code: 'BE', flag: '🇧🇪', abbreviation: 'BEL' },
+  { name: 'Austria', code: 'AT', flag: '🇦🇹', abbreviation: 'AUT' },
+  { name: 'Norway', code: 'NO', flag: '🇳🇴', abbreviation: 'NOR' },
+  { name: 'Denmark', code: 'DK', flag: '🇩🇰', abbreviation: 'DNK' },
+  { name: 'Finland', code: 'FI', flag: '🇫🇮', abbreviation: 'FIN' },
+  { name: 'Ireland', code: 'IE', flag: '🇮🇪', abbreviation: 'IRL' },
+  { name: 'Portugal', code: 'PT', flag: '🇵🇹', abbreviation: 'PRT' },
+  { name: 'Greece', code: 'GR', flag: '🇬🇷', abbreviation: 'GRC' },
+  { name: 'Czech Republic', code: 'CZ', flag: '🇨🇿', abbreviation: 'CZE' },
+  { name: 'Romania', code: 'RO', flag: '🇷🇴', abbreviation: 'ROU' },
+  { name: 'Hungary', code: 'HU', flag: '🇭🇺', abbreviation: 'HUN' },
+  { name: 'Israel', code: 'IL', flag: '🇮🇱', abbreviation: 'ISR' },
+  { name: 'UAE', code: 'AE', flag: '🇦🇪', abbreviation: 'ARE' },
+  { name: 'Saudi Arabia', code: 'SA', flag: '🇸🇦', abbreviation: 'SAU' },
+  { name: 'Egypt', code: 'EG', flag: '🇪🇬', abbreviation: 'EGY' },
+  { name: 'Nigeria', code: 'NG', flag: '🇳🇬', abbreviation: 'NGA' },
+  { name: 'Kenya', code: 'KE', flag: '🇰🇪', abbreviation: 'KEN' },
+  { name: 'New Zealand', code: 'NZ', flag: '🇳🇿', abbreviation: 'NZL' },
+  { name: 'Pakistan', code: 'PK', flag: '🇵🇰', abbreviation: 'PAK' },
+  { name: 'Bangladesh', code: 'BD', flag: '🇧🇩', abbreviation: 'BGD' },
+  { name: 'Ukraine', code: 'UA', flag: '🇺🇦', abbreviation: 'UKR' },
+  { name: 'Kazakhstan', code: 'KZ', flag: '🇰🇿', abbreviation: 'KAZ' }
 ]
 
 interface CountrySelectorProps {
@@ -106,7 +140,8 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
           console.log('Country selector clicked, current state:', isOpen)
           setIsOpen(!isOpen)
         }}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors cursor-pointer"
+        style={{ pointerEvents: 'auto' }}
       >
         <Globe className="size-4" />
         <span className="text-sm font-medium flex items-center gap-2">

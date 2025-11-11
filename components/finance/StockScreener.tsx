@@ -97,9 +97,10 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
                               console.log('Add to watchlist button clicked for:', stock.ticker)
                               onAddToWatchlist(stock.ticker)
                             }}
-                            className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors ml-auto text-xs"
+                            className="flex items-center gap-1 px-3 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors ml-auto text-xs font-medium cursor-pointer"
+                            style={{ pointerEvents: 'auto' }}
                           >
-                            <Plus className="size-3" />
+                            <Plus className="size-4" />
                             Add
                           </button>
                         )}

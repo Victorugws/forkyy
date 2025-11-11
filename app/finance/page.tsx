@@ -15,11 +15,19 @@ import { MarketInsights } from '@/components/finance/MarketInsights'
 import { CountrySelector, type Country } from '@/components/finance/CountrySelector'
 import { useWatchlist } from '@/hooks/useWatchlist'
 
-const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
-
 export default function FinancePage() {
-  const [activeTab, setActiveTab] = useState('US Markets')
   const [selectedCountry, setSelectedCountry] = useState('United States')
+
+  // Dynamic tabs based on selected country
+  const tabs = [
+    selectedCountry === 'United States' ? 'US Markets' : selectedCountry === 'United Kingdom' ? 'UK Markets' : selectedCountry === 'Canada' ? 'Canada Markets' : `${selectedCountry} Markets`,
+    'Crypto',
+    'Earnings',
+    'Screener',
+    'Politicians'
+  ]
+
+  const [activeTab, setActiveTab] = useState(tabs[0])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '1Y'>('1D')
 
@@ -83,20 +91,53 @@ export default function FinancePage() {
     console.log('Finance page: Country changed to:', country.name)
     setSelectedCountry(country.name)
 
-    // Refetch politician trades with new country
-    const fetchPoliticiansByCountry = async () => {
+    // Update active tab to match new country if on Markets tab
+    if (activeTab.includes('Markets')) {
+      const newMarketTab = country.name === 'United States' ? 'US Markets' : country.name === 'United Kingdom' ? 'UK Markets' : country.name === 'Canada' ? 'Canada Markets' : `${country.name} Markets`
+      setActiveTab(newMarketTab)
+    }
+
+    // Refetch all financial data with new country
+    const fetchDataForCountry = async () => {
+      setLoading(true)
       try {
-        const res = await fetch(`/api/finance?type=politicians&country=${encodeURIComponent(country.name)}`)
-        const data = await res.json()
-        if (data.success || data.fallback) {
-          setPoliticianTrades(data.data)
+        // Fetch all data in parallel with country parameter
+        const [stocksRes, cryptoRes, screenerRes, politiciansRes] = await Promise.all([
+          fetch(`/api/finance?type=stocks&country=${encodeURIComponent(country.name)}`),
+          fetch(`/api/finance?type=crypto&country=${encodeURIComponent(country.name)}`),
+          fetch(`/api/finance?type=screener&country=${encodeURIComponent(country.name)}`),
+          fetch(`/api/finance?type=politicians&country=${encodeURIComponent(country.name)}`)
+        ])
+
+        const [stocksData, cryptoDataRes, screenerData, politiciansData] = await Promise.all([
+          stocksRes.json(),
+          cryptoRes.json(),
+          screenerRes.json(),
+          politiciansRes.json()
+        ])
+
+        if (stocksData.success || stocksData.fallback) {
+          setMarketIndices(stocksData.data)
         }
+        if (cryptoDataRes.success || cryptoDataRes.fallback) {
+          setCryptoData(cryptoDataRes.data)
+        }
+        if (screenerData.success || screenerData.fallback) {
+          setScreenerStocks(screenerData.data)
+        }
+        if (politiciansData.success || politiciansData.fallback) {
+          setPoliticianTrades(politiciansData.data)
+        }
+
+        console.log('Data refetched for country:', country.name)
       } catch (error) {
-        console.error('Error fetching politician trades for country:', error)
+        console.error('Error fetching data for country:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
-    fetchPoliticiansByCountry()
+    fetchDataForCountry()
   }
 
   return (
@@ -148,16 +189,16 @@ export default function FinancePage() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'US Markets' && (
+        {activeTab.includes('Markets') && (
           <>
             <MarketInsights type="US Markets" data={marketIndices} timeframe={timeframe} />
             <MarketIndicesGrid indices={marketIndices} loading={loading} />
             <MarketProgressionChart
-              title="Market Performance"
+              title={`${selectedCountry} Market Performance`}
               timeframe={timeframe}
               onTimeframeChange={setTimeframe}
             />
-            <MarketSummary topic="US Markets" />
+            <MarketSummary topic={`${selectedCountry} Markets`} />
           </>
         )}
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Globe, ChevronDown, TrendingUp } from 'lucide-react'
+import { ChevronRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { MarketIndicesGrid } from '@/components/finance/MarketIndicesGrid'
@@ -11,17 +11,20 @@ import { StockScreener } from '@/components/finance/StockScreener'
 import { PoliticianTrades } from '@/components/finance/PoliticianTrades'
 import { WatchlistSidebar } from '@/components/finance/WatchlistSidebar'
 import { MarketProgressionChart } from '@/components/finance/MarketProgressionChart'
+import { MarketInsights } from '@/components/finance/MarketInsights'
+import { CountrySelector, type Country } from '@/components/finance/CountrySelector'
+import { useWatchlist } from '@/hooks/useWatchlist'
 
-const countries = ['United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Japan', 'China', 'India']
 const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
 
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState('US Markets')
-  const [myWatchlist, setMyWatchlist] = useState<string[]>([])
   const [selectedCountry, setSelectedCountry] = useState('United States')
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '1Y'>('1D')
+
+  // Use watchlist hook
+  const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist()
 
   // Dynamic data states
   const [marketIndices, setMarketIndices] = useState<any[]>([])
@@ -29,25 +32,6 @@ export default function FinancePage() {
   const [screenerStocks, setScreenerStocks] = useState<any[]>([])
   const [politicianTrades, setPoliticianTrades] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Load saved watchlist from localStorage
-    const saved = localStorage.getItem('stockWatchlist')
-    if (saved) {
-      setMyWatchlist(JSON.parse(saved))
-    }
-
-    // Close dropdown when clicking outside
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.country-dropdown')) {
-        setShowCountryDropdown(false)
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [])
 
   // Fetch financial data
   useEffect(() => {
@@ -95,20 +79,8 @@ export default function FinancePage() {
     return () => clearInterval(interval)
   }, [])
 
-  const addToWatchlist = (ticker: string) => {
-    setMyWatchlist(prev => {
-      const newWatchlist = [...prev, ticker]
-      localStorage.setItem('stockWatchlist', JSON.stringify(newWatchlist))
-      return newWatchlist
-    })
-  }
-
-  const removeFromWatchlist = (ticker: string) => {
-    setMyWatchlist(prev => {
-      const newWatchlist = prev.filter(t => t !== ticker)
-      localStorage.setItem('stockWatchlist', JSON.stringify(newWatchlist))
-      return newWatchlist
-    })
+  const handleCountryChange = (country: Country) => {
+    setSelectedCountry(country.name)
   }
 
   return (
@@ -135,35 +107,8 @@ export default function FinancePage() {
               <span className="text-sm font-medium">Watchlist</span>
             </button>
 
-            {/* Country Selector */}
-            <div className="relative country-dropdown">
-              <button
-                onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
-              >
-                <Globe className="size-4" />
-                <span className="text-sm font-medium hidden sm:inline">{selectedCountry}</span>
-                <span className="text-sm font-medium sm:hidden">{selectedCountry.slice(0, 3)}</span>
-                <ChevronDown className="size-4" />
-              </button>
-            {showCountryDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-lg z-50">
-                {countries.map((country) => (
-                  <button
-                    key={country}
-                    onClick={() => {
-                      setSelectedCountry(country)
-                      setShowCountryDropdown(false)
-                    }}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors first:rounded-t-xl last:rounded-b-xl ${
-                      selectedCountry === country ? 'bg-accent text-primary' : 'text-foreground'
-                    }`}
-                  >
-                    {country}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Country Selector Component */}
+            <CountrySelector value={selectedCountry} onChange={handleCountryChange} />
           </div>
         </div>
       </div>
@@ -188,6 +133,7 @@ export default function FinancePage() {
         {/* Tab Content */}
         {activeTab === 'US Markets' && (
           <>
+            <MarketInsights type="US Markets" data={marketIndices} timeframe={timeframe} />
             <MarketIndicesGrid indices={marketIndices} loading={loading} />
             <MarketProgressionChart
               title="Market Performance"
@@ -200,6 +146,7 @@ export default function FinancePage() {
 
         {activeTab === 'Crypto' && (
           <>
+            <MarketInsights type="Crypto" data={cryptoData} timeframe={timeframe} />
             <CryptoGrid cryptos={cryptoData} loading={loading} />
             <MarketProgressionChart
               title="Crypto Market Trends"
@@ -212,6 +159,7 @@ export default function FinancePage() {
 
         {activeTab === 'Earnings' && (
           <>
+            <MarketInsights type="Earnings" timeframe={timeframe} />
             <EarningsCalendar />
             <MarketProgressionChart
               title="Earnings Impact"
@@ -223,11 +171,12 @@ export default function FinancePage() {
 
         {activeTab === 'Screener' && (
           <>
+            <MarketInsights type="Screener" data={screenerStocks} timeframe={timeframe} />
             <StockScreener
               stocks={screenerStocks}
               loading={loading}
               onAddToWatchlist={addToWatchlist}
-              watchlist={myWatchlist}
+              watchlist={watchlist}
             />
             <MarketProgressionChart
               title="Screener Performance"
@@ -239,6 +188,7 @@ export default function FinancePage() {
 
         {activeTab === 'Politicians' && (
           <>
+            <MarketInsights type="Politicians" data={politicianTrades} timeframe={timeframe} />
             <PoliticianTrades
               trades={politicianTrades}
               loading={loading}
@@ -255,7 +205,7 @@ export default function FinancePage() {
 
       {/* Right Sidebar */}
       <WatchlistSidebar
-        myWatchlist={myWatchlist}
+        myWatchlist={watchlist}
         onAddToWatchlist={addToWatchlist}
         onRemoveFromWatchlist={removeFromWatchlist}
         isOpen={sidebarOpen}

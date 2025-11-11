@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { InfiniteNewsFeed } from '@/components/discover/InfiniteNewsFeed'
 
 
 const interests = [
@@ -188,40 +189,10 @@ export default function DiscoverPage() {
           </Link>
         )}
 
-        {/* News Grid */}
-        <div className="grid grid-cols-3 gap-4">
-          {newsCards.map((card, index) => (
-            <Link
-              key={index}
-              href={`/search?q=${encodeURIComponent(card.title)}`}
-              className="group"
-            >
-              <div className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all">
-                <div className="relative h-40">
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors mb-3 line-clamp-2">
-                    {card.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Eye className="size-3" />
-                      {card.views}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <FileText className="size-3" />
-                      {card.sources}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+        {/* Infinite News Feed */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Latest News</h2>
+          <InfiniteNewsFeed interests={selectedInterests} />
         </div>
       </div>
 

@@ -6,10 +6,14 @@ import {
   ChevronRight,
   Plus,
   ChevronLeft,
-  X
+  X,
+  Globe,
+  ChevronDown
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+
+const countries = ['United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Japan', 'China', 'India']
 
 const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
 
@@ -92,10 +96,29 @@ const marketIndices = [
   { name: 'VIX', ticker: 'INDEX', price: '176', change: '+3.07%', negative: false }
 ]
 
+const screenerStocks = [
+  { name: 'Palantir Technologies Inc.', ticker: 'PLTR', price: '$89.35', change: '+8.92%', marketCap: '$192.5B', volume: '82.5M' },
+  { name: 'Nvidia Corporation', ticker: 'NVDA', price: '$145.28', change: '+5.87%', marketCap: '$3.58T', volume: '156.2M' },
+  { name: 'Tesla, Inc.', ticker: 'TSLA', price: '$445.23', change: '+3.66%', marketCap: '$1.42T', volume: '98.4M' },
+  { name: 'Advanced Micro Devices', ticker: 'AMD', price: '$118.67', change: '+4.35%', marketCap: '$192.1B', volume: '67.8M' },
+  { name: 'Amazon.com, Inc.', ticker: 'AMZN', price: '$218.45', change: '+2.18%', marketCap: '$2.28T', volume: '45.3M' },
+  { name: 'Microsoft Corporation', ticker: 'MSFT', price: '$506.00', change: '+1.85%', marketCap: '$3.76T', volume: '32.1M' }
+]
+
+const politicianTrades = [
+  { name: 'Nancy Pelosi', position: 'Representative', ticker: 'NVDA', action: 'Purchased', shares: '50 call options', value: '$500K', date: 'Nov 8, 2025' },
+  { name: 'Josh Gottheimer', position: 'Representative', ticker: 'MSFT', action: 'Purchased', shares: '100-500', value: '$15K-$50K', date: 'Nov 7, 2025' },
+  { name: 'Michael McCaul', position: 'Representative', ticker: 'TSLA', action: 'Sold', shares: '500-1000', value: '$50K-$100K', date: 'Nov 6, 2025' },
+  { name: 'Dan Crenshaw', position: 'Representative', ticker: 'PLTR', action: 'Purchased', shares: '100-500', value: '$10K-$50K', date: 'Nov 5, 2025' },
+  { name: 'Tommy Tuberville', position: 'Senator', ticker: 'AMZN', action: 'Purchased', shares: '50-100', value: '$15K-$50K', date: 'Nov 4, 2025' }
+]
+
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState('US Markets')
   const [watchlistTab, setWatchlistTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [myWatchlist, setMyWatchlist] = useState<string[]>([])
+  const [selectedCountry, setSelectedCountry] = useState('United States')
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
 
   useEffect(() => {
     // Load saved watchlist from localStorage
@@ -103,6 +126,17 @@ export default function FinancePage() {
     if (saved) {
       setMyWatchlist(JSON.parse(saved))
     }
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.country-dropdown')) {
+        setShowCountryDropdown(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   const addToWatchlist = (ticker: string) => {
@@ -127,13 +161,45 @@ export default function FinancePage() {
     <div className="flex min-h-screen bg-background">
       {/* Main Content */}
       <div className="flex-1 px-6 py-6 max-w-6xl">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link href="/finance" className="hover:text-primary transition-colors">
-            Perplexity Finance
-          </Link>
-          <ChevronRight className="size-4" />
-          <span className="text-foreground">{activeTab}</span>
+        {/* Breadcrumb and Country Selector */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href="/finance" className="hover:text-primary transition-colors">
+              Perplexity Finance
+            </Link>
+            <ChevronRight className="size-4" />
+            <span className="text-foreground">{activeTab}</span>
+          </div>
+
+          {/* Country Selector */}
+          <div className="relative country-dropdown">
+            <button
+              onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+            >
+              <Globe className="size-4" />
+              <span className="text-sm font-medium">{selectedCountry}</span>
+              <ChevronDown className="size-4" />
+            </button>
+            {showCountryDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-lg z-50">
+                {countries.map((country) => (
+                  <button
+                    key={country}
+                    onClick={() => {
+                      setSelectedCountry(country)
+                      setShowCountryDropdown(false)
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                      selectedCountry === country ? 'bg-accent text-primary' : 'text-foreground'
+                    }`}
+                  >
+                    {country}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Tabs */}
@@ -322,6 +388,142 @@ export default function FinancePage() {
                   </div>
                 </Link>
               ))}
+            </div>
+          </>
+        )}
+
+        {/* Screener Content */}
+        {activeTab === 'Screener' && (
+          <>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground">Stock Screener</h2>
+                <span className="text-sm text-muted-foreground">Top momentum stocks</span>
+              </div>
+
+              {/* Filter Tags */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <button className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+                  High Growth
+                </button>
+                <button className="px-3 py-1.5 rounded-full bg-accent text-foreground text-xs font-medium border border-border hover:border-primary/50 transition-colors">
+                  Large Cap
+                </button>
+                <button className="px-3 py-1.5 rounded-full bg-accent text-foreground text-xs font-medium border border-border hover:border-primary/50 transition-colors">
+                  Tech Sector
+                </button>
+                <button className="px-3 py-1.5 rounded-full bg-accent text-foreground text-xs font-medium border border-border hover:border-primary/50 transition-colors">
+                  High Volume
+                </button>
+              </div>
+
+              {/* Screener Results Table */}
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted/50 border-b border-border">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Company</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Ticker</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">Price</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">Change</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">Market Cap</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">Volume</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {screenerStocks.map((stock, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-border last:border-b-0 hover:bg-accent/50 transition-colors"
+                      >
+                        <td className="px-4 py-4">
+                          <Link href={`/search?q=${stock.ticker}+stock`} className="font-medium text-foreground hover:text-primary transition-colors">
+                            {stock.name}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm text-muted-foreground">{stock.ticker}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <span className="font-semibold text-foreground">{stock.price}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <span className="text-sm font-medium text-green-500">{stock.change}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <span className="text-sm text-muted-foreground">{stock.marketCap}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <span className="text-sm text-muted-foreground">{stock.volume}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Politicians Content */}
+        {activeTab === 'Politicians' && (
+          <>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground">Congressional Stock Trading</h2>
+                <span className="text-sm text-muted-foreground">Recent transactions</span>
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                Track stock trades made by members of Congress. All trades are required to be disclosed within 45 days of the transaction date.
+              </p>
+
+              {/* Politicians Trades List */}
+              <div className="space-y-3">
+                {politicianTrades.map((trade, index) => (
+                  <div
+                    key={index}
+                    className="p-5 rounded-xl border border-border bg-card hover:border-primary/50 transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-1">{trade.name}</h3>
+                        <p className="text-xs text-muted-foreground">{trade.position}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{trade.date}</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Ticker: </span>
+                        <Link href={`/search?q=${trade.ticker}+stock`} className="font-medium text-primary hover:underline">
+                          {trade.ticker}
+                        </Link>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Action: </span>
+                        <span className={`font-medium ${trade.action === 'Purchased' ? 'text-green-500' : 'text-red-500'}`}>
+                          {trade.action}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Shares: </span>
+                        <span className="font-medium text-foreground">{trade.shares}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Value: </span>
+                        <span className="font-medium text-foreground">{trade.value}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Disclaimer:</strong> This data is for informational purposes only and should not be considered investment advice.
+                  Congressional stock trades are publicly disclosed information from official government filings.
+                </p>
+              </div>
             </div>
           </>
         )}

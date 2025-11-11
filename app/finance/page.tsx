@@ -166,8 +166,9 @@ export default function FinancePage() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
+      {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button

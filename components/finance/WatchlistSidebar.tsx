@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, Plus, X as XIcon } from 'lucide-react'
 import Link from 'next/link'
+import { CompanyLogo } from './CompanyLogo'
 
 interface Stock {
   name: string
@@ -192,14 +193,17 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
                 key={stock.ticker}
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors group"
               >
-                <div className="flex-1 min-w-0">
-                  <Link
-                    href={`/search?q=${encodeURIComponent(stock.ticker)}+stock`}
-                    className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate block"
-                  >
-                    {stock.ticker}
-                  </Link>
-                  <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <CompanyLogo ticker={stock.ticker} companyName={stock.name} size={32} />
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/search?q=${encodeURIComponent(stock.ticker)}+stock`}
+                      className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate block"
+                    >
+                      {stock.ticker}
+                    </Link>
+                    <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
+                  </div>
                 </div>
                 <div className="text-right flex items-center gap-2">
                   <div>
@@ -270,11 +274,14 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
                 href={`/search?q=${encodeURIComponent(stock.ticker)}+stock`}
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors group"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                    {stock.ticker}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <CompanyLogo ticker={stock.ticker} companyName={stock.name} size={32} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                      {stock.ticker}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
                   </div>
-                  <div className="text-xs text-muted-foreground truncate">{stock.name}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium text-foreground">{stock.price}</div>

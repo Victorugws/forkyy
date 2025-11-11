@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { CompanyLogo } from './CompanyLogo'
 
 interface Stock {
   name: string
@@ -64,9 +65,12 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
                     <td className="px-4 py-4">
                       <Link
                         href={`/search?q=${encodeURIComponent(stock.ticker)}+stock`}
-                        className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1"
+                        className="flex items-center gap-3 group-hover:text-primary transition-colors"
                       >
-                        {stock.name}
+                        <CompanyLogo ticker={stock.ticker} companyName={stock.name} size={32} />
+                        <span className="text-sm font-medium text-foreground group-hover:text-primary line-clamp-1">
+                          {stock.name}
+                        </span>
                       </Link>
                     </td>
                     <td className="px-4 py-4">

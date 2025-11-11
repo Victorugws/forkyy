@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Globe } from 'lucide-react'
+import { CompanyLogo } from './CompanyLogo'
 
 interface Trade {
   name: string
@@ -64,15 +65,18 @@ export function PoliticianTrades({ trades, loading, selectedCountry = 'United St
               </div>
 
               <div className="flex items-center gap-8">
-                <div className="text-center">
-                  <Link
-                    href={`/search?q=${encodeURIComponent(trade.ticker)}+stock`}
-                    className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors"
-                  >
-                    {trade.ticker}
-                  </Link>
-                  <div className="text-xs text-muted-foreground">Stock</div>
-                </div>
+                <Link
+                  href={`/search?q=${encodeURIComponent(trade.ticker)}+stock`}
+                  className="flex items-center gap-3 group/ticker"
+                >
+                  <CompanyLogo ticker={trade.ticker} companyName={trade.ticker} size={40} />
+                  <div className="text-center">
+                    <div className="text-sm font-semibold text-foreground group-hover/ticker:text-primary transition-colors">
+                      {trade.ticker}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Stock</div>
+                  </div>
+                </Link>
 
                 <div className="text-center">
                   <div className={`text-sm font-semibold ${

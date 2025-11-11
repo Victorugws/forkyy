@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { CompanyLogo } from './CompanyLogo'
 
 interface EarningsCall {
   name: string
@@ -188,9 +189,7 @@ export function EarningsCalendar() {
               className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                  <span className="text-sm font-bold text-foreground">{call.ticker}</span>
-                </div>
+                <CompanyLogo ticker={call.ticker} companyName={call.name} size={48} />
                 <div>
                   <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                     {call.name}

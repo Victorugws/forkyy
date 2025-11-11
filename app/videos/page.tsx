@@ -24,126 +24,52 @@ const videoCategories = [
   'Reviews'
 ]
 
-const allVideos = [
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995',
-    title: 'The Future of Artificial Intelligence',
-    channel: 'Tech Insights',
-    views: '2.5M',
-    duration: '15:32',
-    uploadedAt: '2 days ago',
-    category: 'Technology'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb',
-    title: 'Quantum Computing Explained',
-    channel: 'Science Daily',
-    views: '1.8M',
-    duration: '22:15',
-    uploadedAt: '1 week ago',
-    category: 'Science'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2',
-    title: 'Mars Mission 2024: Latest Updates',
-    channel: 'Space News',
-    views: '3.2M',
-    duration: '18:45',
-    uploadedAt: '3 days ago',
-    category: 'News'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1569163139394-de4798aa62b0',
-    title: 'Climate Change Solutions',
-    channel: 'Environmental Science',
-    views: '1.5M',
-    duration: '25:18',
-    uploadedAt: '5 days ago',
-    category: 'Science'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
-    title: 'Web Development in 2024',
-    channel: 'Code Academy',
-    views: '980K',
-    duration: '32:22',
-    uploadedAt: '1 week ago',
-    category: 'Technology'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
-    title: 'Understanding the Universe',
-    channel: 'Physics Explained',
-    views: '2.1M',
-    duration: '28:55',
-    uploadedAt: '4 days ago',
-    category: 'Science'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
-    title: 'Machine Learning Basics',
-    channel: 'AI Academy',
-    views: '1.2M',
-    duration: '19:40',
-    uploadedAt: '6 days ago',
-    category: 'Education'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c',
-    title: 'Startup Success Stories',
-    channel: 'Business Insights',
-    views: '750K',
-    duration: '21:33',
-    uploadedAt: '2 weeks ago',
-    category: 'Education'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1598550487031-0d6eaf5e3f4f',
-    title: 'How to Build a Robot',
-    channel: 'DIY Tech',
-    views: '890K',
-    duration: '35:12',
-    uploadedAt: '1 week ago',
-    category: 'How-to'
-  },
-  {
-    thumbnail: 'https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a',
-    title: 'iPhone 15 Pro Review',
-    channel: 'Tech Reviews',
-    views: '5.2M',
-    duration: '12:45',
-    uploadedAt: '3 days ago',
-    category: 'Reviews'
-  }
-]
-
 export default function VideosPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
-  const [filteredVideos, setFilteredVideos] = useState(allVideos)
+  const [allVideos, setAllVideos] = useState<any[]>([])
+  const [filteredVideos, setFilteredVideos] = useState<any[]>([])
   const [showFilters, setShowFilters] = useState(false)
+  const [loading, setLoading] = useState(true)
 
+  // Fetch videos when category changes
   useEffect(() => {
-    let filtered = allVideos
+    const fetchVideos = async () => {
+      setLoading(true)
+      try {
+        const query = selectedCategory !== 'All' ? `${selectedCategory} videos` : 'technology trending'
+        const response = await fetch(`/api/videos?query=${encodeURIComponent(query)}&category=${selectedCategory}`)
+        const data = await response.json()
 
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(video => video.category === selectedCategory)
+        if (data.success || data.fallback) {
+          setAllVideos(data.data)
+          setFilteredVideos(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching videos:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // Filter by search query
+    fetchVideos()
+  }, [selectedCategory])
+
+  // Filter by search query
+  useEffect(() => {
     if (searchQuery.trim()) {
-      filtered = filtered.filter(video =>
+      const filtered = allVideos.filter(video =>
         video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         video.channel.toLowerCase().includes(searchQuery.toLowerCase()) ||
         video.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
+      setFilteredVideos(filtered)
+    } else {
+      setFilteredVideos(allVideos)
     }
-
-    setFilteredVideos(filtered)
-  }, [selectedCategory, searchQuery])
+  }, [searchQuery, allVideos])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

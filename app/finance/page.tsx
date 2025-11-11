@@ -82,43 +82,19 @@ const sectors = [
   { name: 'Energy', value: '$90.35', change: '+0.90%', positive: true }
 ]
 
-const cryptoData = [
-  { name: 'Bitcoin', ticker: 'BTCUSD', symbol: 'CRYPTO', price: '$104,890.68', change: '-1.03%', negative: true },
-  { name: 'Ethereum', ticker: 'ETHUSD', symbol: 'CRYPTO', price: '$3,548.91', change: '-0.49%', negative: true },
-  { name: 'Solana', ticker: 'SOLUSD', symbol: 'CRYPTO', price: '$163.90', change: '-2.04%', negative: true },
-  { name: 'Coin 50', ticker: 'COIN50USD', symbol: '', price: '$447.81', change: '-1.45%', negative: true }
-]
-
-const marketIndices = [
-  { name: 'S&P Futures', ticker: 'S&P', price: '6,846', change: '-0.14%', negative: true },
-  { name: 'NASDAQ Fut', ticker: 'NASDAQ', price: '25,650.25', change: '-0.13%', negative: true },
-  { name: 'Dow Futures', ticker: 'Dow', price: '47,443', change: '-0.04%', negative: true },
-  { name: 'VIX', ticker: 'INDEX', price: '176', change: '+3.07%', negative: false }
-]
-
-const screenerStocks = [
-  { name: 'Palantir Technologies Inc.', ticker: 'PLTR', price: '$89.35', change: '+8.92%', marketCap: '$192.5B', volume: '82.5M' },
-  { name: 'Nvidia Corporation', ticker: 'NVDA', price: '$145.28', change: '+5.87%', marketCap: '$3.58T', volume: '156.2M' },
-  { name: 'Tesla, Inc.', ticker: 'TSLA', price: '$445.23', change: '+3.66%', marketCap: '$1.42T', volume: '98.4M' },
-  { name: 'Advanced Micro Devices', ticker: 'AMD', price: '$118.67', change: '+4.35%', marketCap: '$192.1B', volume: '67.8M' },
-  { name: 'Amazon.com, Inc.', ticker: 'AMZN', price: '$218.45', change: '+2.18%', marketCap: '$2.28T', volume: '45.3M' },
-  { name: 'Microsoft Corporation', ticker: 'MSFT', price: '$506.00', change: '+1.85%', marketCap: '$3.76T', volume: '32.1M' }
-]
-
-const politicianTrades = [
-  { name: 'Nancy Pelosi', position: 'Representative', ticker: 'NVDA', action: 'Purchased', shares: '50 call options', value: '$500K', date: 'Nov 8, 2025' },
-  { name: 'Josh Gottheimer', position: 'Representative', ticker: 'MSFT', action: 'Purchased', shares: '100-500', value: '$15K-$50K', date: 'Nov 7, 2025' },
-  { name: 'Michael McCaul', position: 'Representative', ticker: 'TSLA', action: 'Sold', shares: '500-1000', value: '$50K-$100K', date: 'Nov 6, 2025' },
-  { name: 'Dan Crenshaw', position: 'Representative', ticker: 'PLTR', action: 'Purchased', shares: '100-500', value: '$10K-$50K', date: 'Nov 5, 2025' },
-  { name: 'Tommy Tuberville', position: 'Senator', ticker: 'AMZN', action: 'Purchased', shares: '50-100', value: '$15K-$50K', date: 'Nov 4, 2025' }
-]
-
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState('US Markets')
   const [watchlistTab, setWatchlistTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [myWatchlist, setMyWatchlist] = useState<string[]>([])
   const [selectedCountry, setSelectedCountry] = useState('United States')
   const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+
+  // Dynamic data states
+  const [marketIndices, setMarketIndices] = useState<any[]>([])
+  const [cryptoData, setCryptoData] = useState<any[]>([])
+  const [screenerStocks, setScreenerStocks] = useState<any[]>([])
+  const [politicianTrades, setPoliticianTrades] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Load saved watchlist from localStorage
@@ -137,6 +113,52 @@ export default function FinancePage() {
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  // Fetch financial data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        // Fetch all data in parallel
+        const [stocksRes, cryptoRes, screenerRes, politiciansRes] = await Promise.all([
+          fetch('/api/finance?type=stocks'),
+          fetch('/api/finance?type=crypto'),
+          fetch('/api/finance?type=screener'),
+          fetch('/api/finance?type=politicians')
+        ])
+
+        const [stocksData, cryptoDataRes, screenerData, politiciansData] = await Promise.all([
+          stocksRes.json(),
+          cryptoRes.json(),
+          screenerRes.json(),
+          politiciansRes.json()
+        ])
+
+        if (stocksData.success || stocksData.fallback) {
+          setMarketIndices(stocksData.data)
+        }
+        if (cryptoDataRes.success || cryptoDataRes.fallback) {
+          setCryptoData(cryptoDataRes.data)
+        }
+        if (screenerData.success || screenerData.fallback) {
+          setScreenerStocks(screenerData.data)
+        }
+        if (politiciansData.success || politiciansData.fallback) {
+          setPoliticianTrades(politiciansData.data)
+        }
+      } catch (error) {
+        console.error('Error fetching finance data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+
+    // Refresh data every 60 seconds
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   const addToWatchlist = (ticker: string) => {

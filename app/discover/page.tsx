@@ -12,47 +12,6 @@ import {
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
-const featuredArticle = {
-  title: 'Trump says US close to trade deal with India',
-  summary:
-    'The president says tariff will lower the current 50% tariff rate, citing India\'s reduced Russian oil purchases after imposing tariffs earlier this year.',
-  image:
-    'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&h=500&fit=crop',
-  source: 'reuters',
-  views: '1M',
-  sources: 92,
-  publishedHours: 7
-}
-
-const newsCards = [
-  {
-    title: 'Private credit market tops $3T as regulators warn of risks',
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
-    source: 'reuters',
-    views: '75K',
-    sources: 45,
-    publishedHours: 12
-  },
-  {
-    title: 'Ukraine raids Zelensky ally in $300M energy kickback scheme',
-    image:
-      'https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?w=400&h=300&fit=crop',
-    source: 'ap',
-    views: '58K',
-    sources: 34,
-    publishedHours: 8
-  },
-  {
-    title: 'China curbs fentanyl chemical exports after Trump deal',
-    image:
-      'https://images.unsplash.com/photo-1569163139394-de4798aa62b0?w=400&h=300&fit=crop',
-    source: 'wsj',
-    views: '94K',
-    sources: 68,
-    publishedHours: 5
-  }
-]
 
 const interests = [
   'Tech & Science',
@@ -70,6 +29,9 @@ const marketData = {
 export default function DiscoverPage() {
   const [activeTab, setActiveTab] = useState<'top' | 'topics'>('top')
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+  const [featuredArticle, setFeaturedArticle] = useState<any>(null)
+  const [newsCards, setNewsCards] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Load saved interests from localStorage
@@ -77,6 +39,41 @@ export default function DiscoverPage() {
     if (saved) {
       setSelectedInterests(JSON.parse(saved))
     }
+  }, [])
+
+  // Fetch news data
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true)
+      try {
+        const [featuredRes, topRes] = await Promise.all([
+          fetch('/api/news?type=featured'),
+          fetch('/api/news?type=top')
+        ])
+
+        const [featuredData, topData] = await Promise.all([
+          featuredRes.json(),
+          topRes.json()
+        ])
+
+        if (featuredData.success || featuredData.fallback) {
+          setFeaturedArticle(featuredData.data)
+        }
+        if (topData.success || topData.fallback) {
+          setNewsCards(topData.data.slice(0, 3))
+        }
+      } catch (error) {
+        console.error('Error fetching news:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNews()
+
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchNews, 300000)
+    return () => clearInterval(interval)
   }, [])
 
   const toggleInterest = (interest: string) => {
@@ -140,42 +137,56 @@ export default function DiscoverPage() {
         </div>
 
         {/* Featured Article */}
-        <Link
-          href={`/search?q=${encodeURIComponent(featuredArticle.title)}`}
-          className="block group mb-8"
-        >
-          <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold text-foreground group-hover:text-primary transition-colors mb-3">
-                {featuredArticle.title}
-              </h2>
-              <p className="text-muted-foreground text-base mb-4 leading-relaxed">
-                {featuredArticle.summary}
-              </p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Eye className="size-4" />
-                  {featuredArticle.views} views
-                </span>
-                <span className="flex items-center gap-1">
-                  <FileText className="size-4" />
-                  {featuredArticle.sources} sources
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                  {featuredArticle.source}
-                </span>
-                <span>Published {featuredArticle.publishedHours} hours ago</span>
+        {loading || !featuredArticle ? (
+          <div className="mb-8 rounded-2xl border border-border bg-card p-6 h-64 animate-pulse">
+            <div className="flex gap-6 h-full">
+              <div className="flex-1 space-y-4">
+                <div className="h-8 bg-muted rounded w-3/4"></div>
+                <div className="h-4 bg-muted rounded w-full"></div>
+                <div className="h-4 bg-muted rounded w-5/6"></div>
+                <div className="h-4 bg-muted rounded w-2/3"></div>
               </div>
-            </div>
-            <div className="w-80 h-48 rounded-xl overflow-hidden flex-shrink-0">
-              <img
-                src={featuredArticle.image}
-                alt={featuredArticle.title}
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              />
+              <div className="w-80 h-48 bg-muted rounded-xl"></div>
             </div>
           </div>
-        </Link>
+        ) : (
+          <Link
+            href={`/search?q=${encodeURIComponent(featuredArticle.title)}`}
+            className="block group mb-8"
+          >
+            <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
+              <div className="flex-1">
+                <h2 className="text-2xl font-semibold text-foreground group-hover:text-primary transition-colors mb-3">
+                  {featuredArticle.title}
+                </h2>
+                <p className="text-muted-foreground text-base mb-4 leading-relaxed">
+                  {featuredArticle.summary}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Eye className="size-4" />
+                    {featuredArticle.views} views
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FileText className="size-4" />
+                    {featuredArticle.sources} sources
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
+                    {featuredArticle.source}
+                  </span>
+                  <span>Published {featuredArticle.publishedHours} hours ago</span>
+                </div>
+              </div>
+              <div className="w-80 h-48 rounded-xl overflow-hidden flex-shrink-0">
+                <img
+                  src={featuredArticle.image}
+                  alt={featuredArticle.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+              </div>
+            </div>
+          </Link>
+        )}
 
         {/* News Grid */}
         <div className="grid grid-cols-3 gap-4">

@@ -48,41 +48,6 @@ const researchFields = [
   }
 ]
 
-const featuredPapers = [
-  {
-    title:
-      'Attention Is All You Need: Transforming Natural Language Processing',
-    authors: 'Vaswani et al.',
-    journal: 'NeurIPS 2017',
-    citations: '95,000+',
-    year: '2017',
-    href: '/search?q=attention+is+all+you+need'
-  },
-  {
-    title: 'Deep Residual Learning for Image Recognition',
-    authors: 'He et al.',
-    journal: 'CVPR 2016',
-    citations: '180,000+',
-    year: '2016',
-    href: '/search?q=resnet+paper'
-  },
-  {
-    title: 'BERT: Pre-training of Deep Bidirectional Transformers',
-    authors: 'Devlin et al.',
-    journal: 'NAACL 2019',
-    citations: '65,000+',
-    year: '2019',
-    href: '/search?q=bert+paper'
-  },
-  {
-    title: 'Generative Adversarial Networks',
-    authors: 'Goodfellow et al.',
-    journal: 'NeurIPS 2014',
-    citations: '75,000+',
-    year: '2014',
-    href: '/search?q=gan+paper'
-  }
-]
 
 const recentTopics = [
   'Artificial General Intelligence',
@@ -98,6 +63,28 @@ const recentTopics = [
 export default function AcademicPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const [featuredPapers, setFeaturedPapers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPapers = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/academic?query=machine learning')
+        const data = await response.json()
+
+        if (data.success || data.fallback) {
+          setFeaturedPapers(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching papers:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPapers()
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

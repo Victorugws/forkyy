@@ -11,6 +11,13 @@ export const maxDuration = 60
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
 }) {
+  const enableSaveChatHistory = process.env.ENABLE_SAVE_CHAT_HISTORY === 'true'
+
+  // If chat history is disabled, return basic metadata
+  if (!enableSaveChatHistory) {
+    return { title: 'Search' }
+  }
+
   const { id } = await props.params;
   const userId = await getCurrentUserId();
   const chat = await getChat(id, userId || 'anonymous'); // Ensure fallback for userId
@@ -54,6 +61,13 @@ export async function generateMetadata(props: {
 export default async function SearchPage(props: {
   params: Promise<{ id: string }>
 }) {
+  const enableSaveChatHistory = process.env.ENABLE_SAVE_CHAT_HISTORY === 'true'
+
+  // If chat history is disabled, redirect to home
+  if (!enableSaveChatHistory) {
+    redirect('/')
+  }
+
   const userId = await getCurrentUserId()
   const { id } = await props.params
 

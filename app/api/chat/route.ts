@@ -8,10 +8,10 @@ import { cookies } from 'next/headers'
 export const maxDuration = 30
 
 const DEFAULT_MODEL: Model = {
-  id: 'gpt-4o-mini',
-  name: 'GPT-4o mini',
-  provider: 'OpenAI',
-  providerId: 'openai',
+  id: 'grok-3',
+  name: 'Grok 3',
+  provider: 'xAI',
+  providerId: 'xai',
   enabled: true,
   toolCallType: 'native'
 }

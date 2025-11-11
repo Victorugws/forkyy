@@ -59,6 +59,7 @@ export function ChatArtifactContainer({
                 className={cn('overflow-hidden', {
                   'animate-slide-in-right': state.isOpen
                 })}
+                style={{ zIndex: 10 }}
                 maxSize={50}
                 minSize={30}
                 defaultSize={40}

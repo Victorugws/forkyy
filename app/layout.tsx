@@ -13,12 +13,11 @@ import './globals.css'
 
 const fontSans = FontSans({
   subsets: ['latin'],
-  variable: '--font-sans'
+  variable: '--font-sans',
 })
 
 const title = 'Morphic'
-const description =
-  'A fully open-source AI-powered answer engine with a generative UI.'
+const description = 'A fully open-source AI-powered answer engine with a generative UI.'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://morphic.sh'),
@@ -26,25 +25,25 @@ export const metadata: Metadata = {
   description,
   openGraph: {
     title,
-    description
+    description,
   },
   twitter: {
     title,
     description,
     card: 'summary_large_image',
-    creator: '@miiura'
-  }
+    creator: '@miiura',
+  },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
-  maximumScale: 1
+  maximumScale: 1,
 }
 
 export default async function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
@@ -55,7 +54,7 @@ export default async function RootLayout({
   if (supabaseUrl && supabaseAnonKey) {
     const supabase = await createClient()
     const {
-      data: { user: supabaseUser }
+      data: { user: supabaseUser },
     } = await supabase.auth.getUser()
     user = supabaseUser
   }

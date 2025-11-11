@@ -90,7 +90,7 @@ const SidebarProvider = React.forwardRef<
 
     // Initialize state - for SSR we use defaultOpen, for client we read from cookie
     const [_open, _setOpen] = React.useState(defaultOpen)
-    const [isHydrated, setIsHydrated] = React.useState(false)
+    const [isHydrated, setIsHydrated] = React.useState(true)
 
     // On client side, immediately read from cookie and update state
     React.useLayoutEffect(() => {
@@ -189,112 +189,54 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = 'SidebarProvider'
 
+/**
+ * MODIFICATION 1:
+ * The Sidebar component is simplified to always use the <Sheet> component,
+ * which provides an overlay. It no longer has a separate implementation
+ * for desktop screens.
+ */
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<'div'> & {
     side?: 'left' | 'right'
-    variant?: 'sidebar' | 'floating' | 'inset'
     collapsible?: 'offcanvas' | 'icon' | 'none'
   }
->(
-  (
-    {
-      side = 'left',
-      variant = 'sidebar',
-      collapsible = 'offcanvas',
-      className,
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+>(({ className, children, side = 'left', collapsible = 'none', ...props }, ref) => {
+  const { isMobile, open, setOpen, openMobile, setOpenMobile } = useSidebar();
 
-    if (collapsible === 'none') {
-      return (
-        <div
-          className={cn(
-            'flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground',
-            className
-          )}
-          ref={ref}
-          {...props}
-        >
+  // Use the correct state and setter based on screen size.
+  const isOpen = isMobile ? openMobile : open;
+  const onOpenChange = isMobile ? setOpenMobile : setOpen;
+
+  // Don't render anything if the sidebar is not collapsible.
+  if (collapsible === 'none') {
+    return null;
+  }
+
+  return (
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+      <SheetContent
+        ref={ref} // Forward the ref to the SheetContent
+        data-sidebar="sidebar"
+        data-mobile={isMobile.toString()}
+        className={cn("w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden z-[10001]", className)}
+        style={{ '--sidebar-width': isMobile ? SIDEBAR_WIDTH_MOBILE : SIDEBAR_WIDTH, zIndex: 10001 } as React.CSSProperties}
+        side={side}
+        {...props}
+      >
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>Displays the sidebar.</SheetDescription>
+        </SheetHeader>
+        <div className="flex h-full w-full flex-col rounded-lg border border-sidebar-border bg-sidebar/60 text-sidebar-foreground shadow-md backdrop-blur-md">
           {children}
         </div>
-      )
-    }
+      </SheetContent>
+    </Sheet>
+  );
+});
+Sidebar.displayName = 'Sidebar';
 
-    if (isMobile) {
-      return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                '--sidebar-width': SIDEBAR_WIDTH_MOBILE
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-            </SheetHeader>
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
-      )
-    }
-
-    return (
-      <div
-        ref={ref}
-        className="group peer hidden text-sidebar-foreground md:block"
-        data-state={state}
-        data-collapsible={state === 'collapsed' ? collapsible : ''}
-        data-variant={variant}
-        data-side={side}
-      >
-        {/* This is what handles the sidebar gap on desktop */}
-        <div
-          className={cn(
-            'relative w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear',
-            'group-data-[collapsible=offcanvas]:w-0',
-            'group-data-[side=right]:rotate-180',
-            variant === 'floating' || variant === 'inset'
-              ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]'
-              : 'group-data-[collapsible=icon]:w-[--sidebar-width-icon]'
-          )}
-        />
-        <div
-          className={cn(
-            'fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex',
-            side === 'left'
-              ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
-              : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
-            // Adjust the padding for floating and inset variants.
-            variant === 'floating' || variant === 'inset'
-              ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
-              : 'group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l',
-            className
-          )}
-          {...props}
-        >
-          <div
-            data-sidebar="sidebar"
-            className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
-          >
-            {children}
-          </div>
-        </div>
-      </div>
-    )
-  }
-)
-Sidebar.displayName = 'Sidebar'
 
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
@@ -321,6 +263,7 @@ const SidebarTrigger = React.forwardRef<
   )
 })
 SidebarTrigger.displayName = 'SidebarTrigger'
+
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
@@ -351,6 +294,12 @@ const SidebarRail = React.forwardRef<
 })
 SidebarRail.displayName = 'SidebarRail'
 
+/**
+ * MODIFICATION 2:
+ * The SidebarInset component is simplified to remove the CSS classes
+ * that would add margin to "push" the content aside. It now always
+ * takes up the full width, allowing the sidebar to overlay it.
+ */
 const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<'main'>
@@ -360,7 +309,6 @@ const SidebarInset = React.forwardRef<
       ref={ref}
       className={cn(
         'relative flex w-full flex-1 flex-col bg-background',
-        'md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow',
         className
       )}
       {...props}

@@ -54,14 +54,14 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   const handleModelSelect = (id: string) => {
     const newValue = id === value ? '' : id
     setValue(newValue)
-    
+
     const selectedModel = models.find(model => createModelId(model) === newValue)
     if (selectedModel) {
       setCookie('selectedModel', JSON.stringify(selectedModel))
     } else {
       setCookie('selectedModel', '')
     }
-    
+
     setOpen(false)
   }
 
@@ -97,13 +97,22 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search models..." />
-          <CommandList>
+
+      {/* Glass translucent dropdown */}
+      <PopoverContent className="glass-dropdown w-72 p-0" align="start">
+        <Command className="bg-transparent text-gray-700">
+          <CommandInput
+            placeholder="Search models..."
+            className="glass-textarea text-gray-700 placeholder-gray-400"
+          />
+          <CommandList className="command-list bg-transparent text-gray-700">
             <CommandEmpty>No model found.</CommandEmpty>
             {Object.entries(groupedModels).map(([provider, models]) => (
-              <CommandGroup key={provider} heading={provider}>
+              <CommandGroup
+                key={provider}
+                heading={provider}
+                className="command-group-heading text-gray-700 font-semibold"
+              >
                 {models.map(model => {
                   const modelId = createModelId(model)
                   return (
@@ -111,7 +120,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                       key={modelId}
                       value={modelId}
                       onSelect={handleModelSelect}
-                      className="flex justify-between"
+                      className="command-item text-gray-700"
                     >
                       <div className="flex items-center space-x-2">
                         <Image
@@ -121,12 +130,10 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                           height={18}
                           className="bg-white rounded-full border"
                         />
-                        <span className="text-xs font-medium">
-                          {model.name}
-                        </span>
+                        <span className="text-xs font-medium text-gray-700">{model.name}</span>
                       </div>
                       <Check
-                        className={`h-4 w-4 ${
+                        className={`h-4 w-4 transition-opacity ${
                           value === modelId ? 'opacity-100' : 'opacity-0'
                         }`}
                       />

@@ -1,5 +1,4 @@
 'use client'
-
 import { cn } from '@/lib/utils'
 import 'katex/dist/katex.min.css'
 import rehypeExternalLinks from 'rehype-external-links'
@@ -12,86 +11,109 @@ import { MemoizedReactMarkdown } from './ui/markdown'
 
 export function BotMessage({
   message,
-  className
+  className,
 }: {
   message: string
   className?: string
 }) {
-  // Check if the content contains LaTeX patterns
-  const containsLaTeX = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/.test(
-    message || ''
+  const containsLaTeX = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/.test(message || '')
+  const processedData = preprocessLaTeX(message || '')
+  
+  const containerClass = cn(
+    'box-border flex flex-col justify-center items-center p-5 bg-white/70 backdrop-blur-md overflow-hidden content-center flex-nowrap gap-6 rounded-[20px] w-full max-w-3xl mx-auto transition-transform duration-300 ease-in-out hover:scale-[1.015]',
+    className
   )
 
-  // Modify the content to render LaTeX equations if LaTeX patterns are found
-  const processedData = preprocessLaTeX(message || '')
-
-  if (containsLaTeX) {
+  if (!message) {
     return (
-      <MemoizedReactMarkdown
-        rehypePlugins={[
-          [rehypeExternalLinks, { target: '_blank' }],
-          [rehypeKatex]
-        ]}
-        remarkPlugins={[remarkGfm, remarkMath]}
-        className={cn(
-          'prose-sm prose-neutral prose-a:text-accent-foreground/50',
-          className
-        )}
+      <div 
+        className={containerClass}
+        style={{
+          boxShadow: `
+            0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+            0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+            0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+            0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+            0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+            0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+            inset 0px 3px 1px 0px rgb(255, 255, 255)
+          `
+        }}
       >
-        {processedData}
-      </MemoizedReactMarkdown>
+        <p className="prose-sm text-muted-foreground">No content available</p>
+      </div>
     )
   }
 
-  return (
-    <MemoizedReactMarkdown
-      rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
-      remarkPlugins={[remarkGfm]}
-      className={cn(
-        'prose-sm prose-neutral prose-a:text-accent-foreground/50',
-        className
-      )}
-      components={{
-        code({ node, inline, className, children, ...props }) {
-          if (children.length) {
-            if (children[0] == '▍') {
-              return (
-                <span className="mt-1 cursor-default animate-pulse">▍</span>
-              )
-            }
+  const markdownProps = {
+    className: 'prose-sm prose-neutral prose-a:text-accent-foreground/50',
+    rehypePlugins: [[rehypeExternalLinks, { target: '_blank' }]],
+    remarkPlugins: [remarkGfm],
+    components: {
+      code({ node, inline, className, children, ...props }) {
+        if (children.length && children[0] == '▍') {
+          return <span className="mt-1 cursor-default animate-pulse">▍</span>
+        }
 
-            children[0] = (children[0] as string).replace('`▍`', '▍')
-          }
+        if (children.length) {
+          children[0] = (children[0] as string).replace('`▍`', '▍')
+        }
 
-          const match = /language-(\w+)/.exec(className || '')
+        const match = /language-(\w+)/.exec(className || '')
 
-          if (inline) {
-            return (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            )
-          }
-
+        if (inline) {
           return (
-            <CodeBlock
-              key={Math.random()}
-              language={(match && match[1]) || ''}
-              value={String(children).replace(/\n$/, '')}
-              {...props}
-            />
+            <code className={className} {...props}>
+              {children}
+            </code>
           )
-        },
-        a: Citing
+        }
+
+        return (
+          <CodeBlock
+            key={Math.random()}
+            language={(match && match[1]) || ''}
+            value={String(children).replace(/\n$/, '')}
+            {...props}
+          />
+        )
+      },
+      a: Citing,
+    },
+  }
+
+  return (
+    <div 
+      className={containerClass}
+      style={{
+        boxShadow: `
+          0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+          0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+          0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+          0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+          0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+          0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+          inset 0px 3px 1px 0px rgb(255, 255, 255)
+        `
       }}
     >
-      {message}
-    </MemoizedReactMarkdown>
+      <MemoizedReactMarkdown
+        {...markdownProps}
+        remarkPlugins={
+          containsLaTeX ? [remarkGfm, remarkMath] : markdownProps.remarkPlugins
+        }
+        rehypePlugins={
+          containsLaTeX
+            ? [...markdownProps.rehypePlugins, [rehypeKatex]]
+            : markdownProps.rehypePlugins
+        }
+      >
+        {containsLaTeX ? processedData : message}
+      </MemoizedReactMarkdown>
+    </div>
   )
 }
 
-// Preprocess LaTeX equations to be rendered by KaTeX
-// ref: https://github.com/remarkjs/react-markdown/issues/785
 const preprocessLaTeX = (content: string) => {
   const blockProcessedContent = content.replace(
     /\\\[([\s\S]*?)\\\]/g,

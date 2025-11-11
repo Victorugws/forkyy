@@ -1,8 +1,7 @@
 'use client'
 
 import { CHAT_ID } from '@/lib/constants'
-import { useChat } from '@ai-sdk/react'
-import { JSONValue } from 'ai'
+import { useChat, JSONValue } from 'ai/react'
 import { ArrowRight } from 'lucide-react'
 import React from 'react'
 import { CollapsibleMessage } from './collapsible-message'

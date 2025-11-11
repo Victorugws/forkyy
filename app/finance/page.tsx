@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Globe, ChevronDown } from 'lucide-react'
+import { ChevronRight, Globe, ChevronDown, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { MarketIndicesGrid } from '@/components/finance/MarketIndicesGrid'
@@ -10,6 +10,7 @@ import { EarningsCalendar } from '@/components/finance/EarningsCalendar'
 import { StockScreener } from '@/components/finance/StockScreener'
 import { PoliticianTrades } from '@/components/finance/PoliticianTrades'
 import { WatchlistSidebar } from '@/components/finance/WatchlistSidebar'
+import { MarketProgressionChart } from '@/components/finance/MarketProgressionChart'
 
 const countries = ['United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Japan', 'China', 'India']
 const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
@@ -19,6 +20,8 @@ export default function FinancePage() {
   const [myWatchlist, setMyWatchlist] = useState<string[]>([])
   const [selectedCountry, setSelectedCountry] = useState('United States')
   const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '1Y'>('1D')
 
   // Dynamic data states
   const [marketIndices, setMarketIndices] = useState<any[]>([])
@@ -112,8 +115,8 @@ export default function FinancePage() {
     <div className="flex min-h-screen bg-background">
       {/* Main Content */}
       <div className="flex-1 px-6 py-6 max-w-6xl">
-        {/* Breadcrumb and Country Selector */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Breadcrumb and Actions */}
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/finance" className="hover:text-primary transition-colors">
               Perplexity Finance
@@ -122,16 +125,27 @@ export default function FinancePage() {
             <span className="text-foreground">{activeTab}</span>
           </div>
 
-          {/* Country Selector */}
-          <div className="relative country-dropdown">
+          <div className="flex items-center gap-2">
+            {/* Mobile Watchlist Toggle */}
             <button
-              onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
             >
-              <Globe className="size-4" />
-              <span className="text-sm font-medium">{selectedCountry}</span>
-              <ChevronDown className="size-4" />
+              <TrendingUp className="size-4" />
+              <span className="text-sm font-medium">Watchlist</span>
             </button>
+
+            {/* Country Selector */}
+            <div className="relative country-dropdown">
+              <button
+                onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+              >
+                <Globe className="size-4" />
+                <span className="text-sm font-medium hidden sm:inline">{selectedCountry}</span>
+                <span className="text-sm font-medium sm:hidden">{selectedCountry.slice(0, 3)}</span>
+                <ChevronDown className="size-4" />
+              </button>
             {showCountryDropdown && (
               <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-lg z-50">
                 {countries.map((country) => (
@@ -154,12 +168,12 @@ export default function FinancePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-border">
+        <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
                 activeTab === tab
                   ? 'bg-primary/10 text-primary border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -174,6 +188,11 @@ export default function FinancePage() {
         {activeTab === 'US Markets' && (
           <>
             <MarketIndicesGrid indices={marketIndices} loading={loading} />
+            <MarketProgressionChart
+              title="Market Performance"
+              timeframe={timeframe}
+              onTimeframeChange={setTimeframe}
+            />
             <MarketSummary topic="US Markets" />
           </>
         )}
@@ -181,29 +200,55 @@ export default function FinancePage() {
         {activeTab === 'Crypto' && (
           <>
             <CryptoGrid cryptos={cryptoData} loading={loading} />
+            <MarketProgressionChart
+              title="Crypto Market Trends"
+              timeframe={timeframe}
+              onTimeframeChange={setTimeframe}
+            />
             <MarketSummary topic="Crypto" />
           </>
         )}
 
         {activeTab === 'Earnings' && (
-          <EarningsCalendar />
+          <>
+            <EarningsCalendar />
+            <MarketProgressionChart
+              title="Earnings Impact"
+              timeframe={timeframe}
+              onTimeframeChange={setTimeframe}
+            />
+          </>
         )}
 
         {activeTab === 'Screener' && (
-          <StockScreener
-            stocks={screenerStocks}
-            loading={loading}
-            onAddToWatchlist={addToWatchlist}
-            watchlist={myWatchlist}
-          />
+          <>
+            <StockScreener
+              stocks={screenerStocks}
+              loading={loading}
+              onAddToWatchlist={addToWatchlist}
+              watchlist={myWatchlist}
+            />
+            <MarketProgressionChart
+              title="Screener Performance"
+              timeframe={timeframe}
+              onTimeframeChange={setTimeframe}
+            />
+          </>
         )}
 
         {activeTab === 'Politicians' && (
-          <PoliticianTrades
-            trades={politicianTrades}
-            loading={loading}
-            selectedCountry={selectedCountry}
-          />
+          <>
+            <PoliticianTrades
+              trades={politicianTrades}
+              loading={loading}
+              selectedCountry={selectedCountry}
+            />
+            <MarketProgressionChart
+              title="Political Trading Impact"
+              timeframe={timeframe}
+              onTimeframeChange={setTimeframe}
+            />
+          </>
         )}
       </div>
 
@@ -212,6 +257,8 @@ export default function FinancePage() {
         myWatchlist={myWatchlist}
         onAddToWatchlist={addToWatchlist}
         onRemoveFromWatchlist={removeFromWatchlist}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
     </div>
   )

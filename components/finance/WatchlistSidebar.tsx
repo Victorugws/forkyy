@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, Plus, X } from 'lucide-react'
+import { TrendingUp, Plus, X as XIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface Stock {
@@ -18,7 +18,7 @@ interface WatchlistSidebarProps {
   onRemoveFromWatchlist: (ticker: string) => void
 }
 
-export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist }: WatchlistSidebarProps) {
+export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist, isOpen, onClose }: WatchlistSidebarProps & { isOpen?: boolean; onClose?: () => void }) {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [gainers, setGainers] = useState<Stock[]>([])
   const [losers, setLosers] = useState<Stock[]>([])
@@ -130,9 +130,36 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
   const currentStocks = activeTab === 'gainers' ? gainers : activeTab === 'losers' ? losers : activeStocks
 
   return (
-    <div className="w-80 border-l border-border p-6 space-y-6">
-      {/* Watchlist Section */}
-      <div className="rounded-2xl border border-border bg-card p-5">
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:relative right-0 top-0 bottom-0 z-50
+        w-80 lg:w-80 border-l border-border bg-background p-6 space-y-6
+        transform transition-transform duration-300 lg:transform-none
+        ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        overflow-y-auto
+      `}>
+        {/* Close button for mobile */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-accent transition-colors"
+            aria-label="Close sidebar"
+          >
+            <XIcon className="size-5" />
+          </button>
+        )}
+
+        {/* Watchlist Section */}
+        <div className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-foreground flex items-center gap-2">
             <TrendingUp className="size-4" />
@@ -178,7 +205,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
                     aria-label={`Remove ${stock.ticker} from watchlist`}
                   >
-                    <X className="size-3 text-destructive" />
+                    <XIcon className="size-3 text-destructive" />
                   </button>
                 </div>
               </div>
@@ -242,6 +269,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -16,9 +16,10 @@ interface WatchlistSidebarProps {
   myWatchlist: string[]
   onAddToWatchlist: (ticker: string) => void
   onRemoveFromWatchlist: (ticker: string) => void
+  selectedCountry?: string
 }
 
-export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist, isOpen, onClose }: WatchlistSidebarProps & { isOpen?: boolean; onClose?: () => void }) {
+export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist, selectedCountry = 'United States', isOpen, onClose }: WatchlistSidebarProps & { isOpen?: boolean; onClose?: () => void }) {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [gainers, setGainers] = useState<Stock[]>([])
   const [losers, setLosers] = useState<Stock[]>([])
@@ -33,7 +34,8 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
       try {
         // In a real implementation, this would fetch from Finnhub's gainers/losers API
         // For now, using screener data as a proxy
-        const res = await fetch('/api/finance?type=screener')
+        console.log('Fetching market movers for country:', selectedCountry)
+        const res = await fetch(`/api/finance?type=screener&country=${encodeURIComponent(selectedCountry)}`)
         const data = await res.json()
 
         if (data.success || data.fallback) {
@@ -90,7 +92,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
     // Refresh every 60 seconds
     const interval = setInterval(fetchMarketMovers, 60000)
     return () => clearInterval(interval)
-  }, [])
+  }, [selectedCountry])
 
   // Fetch watchlist stock prices
   useEffect(() => {
@@ -102,7 +104,8 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
 
       try {
         // Fetch all watchlist stocks (simplified - would batch in real implementation)
-        const res = await fetch('/api/finance?type=screener')
+        console.log('Fetching watchlist prices for country:', selectedCountry)
+        const res = await fetch(`/api/finance?type=screener&country=${encodeURIComponent(selectedCountry)}`)
         const data = await res.json()
 
         if (data.success || data.fallback) {
@@ -125,7 +128,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
     }
 
     fetchWatchlistPrices()
-  }, [myWatchlist])
+  }, [myWatchlist, selectedCountry])
 
   const currentStocks = activeTab === 'gainers' ? gainers : activeTab === 'losers' ? losers : activeStocks
 

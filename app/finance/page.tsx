@@ -266,6 +266,7 @@ export default function FinancePage() {
         myWatchlist={watchlist}
         onAddToWatchlist={addToWatchlist}
         onRemoveFromWatchlist={removeFromWatchlist}
+        selectedCountry={selectedCountry}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

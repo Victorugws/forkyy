@@ -20,16 +20,22 @@ interface Article {
 
 interface NewsCardProps {
   article: Article
+  onClick?: () => void
 }
 
-export function NewsCard({ article }: NewsCardProps) {
+export function NewsCard({ article, onClick }: NewsCardProps) {
   const [imageError, setImageError] = useState(false)
   const [showBrowser, setShowBrowser] = useState(false)
+
+  const handleClick = () => {
+    setShowBrowser(true)
+    onClick?.()
+  }
 
   return (
     <>
       <div
-        onClick={() => setShowBrowser(true)}
+        onClick={handleClick}
         className="block group cursor-pointer"
       >
         <div className="flex gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary/50 transition-all">

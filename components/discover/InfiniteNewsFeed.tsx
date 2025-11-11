@@ -2,10 +2,12 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { LoadingSkeleton } from '../shared/LoadingSkeleton'
 import { NewsCard } from './NewsCard'
 import { Loader2 } from 'lucide-react'
+import { useUserPreferences } from '@/hooks/useUserPreferences'
+import { rankArticles } from '@/lib/algorithms/rankNews'
 
 interface Article {
   id: string
@@ -30,6 +32,8 @@ export function InfiniteNewsFeed({ interests }: InfiniteNewsFeedProps) {
     threshold: 0,
     triggerOnce: false,
   })
+
+  const { readHistory, recentCategories, markAsRead, trackCategory } = useUserPreferences()
 
   const {
     data,
@@ -63,6 +67,28 @@ export function InfiniteNewsFeed({ interests }: InfiniteNewsFeedProps) {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
+  // Apply ranking algorithm to articles
+  const rankedArticles = useMemo(() => {
+    const allArticles = data?.pages.flatMap(page => page.articles) || []
+
+    if (allArticles.length === 0) return []
+
+    // Rank articles based on user preferences
+    return rankArticles(allArticles, {
+      interests,
+      readHistory,
+      recentCategories
+    })
+  }, [data, interests, readHistory, recentCategories])
+
+  // Handle article click - mark as read and track category
+  const handleArticleClick = (article: Article) => {
+    markAsRead(article.id)
+    if (article.category) {
+      trackCategory(article.category)
+    }
+  }
+
   if (isLoading) {
     return <LoadingSkeleton count={6} type="news" />
   }
@@ -78,9 +104,7 @@ export function InfiniteNewsFeed({ interests }: InfiniteNewsFeedProps) {
     )
   }
 
-  const allArticles = data?.pages.flatMap(page => page.articles) || []
-
-  if (allArticles.length === 0) {
+  if (rankedArticles.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-card p-12 text-center">
         <p className="text-muted-foreground">No articles found. Try adjusting your interests.</p>
@@ -90,8 +114,12 @@ export function InfiniteNewsFeed({ interests }: InfiniteNewsFeedProps) {
 
   return (
     <div className="space-y-4">
-      {allArticles.map((article: Article) => (
-        <NewsCard key={article.id} article={article} />
+      {rankedArticles.map((article: Article) => (
+        <NewsCard
+          key={article.id}
+          article={article}
+          onClick={() => handleArticleClick(article)}
+        />
       ))}
 
       {/* Intersection observer trigger */}
@@ -103,7 +131,7 @@ export function InfiniteNewsFeed({ interests }: InfiniteNewsFeedProps) {
           </div>
         )}
 
-        {!hasNextPage && allArticles.length > 0 && (
+        {!hasNextPage && rankedArticles.length > 0 && (
           <p className="text-sm text-muted-foreground">
             You've reached the end of the feed
           </p>

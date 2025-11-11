@@ -1,268 +1,348 @@
+'use client'
+
 import {
   TrendingUp,
-  TrendingDown,
-  DollarSign,
-  LineChart,
-  BarChart3,
-  Newspaper,
-  Search
+  Search,
+  ChevronRight,
+  Plus,
+  ChevronLeft
 } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 
-const marketIndices = [
-  { name: 'S&P 500', value: '4,783.45', change: '+1.2%', isUp: true },
-  { name: 'Dow Jones', value: '37,545.33', change: '+0.8%', isUp: true },
-  { name: 'NASDAQ', value: '15,074.57', change: '+1.5%', isUp: true },
-  { name: 'Bitcoin', value: '$43,256', change: '-2.1%', isUp: false }
+const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
+
+const weekDays = [
+  { day: 'Sun', date: 'Nov 9', calls: 'No Calls' },
+  { day: 'Mon', date: 'Nov 10', calls: '117 Calls' },
+  { day: 'Tue', date: 'Nov 11', calls: '34 Calls', active: true },
+  { day: 'Wed', date: 'Nov 12', calls: '80 Calls' },
+  { day: 'Thu', date: 'Nov 13', calls: '82 Calls' },
+  { day: 'Fri', date: 'Nov 14', calls: '22 Calls' },
+  { day: 'Sat', date: 'Nov 15', calls: 'No Calls' }
 ]
 
-const trendingStocks = [
+const earningsCalls = [
+  { name: 'Sea Limited', ticker: 'SE', time: '1:30 PM', quarter: 'Q3 \'25' },
   {
-    symbol: 'NVDA',
-    name: 'NVIDIA Corp',
-    price: '$875.28',
-    change: '+3.4%',
-    isUp: true
+    name: 'Occidental Petroleum Corporation',
+    ticker: 'OXY',
+    time: '7:00 PM',
+    quarter: 'Q3 \'25'
   },
   {
-    symbol: 'TSLA',
-    name: 'Tesla Inc',
-    price: '$248.42',
-    change: '+2.1%',
-    isUp: true
+    name: 'Occidental Petroleum Corporation',
+    ticker: 'OXY-WT',
+    time: '7:00 PM',
+    quarter: 'Q3 \'25'
   },
   {
-    symbol: 'AAPL',
-    name: 'Apple Inc',
-    price: '$185.92',
-    change: '-0.5%',
-    isUp: false
+    name: 'AngloGold Ashanti Plc',
+    ticker: 'AU',
+    time: '6:30 PM',
+    quarter: 'Q3 \'25'
   },
   {
-    symbol: 'MSFT',
-    name: 'Microsoft Corp',
-    price: '$378.91',
-    change: '+1.8%',
-    isUp: true
-  }
+    name: 'Nebius Group N.V.',
+    ticker: 'NBIS',
+    time: '2:00 PM',
+    quarter: 'Q3 \'25'
+  },
+  {
+    name: 'Rigetti Computing, Inc.',
+    ticker: 'RGTIW',
+    time: '2:30 PM',
+    quarter: 'Q3 \'25'
+  },
+  { name: 'Oklo Inc.', ticker: 'OKLO', time: '11:00 PM', quarter: 'Q3 \'25' }
 ]
 
-const financeTopics = [
-  {
-    title: 'Market Analysis',
-    description: 'In-depth analysis of stock market trends and movements',
-    query: 'stock+market+analysis+today'
-  },
-  {
-    title: 'Cryptocurrency',
-    description: 'Latest news and insights on digital currencies',
-    query: 'cryptocurrency+news+trends'
-  },
-  {
-    title: 'Economic Indicators',
-    description: 'Key economic data and what it means for investors',
-    query: 'economic+indicators+2024'
-  },
-  {
-    title: 'Investment Strategies',
-    description: 'Expert advice on portfolio management and investing',
-    query: 'investment+strategies+2024'
-  },
-  {
-    title: 'IPOs & Startups',
-    description: 'Upcoming IPOs and startup funding news',
-    query: 'upcoming+ipos+2024'
-  },
-  {
-    title: 'Real Estate',
-    description: 'Property market trends and investment opportunities',
-    query: 'real+estate+market+trends'
-  }
+const watchlistStocks = [
+  { name: 'Alphabet Inc.', ticker: 'GOOG', price: '$290.59', change: '+3.89%', positive: true },
+  { name: 'Meta Platforms, Inc.', ticker: 'META', price: '$631.76', change: '+1.62%', positive: true },
+  { name: 'Accenture plc', ticker: 'ACN', price: '$244.55', change: '-0.49%', positive: false },
+  { name: 'Tesla, Inc.', ticker: 'TSLA', price: '$445.23', change: '+3.66%', positive: true },
+  { name: 'Microsoft Corporation', ticker: 'MSFT', price: '$506.00', change: '+1.85%', positive: true }
 ]
 
-const newsItems = [
-  {
-    title: 'Fed signals potential rate cuts in 2024',
-    source: 'Bloomberg',
-    time: '2 hours ago'
-  },
-  {
-    title: 'Tech stocks rally on AI enthusiasm',
-    source: 'Reuters',
-    time: '4 hours ago'
-  },
-  {
-    title: 'Bitcoin ETF approval drives crypto surge',
-    source: 'CNBC',
-    time: '6 hours ago'
-  },
-  {
-    title: 'Emerging markets show strong growth signals',
-    source: 'Financial Times',
-    time: '8 hours ago'
-  }
+const gainersStocks = [
+  { name: 'Cogent Biosciences, Inc.', ticker: 'COGT', price: '$32.46', change: '+119.03%' },
+  { name: 'Hitek Global Inc.', ticker: 'HKT', price: '$4.15', change: '+89.50%' },
+  { name: 'Robo.ai Inc.', ticker: 'AI10', price: '$0.68', change: '+32.24%' },
+  { name: 'Ironwood Pharmaceuticals,...', ticker: 'IRWD', price: '$2.53', change: '+31.77%' }
+]
+
+const sectors = [
+  { name: 'Technology', value: '$295.53', change: '+2.56%', positive: true },
+  { name: 'Energy', value: '$90.35', change: '+0.90%', positive: true }
 ]
 
 export default function FinancePage() {
+  const [activeTab, setActiveTab] = useState('Earnings')
+  const [watchlistTab, setWatchlistTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
+
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <div className="border-b border-border bg-gradient-to-br from-background via-background to-green-500/5">
-        <div className="container max-w-7xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="rounded-full bg-green-500/10 p-3">
-              <TrendingUp className="size-6 text-green-500" />
+    <div className="flex min-h-screen bg-background">
+      {/* Main Content */}
+      <div className="flex-1 px-6 py-6 max-w-6xl">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+          <Link href="/finance" className="hover:text-primary transition-colors">
+            Perplexity Finance
+          </Link>
+          <ChevronRight className="size-4" />
+          <span className="text-foreground">Earnings</span>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 border-b border-border">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+                activeTab === tab
+                  ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Earnings Calendar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              Earnings Calendar
+            </h2>
+            <div className="flex items-center gap-2">
+              <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                <ChevronLeft className="size-4" />
+              </button>
+              <button className="px-4 py-1.5 rounded-lg bg-accent text-sm font-medium">
+                Today
+              </button>
+              <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                <ChevronRight className="size-4" />
+              </button>
             </div>
-            <h1 className="text-4xl font-bold text-foreground">Finance</h1>
           </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mb-6">
-            Stay informed with real-time market data, analysis, and financial
-            insights
-          </p>
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search stocks, crypto, commodities..."
-              className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
+
+          <div className="grid grid-cols-7 gap-3 mb-6">
+            {weekDays.map((day) => (
+              <button
+                key={day.day}
+                className={`p-4 rounded-xl border text-center transition-all ${
+                  day.active
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-card hover:border-primary/50'
+                }`}
+              >
+                <div className="text-sm font-medium text-foreground mb-1">
+                  {day.day}
+                </div>
+                <div className="text-xs text-muted-foreground mb-2">
+                  {day.date}
+                </div>
+                <div
+                  className={`text-xs font-medium ${
+                    day.active ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  {day.calls}
+                </div>
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* Earnings Calls List */}
+        <div className="space-y-2 mb-8">
+          {earningsCalls.map((call, index) => (
+            <Link
+              key={index}
+              href={`/search?q=${call.ticker}+earnings`}
+              className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-lg font-bold">
+                  {call.ticker.substring(0, 2)}
+                </div>
+                <div>
+                  <div className="font-medium text-foreground group-hover:text-primary transition-colors">
+                    {call.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {call.ticker}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium text-foreground">
+                  {call.quarter}
+                </div>
+                <div className="text-sm text-muted-foreground">{call.time}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Ask any question about finance"
+            className="w-full rounded-2xl border border-input bg-card px-12 py-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container max-w-7xl mx-auto px-6 py-10 flex-1">
-        {/* Market Overview */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
-            Market Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {marketIndices.map((index, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition-all"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {index.name}
-                  </span>
-                  {index.isUp ? (
-                    <TrendingUp className="size-4 text-green-500" />
-                  ) : (
-                    <TrendingDown className="size-4 text-red-500" />
-                  )}
+      {/* Right Sidebar */}
+      <div className="w-96 border-l border-border p-6 space-y-6">
+        {/* Create Watchlist */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground">
+            Create Watchlist
+          </h3>
+          <button className="text-muted-foreground hover:text-primary transition-colors">
+            <TrendingUp className="size-5" />
+          </button>
+        </div>
+
+        {/* Watchlist Stocks */}
+        <div className="space-y-2">
+          {watchlistStocks.map((stock, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-xs font-bold">
+                  {stock.ticker.substring(0, 1)}
                 </div>
-                <div className="text-2xl font-bold text-foreground mb-1">
-                  {index.value}
+                <div>
+                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    {stock.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {stock.ticker}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-semibold text-foreground">
+                  {stock.price}
                 </div>
                 <div
-                  className={`text-sm font-medium ${index.isUp ? 'text-green-500' : 'text-red-500'}`}
+                  className={`text-xs font-medium ${stock.positive ? 'text-green-500' : 'text-red-500'}`}
                 >
-                  {index.change}
+                  {stock.change}
+                </div>
+              </div>
+              <button className="p-1 hover:bg-accent rounded transition-colors">
+                <Plus className="size-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Gainers/Losers/Active Tabs */}
+        <div className="border-t border-border pt-6">
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setWatchlistTab('gainers')}
+              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+                watchlistTab === 'gainers'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-accent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Gainers
+            </button>
+            <button
+              onClick={() => setWatchlistTab('losers')}
+              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+                watchlistTab === 'losers'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-accent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Losers
+            </button>
+            <button
+              onClick={() => setWatchlistTab('active')}
+              className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+                watchlistTab === 'active'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-accent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Active
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {gainersStocks.map((stock, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 rounded-xl bg-card"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded bg-accent flex items-center justify-center text-xs font-bold">
+                    {stock.ticker.substring(0, 1)}
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-foreground">
+                      {stock.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {stock.ticker}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-semibold text-foreground">
+                    {stock.price}
+                  </div>
+                  <div className="text-xs font-medium text-green-500">
+                    {stock.change}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Trending Stocks */}
-        <section className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <LineChart className="size-5 text-primary" />
-            <h2 className="text-2xl font-bold text-foreground">
-              Trending Stocks
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {trendingStocks.map((stock, i) => (
-              <Link
-                key={i}
-                href={`/search?q=${stock.symbol}+stock+price`}
-                className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/50 hover:shadow-lg transition-all"
+        {/* Equity Sectors */}
+        <div className="border-t border-border pt-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            Equity Sectors
+          </h3>
+          <div className="space-y-3">
+            {sectors.map((sector, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 rounded-xl bg-card"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                      {stock.symbol}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {stock.name}
-                    </div>
+                <div className="text-sm font-medium text-foreground">
+                  {sector.name}
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-foreground">
+                    {sector.value}
                   </div>
-                  {stock.isUp ? (
-                    <TrendingUp className="size-4 text-green-500" />
-                  ) : (
-                    <TrendingDown className="size-4 text-red-500" />
-                  )}
+                  <div
+                    className={`text-xs font-medium ${sector.positive ? 'text-green-500' : 'text-red-500'}`}
+                  >
+                    {sector.change}
+                  </div>
                 </div>
-                <div className="text-xl font-bold text-foreground mb-1">
-                  {stock.price}
-                </div>
-                <div
-                  className={`text-sm font-medium ${stock.isUp ? 'text-green-500' : 'text-red-500'}`}
-                >
-                  {stock.change}
-                </div>
-              </Link>
+              </div>
             ))}
           </div>
-        </section>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Finance Topics */}
-          <section className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <BarChart3 className="size-5 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground">
-                Explore Topics
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {financeTopics.map((topic, i) => (
-                <Link
-                  key={i}
-                  href={`/search?q=${topic.query}`}
-                  className="group rounded-2xl border border-border bg-card p-5 hover:border-primary/50 hover:shadow-lg transition-all"
-                >
-                  <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors mb-2">
-                    {topic.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {topic.description}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* Latest News */}
-          <section>
-            <div className="flex items-center gap-2 mb-6">
-              <Newspaper className="size-5 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground">
-                Latest News
-              </h2>
-            </div>
-            <div className="space-y-4">
-              {newsItems.map((item, i) => (
-                <Link
-                  key={i}
-                  href={`/search?q=${encodeURIComponent(item.title)}`}
-                  className="group block rounded-2xl border border-border bg-card p-4 hover:border-primary/50 hover:shadow-lg transition-all"
-                >
-                  <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{item.source}</span>
-                    <span>•</span>
-                    <span>{item.time}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         </div>
       </div>
     </div>

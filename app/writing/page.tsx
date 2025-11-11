@@ -7,10 +7,12 @@ import {
   MessageSquare,
   BookOpen,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const writingTemplates = [
   {
@@ -61,7 +63,75 @@ const writingTools = [
 ]
 
 export default function WritingPage() {
+  const router = useRouter()
   const [prompt, setPrompt] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleImprove = async () => {
+    if (!prompt.trim()) {
+      alert('Please enter some text to improve')
+      return
+    }
+    setIsProcessing(true)
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(`Improve this text: ${prompt}`)}`)
+    }, 500)
+  }
+
+  const handleGrammarCheck = async () => {
+    if (!prompt.trim()) {
+      alert('Please enter some text to check')
+      return
+    }
+    setIsProcessing(true)
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(`Check grammar and fix errors in: ${prompt}`)}`)
+    }, 500)
+  }
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      alert('Please describe what you want to write')
+      return
+    }
+    setIsProcessing(true)
+    setTimeout(() => {
+      router.push(`/search?q=${encodeURIComponent(prompt)}`)
+    }, 500)
+  }
+
+  const handleTemplateClick = (templateName: string) => {
+    router.push(`/search?q=${encodeURIComponent(`Write a ${templateName.toLowerCase()} about: `)}`)
+  }
+
+  const handleToolClick = (toolName: string) => {
+    if (!prompt.trim()) {
+      alert(`Please enter text to ${toolName.toLowerCase()}`)
+      return
+    }
+    let query = ''
+    switch (toolName) {
+      case 'Grammar Check':
+        query = `Check grammar and fix errors in: ${prompt}`
+        break
+      case 'Tone Adjustment':
+        query = `Adjust the tone of this text to be more professional: ${prompt}`
+        break
+      case 'Summarize':
+        query = `Summarize this text: ${prompt}`
+        break
+      case 'Expand':
+        query = `Expand on this text with more detail: ${prompt}`
+        break
+      case 'Simplify':
+        query = `Simplify and make this text easier to read: ${prompt}`
+        break
+      case 'Translate':
+        query = `Translate this text: ${prompt}`
+        break
+    }
+    router.push(`/search?q=${encodeURIComponent(query)}`)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -92,16 +162,37 @@ export default function WritingPage() {
               />
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors">
-                    <Sparkles className="size-4 inline mr-2" />
+                  <button
+                    onClick={handleImprove}
+                    disabled={isProcessing}
+                    className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="size-4 inline mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="size-4 inline mr-2" />
+                    )}
                     Improve
                   </button>
-                  <button className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors">
-                    <CheckCircle2 className="size-4 inline mr-2" />
+                  <button
+                    onClick={handleGrammarCheck}
+                    disabled={isProcessing}
+                    className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="size-4 inline mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="size-4 inline mr-2" />
+                    )}
                     Check Grammar
                   </button>
                 </div>
-                <button className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
+                <button
+                  onClick={handleGenerate}
+                  disabled={isProcessing}
+                  className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isProcessing && <Loader2 className="size-4 inline mr-2 animate-spin" />}
                   Generate
                 </button>
               </div>
@@ -119,10 +210,10 @@ export default function WritingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {writingTemplates.map((template, index) => (
-              <Link
+              <button
                 key={index}
-                href={`/search?q=write+${template.name.toLowerCase()}`}
-                className="group relative flex items-start gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+                onClick={() => handleTemplateClick(template.name)}
+                className="group relative flex items-start gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg text-left"
               >
                 <div
                   className={`rounded-xl ${template.color} p-3 text-white flex-shrink-0`}
@@ -137,7 +228,7 @@ export default function WritingPage() {
                     {template.description}
                   </p>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         </section>
@@ -151,6 +242,7 @@ export default function WritingPage() {
             {writingTools.map((tool, index) => (
               <button
                 key={index}
+                onClick={() => handleToolClick(tool.name)}
                 className="group text-left rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-lg"
               >
                 <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors mb-1">

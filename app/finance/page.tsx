@@ -5,10 +5,11 @@ import {
   Search,
   ChevronRight,
   Plus,
-  ChevronLeft
+  ChevronLeft,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const tabs = ['US Markets', 'Crypto', 'Earnings', 'Screener', 'Politicians']
 
@@ -80,6 +81,33 @@ const sectors = [
 export default function FinancePage() {
   const [activeTab, setActiveTab] = useState('Earnings')
   const [watchlistTab, setWatchlistTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
+  const [myWatchlist, setMyWatchlist] = useState<string[]>([])
+
+  useEffect(() => {
+    // Load saved watchlist from localStorage
+    const saved = localStorage.getItem('stockWatchlist')
+    if (saved) {
+      setMyWatchlist(JSON.parse(saved))
+    }
+  }, [])
+
+  const addToWatchlist = (ticker: string) => {
+    setMyWatchlist(prev => {
+      const newWatchlist = [...prev, ticker]
+      localStorage.setItem('stockWatchlist', JSON.stringify(newWatchlist))
+      return newWatchlist
+    })
+  }
+
+  const removeFromWatchlist = (ticker: string) => {
+    setMyWatchlist(prev => {
+      const newWatchlist = prev.filter(t => t !== ticker)
+      localStorage.setItem('stockWatchlist', JSON.stringify(newWatchlist))
+      return newWatchlist
+    })
+  }
+
+  const isInWatchlist = (ticker: string) => myWatchlist.includes(ticker)
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -202,12 +230,20 @@ export default function FinancePage() {
 
       {/* Right Sidebar */}
       <div className="w-96 border-l border-border p-6 space-y-6">
-        {/* Create Watchlist */}
+        {/* My Watchlist */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-foreground">
-            Create Watchlist
+            My Watchlist {myWatchlist.length > 0 && `(${myWatchlist.length})`}
           </h3>
-          <button className="text-muted-foreground hover:text-primary transition-colors">
+          <button
+            onClick={() => {
+              if (confirm('Clear all watchlist items?')) {
+                setMyWatchlist([])
+                localStorage.removeItem('stockWatchlist')
+              }
+            }}
+            className="text-muted-foreground hover:text-primary transition-colors"
+          >
             <TrendingUp className="size-5" />
           </button>
         </div>
@@ -242,8 +278,26 @@ export default function FinancePage() {
                   {stock.change}
                 </div>
               </div>
-              <button className="p-1 hover:bg-accent rounded transition-colors">
-                <Plus className="size-4" />
+              <button
+                onClick={() => {
+                  if (isInWatchlist(stock.ticker)) {
+                    removeFromWatchlist(stock.ticker)
+                  } else {
+                    addToWatchlist(stock.ticker)
+                  }
+                }}
+                className={`p-1 rounded transition-colors ${
+                  isInWatchlist(stock.ticker)
+                    ? 'bg-primary/10 hover:bg-primary/20 text-primary'
+                    : 'hover:bg-accent'
+                }`}
+                title={isInWatchlist(stock.ticker) ? 'Remove from watchlist' : 'Add to watchlist'}
+              >
+                {isInWatchlist(stock.ticker) ? (
+                  <X className="size-4" />
+                ) : (
+                  <Plus className="size-4" />
+                )}
               </button>
             </div>
           ))}

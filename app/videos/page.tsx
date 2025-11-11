@@ -7,9 +7,11 @@ import {
   Play,
   Clock,
   Eye,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const videoCategories = [
   'All',
@@ -22,14 +24,15 @@ const videoCategories = [
   'Reviews'
 ]
 
-const sampleVideos = [
+const allVideos = [
   {
     thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995',
     title: 'The Future of Artificial Intelligence',
     channel: 'Tech Insights',
     views: '2.5M',
     duration: '15:32',
-    uploadedAt: '2 days ago'
+    uploadedAt: '2 days ago',
+    category: 'Technology'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb',
@@ -37,7 +40,8 @@ const sampleVideos = [
     channel: 'Science Daily',
     views: '1.8M',
     duration: '22:15',
-    uploadedAt: '1 week ago'
+    uploadedAt: '1 week ago',
+    category: 'Science'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2',
@@ -45,7 +49,8 @@ const sampleVideos = [
     channel: 'Space News',
     views: '3.2M',
     duration: '18:45',
-    uploadedAt: '3 days ago'
+    uploadedAt: '3 days ago',
+    category: 'News'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1569163139394-de4798aa62b0',
@@ -53,7 +58,8 @@ const sampleVideos = [
     channel: 'Environmental Science',
     views: '1.5M',
     duration: '25:18',
-    uploadedAt: '5 days ago'
+    uploadedAt: '5 days ago',
+    category: 'Science'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
@@ -61,7 +67,8 @@ const sampleVideos = [
     channel: 'Code Academy',
     views: '980K',
     duration: '32:22',
-    uploadedAt: '1 week ago'
+    uploadedAt: '1 week ago',
+    category: 'Technology'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
@@ -69,7 +76,8 @@ const sampleVideos = [
     channel: 'Physics Explained',
     views: '2.1M',
     duration: '28:55',
-    uploadedAt: '4 days ago'
+    uploadedAt: '4 days ago',
+    category: 'Science'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
@@ -77,7 +85,8 @@ const sampleVideos = [
     channel: 'AI Academy',
     views: '1.2M',
     duration: '19:40',
-    uploadedAt: '6 days ago'
+    uploadedAt: '6 days ago',
+    category: 'Education'
   },
   {
     thumbnail: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c',
@@ -85,13 +94,67 @@ const sampleVideos = [
     channel: 'Business Insights',
     views: '750K',
     duration: '21:33',
-    uploadedAt: '2 weeks ago'
+    uploadedAt: '2 weeks ago',
+    category: 'Education'
+  },
+  {
+    thumbnail: 'https://images.unsplash.com/photo-1598550487031-0d6eaf5e3f4f',
+    title: 'How to Build a Robot',
+    channel: 'DIY Tech',
+    views: '890K',
+    duration: '35:12',
+    uploadedAt: '1 week ago',
+    category: 'How-to'
+  },
+  {
+    thumbnail: 'https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a',
+    title: 'iPhone 15 Pro Review',
+    channel: 'Tech Reviews',
+    views: '5.2M',
+    duration: '12:45',
+    uploadedAt: '3 days ago',
+    category: 'Reviews'
   }
 ]
 
 export default function VideosPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState('All')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
+  const [filteredVideos, setFilteredVideos] = useState(allVideos)
+  const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    let filtered = allVideos
+
+    // Filter by category
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(video => video.category === selectedCategory)
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(video =>
+        video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.channel.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    setFilteredVideos(filtered)
+  }, [selectedCategory, searchQuery])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery + ' videos')}`)
+    }
+  }
+
+  const handleVideoClick = (video: typeof allVideos[0]) => {
+    router.push(`/search?q=${encodeURIComponent(video.title)}`)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -107,7 +170,7 @@ export default function VideosPage() {
           <p className="text-lg text-muted-foreground max-w-2xl mb-6">
             Discover educational and informative videos from across the web
           </p>
-          <div className="flex gap-3 items-center">
+          <form onSubmit={handleSearch} className="flex gap-3 items-center">
             <div className="relative flex-1 max-w-3xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
               <input
@@ -115,13 +178,27 @@ export default function VideosPage() {
                 placeholder="Search for videos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as any)}
                 className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-5" />
+                </button>
+              )}
             </div>
-            <button className="rounded-2xl border border-input bg-background p-4 hover:bg-accent transition-colors">
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`rounded-2xl border transition-colors ${showFilters ? 'border-primary bg-primary/10' : 'border-input bg-background hover:bg-accent'} p-4`}
+            >
               <Filter className="size-5" />
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
@@ -146,20 +223,32 @@ export default function VideosPage() {
           </div>
         </section>
 
+        {/* Results Count */}
+        {(selectedCategory !== 'All' || searchQuery) && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            Showing {filteredVideos.length} {filteredVideos.length === 1 ? 'result' : 'results'}
+            {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+            {searchQuery && ` for "${searchQuery}"`}
+          </div>
+        )}
+
         {/* Trending Section */}
         <section className="mb-10">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="size-5 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">
-              Trending Videos
+              {selectedCategory === 'All' ? 'Trending Videos' : `Trending in ${selectedCategory}`}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {sampleVideos.map((video, index) => (
-              <div
-                key={index}
-                className="group cursor-pointer"
-              >
+          {filteredVideos.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredVideos.map((video, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleVideoClick(video)}
+                    className="group cursor-pointer"
+                  >
                 <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted mb-3">
                   <img
                     src={video.thumbnail}
@@ -196,12 +285,34 @@ export default function VideosPage() {
             ))}
           </div>
 
-          {/* Load More */}
-          <div className="flex justify-center mt-12">
-            <button className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
-              Load More Videos
-            </button>
-          </div>
+              {/* Load More */}
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => alert('Loading more videos... (Would load from API in production)')}
+                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Load More Videos
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <Video className="size-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No videos found</h3>
+              <p className="text-sm text-muted-foreground">
+                Try adjusting your search or filters
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedCategory('All')
+                }}
+                className="mt-4 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </div>

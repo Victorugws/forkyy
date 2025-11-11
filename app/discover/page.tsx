@@ -10,7 +10,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const featuredArticle = {
   title: 'Trump says US close to trade deal with India',
@@ -69,6 +69,29 @@ const marketData = {
 
 export default function DiscoverPage() {
   const [activeTab, setActiveTab] = useState<'top' | 'topics'>('top')
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+
+  useEffect(() => {
+    // Load saved interests from localStorage
+    const saved = localStorage.getItem('userInterests')
+    if (saved) {
+      setSelectedInterests(JSON.parse(saved))
+    }
+  }, [])
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => {
+      const newInterests = prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+      return newInterests
+    })
+  }
+
+  const saveInterests = () => {
+    localStorage.setItem('userInterests', JSON.stringify(selectedInterests))
+    alert(`Saved ${selectedInterests.length} interests successfully!`)
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -210,14 +233,23 @@ export default function DiscoverPage() {
             {interests.map((interest) => (
               <button
                 key={interest}
-                className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent border border-border hover:border-primary/50 transition-colors"
+                onClick={() => toggleInterest(interest)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  selectedInterests.includes(interest)
+                    ? 'bg-primary text-primary-foreground border border-primary'
+                    : 'bg-accent border border-border hover:border-primary/50'
+                }`}
               >
                 {interest}
               </button>
             ))}
           </div>
-          <button className="w-full py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors">
-            Save Interests
+          <button
+            onClick={saveInterests}
+            disabled={selectedInterests.length === 0}
+            className="w-full py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Save Interests ({selectedInterests.length})
           </button>
         </div>
 

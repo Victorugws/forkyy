@@ -25,8 +25,10 @@ export function NewsCard({ article }: NewsCardProps) {
   const [imageError, setImageError] = useState(false)
 
   return (
-    <Link
-      href={`/search?q=${encodeURIComponent(article.title)}`}
+    <a
+      href={article.url}
+      target="_blank"
+      rel="noopener noreferrer"
       className="block group"
     >
       <div className="flex gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary/50 transition-all">
@@ -74,6 +76,6 @@ export function NewsCard({ article }: NewsCardProps) {
           </div>
         </div>
       </div>
-    </Link>
+    </a>
   )
 }

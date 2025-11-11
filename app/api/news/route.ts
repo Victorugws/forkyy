@@ -78,6 +78,7 @@ function getFallbackNews(type: string | null) {
     summary: 'The president says tariff will lower the current 50% tariff rate, citing India\'s reduced Russian oil purchases after imposing tariffs earlier this year.',
     image: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&h=500&fit=crop',
     source: 'reuters',
+    url: 'https://www.reuters.com/world/us/',
     views: '1M',
     sources: 92,
     publishedHours: 7
@@ -88,6 +89,7 @@ function getFallbackNews(type: string | null) {
       title: 'Private credit market tops $3T as regulators warn of risks',
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
       source: 'reuters',
+      url: 'https://www.reuters.com/markets/',
       views: '75K',
       sources: 45,
       publishedHours: 12
@@ -96,6 +98,7 @@ function getFallbackNews(type: string | null) {
       title: 'Ukraine raids Zelensky ally in $300M energy kickback scheme',
       image: 'https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?w=400&h=300&fit=crop',
       source: 'ap',
+      url: 'https://apnews.com/world',
       views: '58K',
       sources: 34,
       publishedHours: 8
@@ -104,6 +107,7 @@ function getFallbackNews(type: string | null) {
       title: 'China curbs fentanyl chemical exports after Trump deal',
       image: 'https://images.unsplash.com/photo-1569163139394-de4798aa62b0?w=400&h=300&fit=crop',
       source: 'wsj',
+      url: 'https://www.wsj.com/world',
       views: '94K',
       sources: 68,
       publishedHours: 5

@@ -79,7 +79,13 @@ export default function VideosPage() {
   }
 
   const handleVideoClick = (video: typeof allVideos[0]) => {
-    router.push(`/search?q=${encodeURIComponent(video.title)}`)
+    // Open video link in new tab if available
+    if (video.link) {
+      window.open(video.link, '_blank')
+    } else {
+      // Fallback to search
+      router.push(`/search?q=${encodeURIComponent(video.title)}`)
+    }
   }
 
   return (

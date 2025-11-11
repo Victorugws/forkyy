@@ -151,8 +151,10 @@ export default function DiscoverPage() {
             </div>
           </div>
         ) : (
-          <Link
-            href={`/search?q=${encodeURIComponent(featuredArticle.title)}`}
+          <a
+            href={featuredArticle.url || `/search?q=${encodeURIComponent(featuredArticle.title)}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="block group mb-8"
           >
             <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
@@ -186,7 +188,7 @@ export default function DiscoverPage() {
                 />
               </div>
             </div>
-          </Link>
+          </a>
         )}
 
         {/* Infinite News Feed */}

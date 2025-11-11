@@ -139,7 +139,8 @@ export default function ImagesPage() {
   }
 
   const handleImageClick = (image: typeof allImages[0]) => {
-    router.push(`/search?q=${encodeURIComponent(image.title)}`)
+    // Open image in new tab
+    window.open(image.url, '_blank')
   }
 
   return (

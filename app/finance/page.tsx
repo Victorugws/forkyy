@@ -100,6 +100,7 @@ export default function FinancePage() {
           <div className="flex items-center gap-2">
             {/* Mobile Watchlist Toggle */}
             <button
+              type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
             >
@@ -116,6 +117,7 @@ export default function FinancePage() {
         <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
+              type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${

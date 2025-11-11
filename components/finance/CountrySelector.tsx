@@ -89,7 +89,12 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
     <div ref={dropdownRef} className={`relative ${className}`}>
       {/* Trigger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsOpen(!isOpen)
+        }}
         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
       >
         <Globe className="size-4" />
@@ -121,8 +126,13 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
             {filteredCountries.length > 0 ? (
               filteredCountries.map((country) => (
                 <button
+                  type="button"
                   key={country.code}
-                  onClick={() => handleSelect(country)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleSelect(country)
+                  }}
                   className={`w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors flex items-center justify-between ${
                     selectedCountry.code === country.code ? 'bg-accent text-primary' : 'text-foreground'
                   }`}

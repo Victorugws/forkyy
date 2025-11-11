@@ -90,7 +90,12 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
                       <td className="px-4 py-4 text-right">
                         {!isInWatchlist && (
                           <button
-                            onClick={() => onAddToWatchlist(stock.ticker)}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              onAddToWatchlist(stock.ticker)
+                            }}
                             className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors ml-auto text-xs"
                           >
                             <Plus className="size-3" />

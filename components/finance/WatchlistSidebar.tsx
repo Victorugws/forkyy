@@ -150,7 +150,12 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
         {/* Close button for mobile */}
         {onClose && (
           <button
-            onClick={onClose}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onClose()
+            }}
             className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-accent transition-colors"
             aria-label="Close sidebar"
           >
@@ -201,7 +206,12 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
                     </div>
                   </div>
                   <button
-                    onClick={() => onRemoveFromWatchlist(stock.ticker)}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onRemoveFromWatchlist(stock.ticker)
+                    }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
                     aria-label={`Remove ${stock.ticker} from watchlist`}
                   >
@@ -226,8 +236,13 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
             { id: 'active' as const, label: 'Active' }
           ].map((tab) => (
             <button
+              type="button"
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setActiveTab(tab.id)
+              }}
               className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'bg-primary/10 text-primary'

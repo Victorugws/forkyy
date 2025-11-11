@@ -41,12 +41,15 @@ export function useWatchlist() {
 
   // Add ticker to watchlist
   const addToWatchlist = useCallback((ticker: string) => {
+    console.log('Adding to watchlist:', ticker)
     setWatchlist(prev => {
       // Avoid duplicates
       if (prev.includes(ticker)) {
+        console.log('Ticker already in watchlist:', ticker)
         return prev
       }
       const newWatchlist = [...prev, ticker]
+      console.log('New watchlist:', newWatchlist)
       saveToStorage(newWatchlist)
       return newWatchlist
     })
@@ -54,8 +57,10 @@ export function useWatchlist() {
 
   // Remove ticker from watchlist
   const removeFromWatchlist = useCallback((ticker: string) => {
+    console.log('Removing from watchlist:', ticker)
     setWatchlist(prev => {
       const newWatchlist = prev.filter(t => t !== ticker)
+      console.log('New watchlist after removal:', newWatchlist)
       saveToStorage(newWatchlist)
       return newWatchlist
     })

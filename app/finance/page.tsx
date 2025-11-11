@@ -80,7 +80,23 @@ export default function FinancePage() {
   }, [])
 
   const handleCountryChange = (country: Country) => {
+    console.log('Finance page: Country changed to:', country.name)
     setSelectedCountry(country.name)
+
+    // Refetch politician trades with new country
+    const fetchPoliticiansByCountry = async () => {
+      try {
+        const res = await fetch(`/api/finance?type=politicians&country=${encodeURIComponent(country.name)}`)
+        const data = await res.json()
+        if (data.success || data.fallback) {
+          setPoliticianTrades(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching politician trades for country:', error)
+      }
+    }
+
+    fetchPoliticiansByCountry()
   }
 
   return (

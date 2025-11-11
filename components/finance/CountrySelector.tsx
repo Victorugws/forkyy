@@ -50,6 +50,8 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false)
@@ -57,9 +59,16 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    // Add slight delay to prevent immediate closing
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside)
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   // Update selected country when value prop changes
   useEffect(() => {
@@ -72,6 +81,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
   }, [value])
 
   const handleSelect = (country: Country) => {
+    console.log('Country selected:', country.name)
     setSelectedCountry(country)
     setIsOpen(false)
     setSearchQuery('')
@@ -93,6 +103,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
+          console.log('Country selector clicked, current state:', isOpen)
           setIsOpen(!isOpen)
         }}
         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
@@ -108,7 +119,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-border bg-card shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-border bg-card shadow-lg z-[100] overflow-hidden">
           {/* Search Input */}
           <div className="p-3 border-b border-border">
             <input

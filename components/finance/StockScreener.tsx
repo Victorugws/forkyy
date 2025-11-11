@@ -94,6 +94,7 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
+                              console.log('Add to watchlist button clicked for:', stock.ticker)
                               onAddToWatchlist(stock.ticker)
                             }}
                             className="flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors ml-auto text-xs"

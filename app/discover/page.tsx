@@ -7,12 +7,16 @@ import {
   TrendingUp,
   Eye,
   FileText,
-  Sparkles
+  Sparkles,
+  Globe,
+  Image as ImageIcon,
+  Video
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { InfiniteNewsFeed } from '@/components/discover/InfiniteNewsFeed'
 
+type ContentTab = 'all' | 'images' | 'videos' | 'news'
 
 const interests = [
   'Tech & Science',
@@ -28,11 +32,12 @@ const marketData = {
 }
 
 export default function DiscoverPage() {
-  const [activeTab, setActiveTab] = useState<'top' | 'topics'>('top')
+  const [activeTab, setActiveTab] = useState<ContentTab>('all')
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
   const [featuredArticle, setFeaturedArticle] = useState<any>(null)
-  const [newsCards, setNewsCards] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [imageResults, setImageResults] = useState<any[]>([])
+  const [videoResults, setVideoResults] = useState<any[]>([])
 
   useEffect(() => {
     // Load saved interests from localStorage
@@ -42,26 +47,16 @@ export default function DiscoverPage() {
     }
   }, [])
 
-  // Fetch news data
+  // Fetch news data (latest news, not topic-based)
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true)
       try {
-        const [featuredRes, topRes] = await Promise.all([
-          fetch('/api/news?type=featured'),
-          fetch('/api/news?type=top')
-        ])
-
-        const [featuredData, topData] = await Promise.all([
-          featuredRes.json(),
-          topRes.json()
-        ])
+        const featuredRes = await fetch('/api/news?type=featured')
+        const featuredData = await featuredRes.json()
 
         if (featuredData.success || featuredData.fallback) {
           setFeaturedArticle(featuredData.data)
-        }
-        if (topData.success || topData.fallback) {
-          setNewsCards(topData.data.slice(0, 3))
         }
       } catch (error) {
         console.error('Error fetching news:', error)
@@ -76,6 +71,42 @@ export default function DiscoverPage() {
     const interval = setInterval(fetchNews, 300000)
     return () => clearInterval(interval)
   }, [])
+
+  // Fetch images when Images tab is active
+  useEffect(() => {
+    if (activeTab === 'images') {
+      const fetchImages = async () => {
+        try {
+          const res = await fetch('/api/images?query=latest+news')
+          const data = await res.json()
+          if (data.success || data.fallback) {
+            setImageResults(data.data || [])
+          }
+        } catch (error) {
+          console.error('Error fetching images:', error)
+        }
+      }
+      fetchImages()
+    }
+  }, [activeTab])
+
+  // Fetch videos when Videos tab is active
+  useEffect(() => {
+    if (activeTab === 'videos') {
+      const fetchVideos = async () => {
+        try {
+          const res = await fetch('/api/videos?query=latest+news&category=News')
+          const data = await res.json()
+          if (data.success || data.fallback) {
+            setVideoResults(data.data || [])
+          }
+        } catch (error) {
+          console.error('Error fetching videos:', error)
+        }
+      }
+      fetchVideos()
+    }
+  }, [activeTab])
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => {
@@ -107,95 +138,238 @@ export default function DiscoverPage() {
           {/* Tabs */}
           <div className="flex gap-4 border-b border-border">
             <button
-              onClick={() => setActiveTab('top')}
+              onClick={() => setActiveTab('all')}
               className={`px-4 py-2 text-sm font-medium transition-colors relative ${
-                activeTab === 'top'
+                activeTab === 'all'
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Star className="size-4 inline mr-2" />
-              Top
-              {activeTab === 'top' && (
+              <Globe className="size-4 inline mr-2" />
+              All
+              {activeTab === 'all' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
             <button
-              onClick={() => setActiveTab('topics')}
+              onClick={() => setActiveTab('images')}
               className={`px-4 py-2 text-sm font-medium transition-colors relative ${
-                activeTab === 'topics'
+                activeTab === 'images'
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ImageIcon className="size-4 inline mr-2" />
+              Images
+              {activeTab === 'images' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('videos')}
+              className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                activeTab === 'videos'
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Video className="size-4 inline mr-2" />
+              Videos
+              {activeTab === 'videos' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                activeTab === 'news'
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Newspaper className="size-4 inline mr-2" />
-              Topics
-              {activeTab === 'topics' && (
+              News
+              {activeTab === 'news' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Featured Article */}
-        {loading || !featuredArticle ? (
-          <div className="mb-8 rounded-2xl border border-border bg-card p-6 h-64 animate-pulse">
-            <div className="flex gap-6 h-full">
-              <div className="flex-1 space-y-4">
-                <div className="h-8 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-                <div className="h-4 bg-muted rounded w-2/3"></div>
-              </div>
-              <div className="w-80 h-48 bg-muted rounded-xl"></div>
-            </div>
-          </div>
-        ) : (
-          <a
-            href={featuredArticle.url || `/search?q=${encodeURIComponent(featuredArticle.title)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block group mb-8"
-          >
-            <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
-              <div className="flex-1">
-                <h2 className="text-2xl font-semibold text-foreground group-hover:text-primary transition-colors mb-3">
-                  {featuredArticle.title}
-                </h2>
-                <p className="text-muted-foreground text-base mb-4 leading-relaxed">
-                  {featuredArticle.summary}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Eye className="size-4" />
-                    {featuredArticle.views} views
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FileText className="size-4" />
-                    {featuredArticle.sources} sources
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                    {featuredArticle.source}
-                  </span>
-                  <span>Published {featuredArticle.publishedHours} hours ago</span>
+        {/* All Tab & News Tab - Show Featured Article + Infinite News Feed */}
+        {(activeTab === 'all' || activeTab === 'news') && (
+          <>
+            {/* Featured Article */}
+            {loading || !featuredArticle ? (
+              <div className="mb-8 rounded-2xl border border-border bg-card p-6 h-64 animate-pulse">
+                <div className="flex gap-6 h-full">
+                  <div className="flex-1 space-y-4">
+                    <div className="h-8 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                  </div>
+                  <div className="w-80 h-48 bg-muted rounded-xl"></div>
                 </div>
               </div>
-              <div className="w-80 h-48 rounded-xl overflow-hidden flex-shrink-0">
-                <img
-                  src={featuredArticle.image}
-                  alt={featuredArticle.title}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                />
-              </div>
+            ) : (
+              <a
+                href={featuredArticle.url || `/search?q=${encodeURIComponent(featuredArticle.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block group mb-8"
+              >
+                <div className="flex gap-6 rounded-2xl border border-border bg-card p-6 hover:border-primary/50 transition-all">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-semibold text-foreground group-hover:text-primary transition-colors mb-3">
+                      {featuredArticle.title}
+                    </h2>
+                    <p className="text-muted-foreground text-base mb-4 leading-relaxed">
+                      {featuredArticle.summary}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Eye className="size-4" />
+                        {featuredArticle.views} views
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FileText className="size-4" />
+                        {featuredArticle.sources} sources
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
+                        {featuredArticle.source}
+                      </span>
+                      <span>Published {featuredArticle.publishedHours} hours ago</span>
+                    </div>
+                  </div>
+                  <div className="w-80 h-48 rounded-xl overflow-hidden flex-shrink-0">
+                    <img
+                      src={featuredArticle.image}
+                      alt={featuredArticle.title}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {/* Infinite News Feed */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-6">Latest News</h2>
+              <InfiniteNewsFeed interests={selectedInterests} />
             </div>
-          </a>
+          </>
         )}
 
-        {/* Infinite News Feed */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Latest News</h2>
-          <InfiniteNewsFeed interests={selectedInterests} />
-        </div>
+        {/* Images Tab - Show Image Grid */}
+        {activeTab === 'images' && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Latest Images</h2>
+            {imageResults.length === 0 ? (
+              <div className="grid grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="aspect-square bg-muted rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-4">
+                {imageResults.map((image, index) => (
+                  <a
+                    key={index}
+                    href={image.url || image.thumbnail}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <div className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all">
+                      <div className="aspect-square bg-muted">
+                        <img
+                          src={image.thumbnail || image.url}
+                          alt={image.title || 'Image'}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      </div>
+                      {image.title && (
+                        <div className="p-3">
+                          <p className="text-sm text-muted-foreground line-clamp-1">{image.title}</p>
+                          {image.source && (
+                            <p className="text-xs text-muted-foreground/70 mt-1">{image.source}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Videos Tab - Show Video Grid */}
+        {activeTab === 'videos' && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Latest Videos</h2>
+            {videoResults.length === 0 ? (
+              <div className="grid grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="aspect-video bg-muted rounded-xl animate-pulse" />
+                    <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+                    <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {videoResults.map((video, index) => (
+                  <a
+                    key={index}
+                    href={video.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <div className="rounded-xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all">
+                      <div className="relative aspect-video bg-muted">
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                            <svg className="w-6 h-6 text-primary-foreground ml-1" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </div>
+                        </div>
+                        {video.duration && (
+                          <span className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 text-white text-xs rounded">
+                            {video.duration}
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                          {video.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span>{video.channel}</span>
+                          {video.views && (
+                            <>
+                              <span>•</span>
+                              <span>{video.views} views</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right Sidebar */}

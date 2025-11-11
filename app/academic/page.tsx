@@ -1,3 +1,5 @@
+'use client'
+
 import {
   GraduationCap,
   Search,
@@ -9,6 +11,8 @@ import {
   FlaskConical
 } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const researchFields = [
   {
@@ -92,6 +96,16 @@ const recentTopics = [
 ]
 
 export default function AcademicPage() {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery + ' academic research')}`)
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -107,14 +121,16 @@ export default function AcademicPage() {
             Access scholarly articles, research papers, and academic resources
             from leading institutions worldwide
           </p>
-          <div className="relative max-w-3xl">
+          <form onSubmit={handleSearch} className="relative max-w-3xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search papers, authors, topics..."
               className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-          </div>
+          </form>
         </div>
       </div>
 

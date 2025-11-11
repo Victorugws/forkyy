@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Folder,
   Plus,
@@ -9,6 +11,7 @@ import {
   Users
 } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 const defaultSpaces = [
   {
@@ -47,6 +50,54 @@ const defaultSpaces = [
 ]
 
 export default function SpacesPage() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [spaces, setSpaces] = useState(defaultSpaces)
+  const [filteredSpaces, setFilteredSpaces] = useState(defaultSpaces)
+
+  useEffect(() => {
+    // Load saved spaces from localStorage
+    const saved = localStorage.getItem('userSpaces')
+    if (saved) {
+      try {
+        const savedSpaces = JSON.parse(saved)
+        setSpaces(savedSpaces)
+        setFilteredSpaces(savedSpaces)
+      } catch (e) {
+        console.error('Failed to load spaces:', e)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    // Filter spaces by search query
+    if (searchQuery.trim()) {
+      const filtered = spaces.filter(space =>
+        space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        space.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredSpaces(filtered)
+    } else {
+      setFilteredSpaces(spaces)
+    }
+  }, [searchQuery, spaces])
+
+  const handleCreateSpace = () => {
+    const spaceName = prompt('Enter space name:')
+    if (spaceName && spaceName.trim()) {
+      const newSpace = {
+        name: spaceName.trim(),
+        description: 'Custom space for organizing threads',
+        icon: Folder,
+        threadsCount: 0,
+        lastUpdated: 'just now',
+        color: 'bg-blue-500'
+      }
+      const updatedSpaces = [...spaces, newSpace]
+      setSpaces(updatedSpaces)
+      localStorage.setItem('userSpaces', JSON.stringify(updatedSpaces))
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -63,7 +114,10 @@ export default function SpacesPage() {
             knowledge management
           </p>
           <div className="flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+            <button
+              onClick={handleCreateSpace}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
               <Plus className="size-4" />
               Create Space
             </button>
@@ -71,6 +125,8 @@ export default function SpacesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search spaces..."
                 className="w-full rounded-full border border-input bg-background px-10 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
@@ -83,11 +139,21 @@ export default function SpacesPage() {
       <div className="container max-w-7xl mx-auto px-6 py-10 flex-1">
         {/* My Spaces Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
-            My Spaces
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">
+              My Spaces {filteredSpaces.length > 0 && `(${filteredSpaces.length})`}
+            </h2>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {defaultSpaces.map((space, index) => (
+            {filteredSpaces.map((space, index) => (
               <Link
                 key={index}
                 href={`/spaces/${space.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -116,7 +182,10 @@ export default function SpacesPage() {
             ))}
 
             {/* Create New Space Card */}
-            <button className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card p-6 transition-all hover:border-primary/50 hover:bg-accent">
+            <button
+              onClick={handleCreateSpace}
+              className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card p-6 transition-all hover:border-primary/50 hover:bg-accent"
+            >
               <div className="rounded-full bg-primary/10 p-4 mb-4 group-hover:bg-primary/20 transition-colors">
                 <Plus className="size-8 text-primary" />
               </div>

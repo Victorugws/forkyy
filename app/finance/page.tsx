@@ -78,8 +78,22 @@ const sectors = [
   { name: 'Energy', value: '$90.35', change: '+0.90%', positive: true }
 ]
 
+const cryptoData = [
+  { name: 'Bitcoin', ticker: 'BTCUSD', symbol: 'CRYPTO', price: '$104,890.68', change: '-1.03%', negative: true },
+  { name: 'Ethereum', ticker: 'ETHUSD', symbol: 'CRYPTO', price: '$3,548.91', change: '-0.49%', negative: true },
+  { name: 'Solana', ticker: 'SOLUSD', symbol: 'CRYPTO', price: '$163.90', change: '-2.04%', negative: true },
+  { name: 'Coin 50', ticker: 'COIN50USD', symbol: '', price: '$447.81', change: '-1.45%', negative: true }
+]
+
+const marketIndices = [
+  { name: 'S&P Futures', ticker: 'S&P', price: '6,846', change: '-0.14%', negative: true },
+  { name: 'NASDAQ Fut', ticker: 'NASDAQ', price: '25,650.25', change: '-0.13%', negative: true },
+  { name: 'Dow Futures', ticker: 'Dow', price: '47,443', change: '-0.04%', negative: true },
+  { name: 'VIX', ticker: 'INDEX', price: '176', change: '+3.07%', negative: false }
+]
+
 export default function FinancePage() {
-  const [activeTab, setActiveTab] = useState('Earnings')
+  const [activeTab, setActiveTab] = useState('US Markets')
   const [watchlistTab, setWatchlistTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [myWatchlist, setMyWatchlist] = useState<string[]>([])
 
@@ -119,7 +133,7 @@ export default function FinancePage() {
             Perplexity Finance
           </Link>
           <ChevronRight className="size-4" />
-          <span className="text-foreground">Earnings</span>
+          <span className="text-foreground">{activeTab}</span>
         </div>
 
         {/* Tabs */}
@@ -139,83 +153,178 @@ export default function FinancePage() {
           ))}
         </div>
 
-        {/* Earnings Calendar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              Earnings Calendar
-            </h2>
-            <div className="flex items-center gap-2">
-              <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
-                <ChevronLeft className="size-4" />
-              </button>
-              <button className="px-4 py-1.5 rounded-lg bg-accent text-sm font-medium">
-                Today
-              </button>
-              <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-7 gap-3 mb-6">
-            {weekDays.map((day) => (
-              <button
-                key={day.day}
-                className={`p-4 rounded-xl border text-center transition-all ${
-                  day.active
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-card hover:border-primary/50'
-                }`}
-              >
-                <div className="text-sm font-medium text-foreground mb-1">
-                  {day.day}
-                </div>
-                <div className="text-xs text-muted-foreground mb-2">
-                  {day.date}
-                </div>
-                <div
-                  className={`text-xs font-medium ${
-                    day.active ? 'text-primary' : 'text-muted-foreground'
-                  }`}
+        {/* US Markets Content */}
+        {activeTab === 'US Markets' && (
+          <>
+            {/* Market Indices Grid */}
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {marketIndices.map((index) => (
+                <Link
+                  key={index.name}
+                  href={`/search?q=${index.name}+stock+market`}
+                  className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
                 >
-                  {day.calls}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+                  <div className="text-xs text-muted-foreground mb-1">{index.name}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{index.ticker}</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{index.price}</div>
+                  <div className={`text-sm font-medium ${index.negative ? 'text-red-500' : 'text-green-500'}`}>
+                    {index.change}
+                  </div>
+                </Link>
+              ))}
+            </div>
 
-        {/* Earnings Calls List */}
-        <div className="space-y-2 mb-8">
-          {earningsCalls.map((call, index) => (
-            <Link
-              key={index}
-              href={`/search?q=${call.ticker}+earnings`}
-              className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-lg font-bold">
-                  {call.ticker.substring(0, 2)}
+            {/* Market Summary */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground">Market Summary</h2>
+                <span className="text-sm text-muted-foreground">Updated 50 seconds ago</span>
+              </div>
+              <div className="space-y-4">
+                <div className="p-6 rounded-xl border border-border bg-card">
+                  <h3 className="font-semibold text-foreground mb-3">Stocks Surge as Senate Advances Shutdown Deal</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    US stocks surged Monday after bipartisan progress to end the longest federal government shutdown in history. The S&P 500 rose 1.54% and the Nasdaq 100 jumped 2.20%, led by Big Tech and AI-linked names after last week's sell-off.
+                  </p>
                 </div>
-                <div>
-                  <div className="font-medium text-foreground group-hover:text-primary transition-colors">
-                    {call.name}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {call.ticker}
-                  </div>
+                <div className="p-6 rounded-xl border border-border bg-card">
+                  <h3 className="font-semibold text-foreground mb-3">Technology and AI Lead Gains</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Nvidia soared nearly 6%, Palantir gained almost 9%, and Alphabet rose 4% as investors rotated back into AI and tech stocks. The move was fueled by optimism about fiscal clarity and improved risk appetite following the shutdown agreement.
+                  </p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm font-medium text-foreground">
-                  {call.quarter}
-                </div>
-                <div className="text-sm text-muted-foreground">{call.time}</div>
+            </div>
+          </>
+        )}
+
+        {/* Crypto Content */}
+        {activeTab === 'Crypto' && (
+          <>
+            {/* Crypto Cards Grid */}
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {cryptoData.map((crypto) => (
+                <Link
+                  key={crypto.name}
+                  href={`/search?q=${crypto.name}+cryptocurrency`}
+                  className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+                >
+                  <div className="text-xs text-muted-foreground mb-1">{crypto.name}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{crypto.ticker} · {crypto.symbol}</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{crypto.price}</div>
+                  <div className={`text-sm font-medium ${crypto.negative ? 'text-red-500' : 'text-green-500'}`}>
+                    {crypto.change}
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Market Summary */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground">Market Summary</h2>
+                <span className="text-sm text-muted-foreground">Updated 4 minutes ago</span>
               </div>
-            </Link>
-          ))}
-        </div>
+              <div className="space-y-4">
+                <div className="p-6 rounded-xl border border-border bg-card">
+                  <h3 className="font-semibold text-foreground mb-3">Bitcoin Holds Above Key $105,000 Level Despite Profit-Taking</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Bitcoin rebounded from weekend lows below $100,000 after Senate progress to end the U.S. government shutdown improved risk appetite. However, selling pressure returned Tuesday, keeping BTC pinned just above $105,000 despite bullish positioning and recent institutional purchases.
+                  </p>
+                </div>
+                <div className="p-6 rounded-xl border border-border bg-card">
+                  <h3 className="font-semibold text-foreground mb-3">Ethereum and Solana Lag Behind, Weighed by Treasury Rotation and Market Volatility</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Ethereum and Solana saw muted declines alongside major crypto treasury companies pivoting toward safer havens for higher returns amid lingering uncertainty. NFT market activity remains sensitive to macro shifts and sentiment swings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Earnings Content */}
+        {activeTab === 'Earnings' && (
+          <>
+            {/* Earnings Calendar */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Earnings Calendar
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                    <ChevronLeft className="size-4" />
+                  </button>
+                  <button className="px-4 py-1.5 rounded-lg bg-accent text-sm font-medium">
+                    Today
+                  </button>
+                  <button className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-3 mb-6">
+                {weekDays.map((day) => (
+                  <button
+                    key={day.day}
+                    className={`p-4 rounded-xl border text-center transition-all ${
+                      day.active
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border bg-card hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-sm font-medium text-foreground mb-1">
+                      {day.day}
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      {day.date}
+                    </div>
+                    <div
+                      className={`text-xs font-medium ${
+                        day.active ? 'text-primary' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {day.calls}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Earnings Calls List */}
+            <div className="space-y-2 mb-8">
+              {earningsCalls.map((call, index) => (
+                <Link
+                  key={index}
+                  href={`/search?q=${call.ticker}+earnings`}
+                  className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-lg font-bold">
+                      {call.ticker.substring(0, 2)}
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground group-hover:text-primary transition-colors">
+                        {call.name}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {call.ticker}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-foreground">
+                      {call.quarter}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{call.time}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Search Input */}
         <div className="relative">

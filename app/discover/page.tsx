@@ -9,6 +9,7 @@ import {
   Zap,
   Star
 } from 'lucide-react'
+import Link from 'next/link'
 
 const trendingTopics = [
   {
@@ -188,21 +189,5 @@ export default function DiscoverPage() {
         </section>
       </div>
     </div>
-  )
-}
-
-function Link({
-  href,
-  children,
-  className
-}: {
-  href: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <a href={href} className={className}>
-      {children}
-    </a>
   )
 }

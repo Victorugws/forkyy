@@ -152,6 +152,9 @@ const config = {
   				'var(--font-sans)',
                     ...fontFamily.sans
                 ]
+  		},
+  		backgroundImage: {
+  			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))'
   		}
   	}
   },

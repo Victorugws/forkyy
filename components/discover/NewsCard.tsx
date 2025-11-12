@@ -39,30 +39,30 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
       <>
         <div
           onClick={handleClick}
-          className="flex-shrink-0 w-80 group cursor-pointer"
+          className="flex-shrink-0 w-[380px] group cursor-pointer"
         >
-          <div className="rounded-xl border border-border/60 bg-card hover:border-primary/50 transition-all overflow-hidden h-full flex flex-col">
+          <div className="rounded-2xl border border-white/10 bg-white/5 hover:border-white/20 transition-all overflow-hidden h-full flex flex-col backdrop-blur-sm">
             {/* Image */}
-            <div className="relative h-48 overflow-hidden bg-muted">
+            <div className="relative h-56 overflow-hidden bg-black/40">
               {!imageError && article.image ? (
                 <img
                   src={article.image}
                   alt={article.title}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <FileText className="size-12 text-muted-foreground/40" />
+                <div className="w-full h-full flex items-center justify-center bg-black/40">
+                  <FileText className="size-12 text-white/20" />
                 </div>
               )}
 
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
               {/* Source badge */}
-              <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-background/90 backdrop-blur-sm border border-border/60 text-foreground">
+              <div className="absolute top-4 left-4">
+                <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-black/60 backdrop-blur-md border border-white/10 text-white/90">
                   {article.source}
                 </span>
               </div>
@@ -73,25 +73,25 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
                   e.stopPropagation()
                   window.open(article.url || `/search?q=${encodeURIComponent(article.title)}`, '_blank', 'noopener,noreferrer')
                 }}
-                className="absolute top-3 right-3 p-2 rounded-full bg-background/90 backdrop-blur-sm border border-border/60 hover:bg-background transition-all opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
                 aria-label="Open in new tab"
               >
-                <ExternalLink className="size-3.5" />
+                <ExternalLink className="size-4 text-white" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3">
+            <div className="p-6 flex flex-col flex-1">
+              <h3 className="text-base font-medium text-white group-hover:text-white/80 transition-colors line-clamp-2 mb-3 leading-snug">
                 {article.title}
               </h3>
 
-              <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
+              <p className="text-sm text-white/60 line-clamp-3 mb-4 flex-1 leading-relaxed">
                 {article.summary}
               </p>
 
               {/* Footer */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-3 border-t border-border/40">
+              <div className="flex items-center gap-2 text-xs text-white/40 pt-4 border-t border-white/10">
                 <Clock className="size-3.5" />
                 <span>{article.publishedAt || `${article.publishedHours}h ago`}</span>
               </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { MiniChart } from './MiniChart'
+import { CryptoLogo } from './CryptoLogo'
 
 interface CryptoData {
   name: string
@@ -58,8 +59,13 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
             href={`/search?q=${encodeURIComponent(crypto.name)}+cryptocurrency`}
             className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
           >
-            <div className="text-xs text-muted-foreground mb-1">{crypto.name}</div>
-            <div className="text-xs text-muted-foreground mb-2">{crypto.ticker} · {crypto.symbol}</div>
+            <div className="flex items-center gap-3 mb-3">
+              <CryptoLogo symbol={crypto.symbol} name={crypto.name} size={48} />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-foreground truncate">{crypto.name}</div>
+                <div className="text-xs text-muted-foreground">{crypto.ticker} · {crypto.symbol}</div>
+              </div>
+            </div>
             <div className="flex items-end justify-between mb-2">
               <div className="text-2xl font-bold text-foreground">{crypto.price}</div>
               <MiniChart data={chartData} width={60} height={30} positive={!crypto.negative} />

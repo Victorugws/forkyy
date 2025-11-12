@@ -92,22 +92,26 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
                     </td>
                     {onAddToWatchlist && (
                       <td className="px-4 py-4 text-right">
-                        {!isInWatchlist && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              console.log('Add to watchlist button clicked for:', stock.ticker)
-                              onAddToWatchlist(stock.ticker)
-                            }}
-                            className="flex items-center gap-1 px-3 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors ml-auto text-xs font-medium cursor-pointer"
-                            style={{ pointerEvents: 'auto' }}
-                          >
-                            <Plus className="size-4" />
-                            Add
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            console.log('Add to watchlist button clicked for:', stock.ticker)
+                            console.log('Is already in watchlist?', isInWatchlist)
+                            onAddToWatchlist(stock.ticker)
+                          }}
+                          disabled={isInWatchlist}
+                          className={`flex items-center gap-1 px-4 py-2 rounded-md transition-colors ml-auto text-xs font-medium cursor-pointer ${
+                            isInWatchlist
+                              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                              : 'bg-primary/10 text-primary hover:bg-primary/20'
+                          }`}
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          <Plus className="size-4" />
+                          {isInWatchlist ? 'Added' : 'Add'}
+                        </button>
                       </td>
                     )}
                   </tr>

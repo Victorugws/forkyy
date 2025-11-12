@@ -192,7 +192,12 @@ export default function FinancePage() {
         {activeTab.includes('Markets') && (
           <>
             <MarketInsights type="US Markets" data={marketIndices} timeframe={timeframe} />
-            <MarketIndicesGrid indices={marketIndices} loading={loading} />
+            <MarketIndicesGrid
+              indices={marketIndices}
+              loading={loading}
+              onAddToWatchlist={addToWatchlist}
+              watchlist={watchlist}
+            />
             <MarketProgressionChart
               title={`${selectedCountry} Market Performance`}
               timeframe={timeframe}

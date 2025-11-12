@@ -62,16 +62,17 @@ function getColorFromSymbol(symbol: string): string {
 export function CryptoLogo({ symbol, name, size = 40, className = '' }: CryptoLogoProps) {
   const [imageError, setImageError] = useState(false)
 
-  // Get CoinGecko ID for the crypto
-  const cryptoId = CRYPTO_ID_MAP[symbol.toUpperCase()] || symbol.toLowerCase()
+  // Clean symbol and get crypto ID
+  const cleanSymbol = symbol.toUpperCase().trim()
+  const cryptoId = CRYPTO_ID_MAP[cleanSymbol] || cleanSymbol.toLowerCase()
 
-  // CoinGecko logo API URL
-  const logoUrl = `https://assets.coincap.io/assets/icons/${symbol.toLowerCase()}@2x.png`
+  // Try multiple logo sources
+  const logoUrl = `https://assets.coincap.io/assets/icons/${cleanSymbol.toLowerCase()}@2x.png`
 
   if (imageError) {
     // Fallback to colored circle with symbol
-    const bgColor = getColorFromSymbol(symbol)
-    const initials = symbol.slice(0, 2).toUpperCase()
+    const bgColor = getColorFromSymbol(cleanSymbol)
+    const initials = cleanSymbol.slice(0, 2).toUpperCase()
 
     return (
       <div
@@ -100,9 +101,12 @@ export function CryptoLogo({ symbol, name, size = 40, className = '' }: CryptoLo
         alt={`${name} logo`}
         width={size}
         height={size}
-        className="object-contain"
-        onError={() => setImageError(true)}
-        unoptimized // CoinCap doesn't support Next.js image optimization
+        className="object-contain p-1"
+        onError={() => {
+          console.log(`Failed to load crypto logo for ${cleanSymbol} from:`, logoUrl)
+          setImageError(true)
+        }}
+        unoptimized
       />
     </div>
   )

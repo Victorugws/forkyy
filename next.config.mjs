@@ -19,6 +19,12 @@ const nextConfig = {
         hostname: 'logo.clearbit.com',
         port: '',
         pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coincap.io',
+        port: '',
+        pathname: '/assets/icons/**'
       }
     ]
   }

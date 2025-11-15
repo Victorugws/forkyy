@@ -152,6 +152,16 @@ const config = {
   				'var(--font-sans)',
                     ...fontFamily.sans
                 ]
+  		},
+  		boxShadow: {
+  			'neu-sm': 'inset -4px -4px 8px -2px rgba(200, 200, 200, 0.25), 6px 6px 12px -2px rgba(160, 160, 160, 0.2), inset 25px 15px 40px -20px rgba(255, 255, 255, 0.9)',
+  			'neu': 'inset -8px -8px 20px -5px rgba(200, 200, 200, 0.25), 12px 12px 24px -5px rgba(160, 160, 160, 0.2), inset -40px -30px 60px -15px rgba(180, 180, 180, 0.12), inset 50px 30px 70px -30px rgba(255, 255, 255, 0.9)',
+  			'neu-lg': 'inset -12px -18px 35px -5px rgba(200, 200, 200, 0.3), 20px 18px 40px -5px rgba(160, 160, 160, 0.25), inset -70px -50px 80px -20px rgba(180, 180, 180, 0.15), inset 80px 50px 100px -40px rgba(255, 255, 255, 0.9), -25px -15px 60px -5px rgba(200, 200, 200, 0.15)',
+  			'neu-inset': 'inset 6px 6px 12px -3px rgba(180, 180, 180, 0.4), inset -6px -6px 12px -3px rgba(255, 255, 255, 0.9)',
+  			'neu-inset-lg': 'inset 8px 8px 16px -5px rgba(180, 180, 180, 0.4), inset -8px -8px 16px -5px rgba(255, 255, 255, 0.9)'
+  		},
+  		backdropBlur: {
+  			'neu': '5px'
   		}
   	}
   },

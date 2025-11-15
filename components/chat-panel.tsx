@@ -325,8 +325,8 @@ export function ChatPanel({
               )}
               <div
                 className={cn(
-                  'flex items-center w-full p-3 rounded-md',
-                  'bg-white/10 backdrop-blur-sm shadow-inner',
+                  'flex items-center w-full p-3 rounded-xl',
+                  'neu-raised',
                   buttonBaseClass
                 )}
               >
@@ -437,8 +437,8 @@ export function ChatPanel({
             )}
             <div
               className={cn(
-                'flex items-center w-full p-3 rounded-md',
-                'bg-white/10 backdrop-blur-sm shadow-inner',
+                'flex items-center w-full p-3 rounded-xl',
+                'neu-raised',
                 buttonBaseClass
               )}
             >

@@ -55,7 +55,7 @@ export default function AppSidebar() {
           <div className="px-3 py-3 border-b">
             <Link
               href="/"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="neu-button flex items-center justify-center gap-2 px-4 py-2.5"
             >
               <Plus className="size-4" />
               <span className="font-medium">New Search</span>

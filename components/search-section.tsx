@@ -73,7 +73,7 @@ export function SearchSection({
       {isLoading && isToolLoading ? (
         <SearchSkeleton />
       ) : searchResults?.results ? (
-        <Section title="Sources">
+        <Section title="Sources" className="!pt-0.5 pb-2">
           <SearchResults results={searchResults.results} />
         </Section>
       ) : null}

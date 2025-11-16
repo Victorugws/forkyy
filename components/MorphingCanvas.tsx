@@ -47,7 +47,7 @@ export function MorphingCanvas({
     if (morphState === 'eye-landing') {
       const timer = setTimeout(() => {
         setMorphState('eye-to-search')
-      }, 5000) // Let eye animation play for 5 seconds
+      }, 6000) // Let eye animation breathe for 6 seconds
 
       return () => clearTimeout(timer)
     }
@@ -55,7 +55,7 @@ export function MorphingCanvas({
     if (morphState === 'eye-to-search') {
       const timer = setTimeout(() => {
         setMorphState('search-active')
-      }, 2500) // Slow, visible morphing into canvas - 2.5 seconds
+      }, 4500) // 4.5 seconds for eye to FULLY vanish into canvas (no skipped frames)
 
       return () => clearTimeout(timer)
     }
@@ -67,24 +67,18 @@ export function MorphingCanvas({
       setSearchQuery(query)
       setMorphState('search-to-loading')
 
-      // Transition to loading state - search morphs back into canvas
-      setTimeout(() => {
-        setMorphState('loading-eye')
-        setShowBinary(true)
-      }, 2000) // 2 seconds for search to morph back into canvas
-
       // Call parent callback
       onSearchSubmit?.(query)
 
-      // Simulate loading completion (in real app, this would be triggered by data load)
+      // Transition directly to content after search vanishes (skip binary loading)
       setTimeout(() => {
-        setShowBinary(false)
         setMorphState('eye-to-content')
-      }, 5000) // 3 seconds of loading state
+      }, 4500) // 4.5 seconds for search to FULLY vanish back into canvas
 
+      // Content morphs out slowly after search is fully gone
       setTimeout(() => {
         setMorphState('content-visible')
-      }, 7500) // 2.5 seconds for content to morph out of canvas
+      }, 9000) // 4.5 seconds for content to morph out from canvas (no skipped frames)
     },
     [onSearchSubmit]
   )
@@ -161,7 +155,7 @@ export function MorphingCanvas({
         className="absolute inset-0 pointer-events-none"
         style={{
           ...getEyeStyle(),
-          transition: 'all 2500ms cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 4500ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 4.5 second smooth transition, no skipped frames
         }}
       >
         <AnimatedEyeBackground />
@@ -174,7 +168,7 @@ export function MorphingCanvas({
           ${getSearchVisibility() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
         style={{
-          transition: 'all 2000ms cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 4500ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 4.5 second smooth transition
         }}
       >
         <SearchInterface
@@ -183,47 +177,15 @@ export function MorphingCanvas({
         />
       </div>
 
-      {/* Loading State with Binary Placeholders */}
-      {morphState === 'loading-eye' && showBinary && (
-        <div
-          className="absolute inset-0 flex items-center justify-center p-8"
-          style={{
-            animation: 'fade-in 0.5s ease-out'
-          }}
-        >
-          <div className="w-full max-w-4xl space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-2">
-                Processing your query...
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Searching across all sources
-              </p>
-            </div>
-
-            <BinaryLoadingPlaceholder lines={6} />
-
-            {/* Pulsing indicator */}
-            <div className="flex justify-center mt-8">
-              <div
-                className="neu-raised rounded-full p-4"
-                style={{
-                  animation: 'pulse-scale 2s ease-in-out infinite'
-                }}
-              >
-                <div className="size-3 rounded-full bg-primary" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Final Content Layer */}
       <div
         className={`
-          absolute inset-0 transition-all duration-1000
+          absolute inset-0
           ${getContentVisibility() ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}
         `}
+        style={{
+          transition: 'all 4500ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 4.5 second smooth emergence from canvas
+        }}
       >
         {children}
       </div>

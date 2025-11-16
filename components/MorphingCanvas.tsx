@@ -47,7 +47,7 @@ export function MorphingCanvas({
     if (morphState === 'eye-landing') {
       const timer = setTimeout(() => {
         setMorphState('eye-to-search')
-      }, 4000) // Let eye animation play for 4 seconds
+      }, 5000) // Let eye animation play for 5 seconds
 
       return () => clearTimeout(timer)
     }
@@ -55,7 +55,7 @@ export function MorphingCanvas({
     if (morphState === 'eye-to-search') {
       const timer = setTimeout(() => {
         setMorphState('search-active')
-      }, 1000) // Transition duration
+      }, 2500) // Slow, visible morphing into canvas - 2.5 seconds
 
       return () => clearTimeout(timer)
     }
@@ -67,11 +67,11 @@ export function MorphingCanvas({
       setSearchQuery(query)
       setMorphState('search-to-loading')
 
-      // Transition to loading state
+      // Transition to loading state - search morphs back into canvas
       setTimeout(() => {
         setMorphState('loading-eye')
         setShowBinary(true)
-      }, 500)
+      }, 2000) // 2 seconds for search to morph back into canvas
 
       // Call parent callback
       onSearchSubmit?.(query)
@@ -80,34 +80,69 @@ export function MorphingCanvas({
       setTimeout(() => {
         setShowBinary(false)
         setMorphState('eye-to-content')
-      }, 3000)
+      }, 5000) // 3 seconds of loading state
 
       setTimeout(() => {
         setMorphState('content-visible')
-      }, 4000)
+      }, 7500) // 2.5 seconds for content to morph out of canvas
     },
     [onSearchSubmit]
   )
 
   // Render eye with varying opacity and scale based on state
+  // Concentric absorption/expulsion like mass being absorbed into skin
   const getEyeStyle = (): React.CSSProperties => {
     switch (morphState) {
       case 'eye-landing':
-        return { opacity: 1, transform: 'scale(1)' }
+        return {
+          opacity: 1,
+          transform: 'scale(1)',
+          filter: 'blur(0px)'
+        }
       case 'eye-to-search':
-        return { opacity: 0.3, transform: 'scale(0.8)' }
+        // Eye concentrically absorbs into canvas
+        return {
+          opacity: 0.2,
+          transform: 'scale(0.3)',
+          filter: 'blur(8px)'
+        }
       case 'search-active':
-        return { opacity: 0, transform: 'scale(0.6)' }
+        return {
+          opacity: 0,
+          transform: 'scale(0.1)',
+          filter: 'blur(12px)',
+          pointerEvents: 'none'
+        }
       case 'search-to-loading':
-        return { opacity: 0.5, transform: 'scale(0.9)' }
+        // Search morphs back, eye begins to re-emerge
+        return {
+          opacity: 0.3,
+          transform: 'scale(0.5)',
+          filter: 'blur(6px)'
+        }
       case 'loading-eye':
-        return { opacity: 0.8, transform: 'scale(1.1)' }
+        // Eye fully visible during loading
+        return {
+          opacity: 0.9,
+          transform: 'scale(0.9)',
+          filter: 'blur(2px)'
+        }
       case 'eye-to-content':
-        return { opacity: 0.2, transform: 'scale(1.5)' }
+        // Eye expands and dissolves as content emerges
+        return {
+          opacity: 0.1,
+          transform: 'scale(2)',
+          filter: 'blur(20px)'
+        }
       case 'content-visible':
-        return { opacity: 0, transform: 'scale(2)' }
+        return {
+          opacity: 0,
+          transform: 'scale(3)',
+          filter: 'blur(30px)',
+          pointerEvents: 'none'
+        }
       default:
-        return { opacity: 1, transform: 'scale(1)' }
+        return { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' }
     }
   }
 
@@ -123,8 +158,11 @@ export function MorphingCanvas({
     <div className="relative w-full min-h-screen overflow-hidden bg-background">
       {/* Eye Background Layer */}
       <div
-        className="absolute inset-0 transition-all duration-1000 ease-out pointer-events-none"
-        style={getEyeStyle()}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          ...getEyeStyle(),
+          transition: 'all 2500ms cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
       >
         <AnimatedEyeBackground />
       </div>
@@ -133,9 +171,11 @@ export function MorphingCanvas({
       <div
         className={`
           absolute inset-0 flex items-center justify-center p-8
-          transition-all duration-700
           ${getSearchVisibility() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
+        style={{
+          transition: 'all 2000ms cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
       >
         <SearchInterface
           onSearch={handleSearch}

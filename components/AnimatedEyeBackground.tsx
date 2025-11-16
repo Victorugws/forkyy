@@ -140,6 +140,78 @@ export function AnimatedEyeBackground() {
           }
         }
 
+        .eye::before {
+          width: 245px;
+          height: 245px;
+          border-radius: 50%;
+          background: conic-gradient(
+            rgba(200, 200, 200, 0.3) 0deg 10deg,
+            transparent 10deg 20deg,
+            rgba(200, 200, 200, 0.3) 20deg 30deg,
+            transparent 30deg 40deg,
+            rgba(200, 200, 200, 0.3) 40deg 50deg,
+            transparent 50deg 60deg,
+            rgba(200, 200, 200, 0.3) 60deg 70deg,
+            transparent 70deg 80deg,
+            rgba(200, 200, 200, 0.3) 80deg 90deg,
+            transparent 90deg 100deg,
+            rgba(200, 200, 200, 0.3) 100deg 110deg,
+            transparent 110deg 120deg,
+            rgba(200, 200, 200, 0.3) 120deg 130deg,
+            transparent 130deg 140deg,
+            rgba(200, 200, 200, 0.3) 140deg 150deg,
+            transparent 150deg 160deg,
+            rgba(200, 200, 200, 0.3) 160deg 170deg,
+            transparent 170deg 180deg,
+            rgba(200, 200, 200, 0.3) 180deg 190deg,
+            transparent 190deg 200deg,
+            rgba(200, 200, 200, 0.3) 200deg 210deg,
+            transparent 210deg 220deg,
+            rgba(200, 200, 200, 0.3) 220deg 230deg,
+            transparent 230deg 240deg,
+            rgba(200, 200, 200, 0.3) 240deg 250deg,
+            transparent 250deg 260deg,
+            rgba(200, 200, 200, 0.3) 260deg 270deg,
+            transparent 270deg 280deg,
+            rgba(200, 200, 200, 0.3) 280deg 290deg,
+            transparent 290deg 300deg,
+            rgba(200, 200, 200, 0.3) 300deg 310deg,
+            transparent 310deg 320deg,
+            rgba(200, 200, 200, 0.3) 320deg 330deg,
+            transparent 330deg 340deg,
+            rgba(200, 200, 200, 0.3) 340deg 350deg,
+            transparent 350deg 360deg
+          ),
+          radial-gradient(
+            circle at center,
+            transparent 0%,
+            transparent 45%,
+            rgba(210, 210, 210, 0.4) 45%,
+            rgba(220, 220, 220, 0.5) 50%,
+            rgba(210, 210, 210, 0.4) 55%,
+            transparent 55%,
+            transparent 100%
+          );
+          clip-path: url(#bagel1);
+          transform: translate(-50%, -50%) scale(0.8);
+          animation: irisAnimation 4s ease infinite;
+        }
+
+        @keyframes irisAnimation {
+          0%, 30%, 100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.8);
+          }
+          60%, 66% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.6);
+          }
+          90% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.8);
+          }
+        }
+
         .eye::after {
           width: 160px;
           height: 160px;

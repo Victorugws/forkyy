@@ -56,6 +56,7 @@ export function SearchInterface({
     <div
       className={`
         w-full max-w-3xl mx-auto
+        neu-card rounded-[2.5rem] p-6
         transition-all duration-700 ease-out
         ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
         ${className}
@@ -116,12 +117,13 @@ export function SearchInterface({
           </div>
         </div>
 
-        {/* Focus Indicator */}
+        {/* Focus Indicator - Neumorphic Glow */}
         {isFocused && (
           <div
-            className="absolute -inset-1 rounded-[2.2rem] border-2 border-primary/30 pointer-events-none"
+            className="absolute -inset-2 rounded-[2.3rem] pointer-events-none"
             style={{
-              animation: 'pulse-border 2s ease-in-out infinite'
+              boxShadow: '0 0 0 3px rgba(var(--primary), 0.1), 0 0 20px 5px rgba(var(--primary), 0.15)',
+              animation: 'pulse-glow 2s ease-in-out infinite'
             }}
           />
         )}
@@ -160,14 +162,14 @@ export function SearchInterface({
       )}
 
       <style jsx>{`
-        @keyframes pulse-border {
+        @keyframes pulse-glow {
           0%, 100% {
             opacity: 0.3;
             transform: scale(1);
           }
           50% {
-            opacity: 0.6;
-            transform: scale(1.01);
+            opacity: 0.7;
+            transform: scale(1.005);
           }
         }
       `}</style>

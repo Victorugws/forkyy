@@ -1,13 +1,8 @@
-import React from "react"
-
-/**
- * ANIMATED EYE HERO BACKGROUND
- * Pure CSS eye animation with white neumorphic design
- * Based on: https://codepen.io/miocene/pen/rNOVWor
- * Can be used as a full-screen hero background
- */
+import React, { useState } from "react"
 
 export function AnimatedEyeBackground() {
+    const [uniqueId] = useState(() => Math.random().toString(36).substr(2, 9))
+
     return (
         <div
             style={{
@@ -19,49 +14,47 @@ export function AnimatedEyeBackground() {
                 overflow: "hidden",
             }}
         >
-            {/* SVG Clip Paths */}
             <svg width="0" height="0" style={{ position: "absolute" }}>
                 <defs>
-                    <clipPath id="bagel1">
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M95 190C147.467 190 190 147.467 190 95C190 42.533 147.467 0 95 0C42.533 0 0 42.533 0 95C0 147.467 42.533 190 95 190ZM95 120C108.807 120 120 108.807 120 95C120 81.1929 108.807 70 95 70C81.1929 70 70 81.1929 70 95C70 108.807 81.1929 120 95 120Z"
-                        />
+                    <clipPath id={`bagel1-${uniqueId}`}>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M95 190C147.467 190 190 147.467 190 95C190 42.533 147.467 0 95 0C42.533 0 0 42.533 0 95C0 147.467 42.533 190 95 190ZM95 120C108.807 120 120 108.807 120 95C120 81.1929 108.807 70 95 70C81.1929 70 70 81.1929 70 95C70 108.807 81.1929 120 95 120Z"/>
                     </clipPath>
-                    <clipPath id="bagel2">
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M71 142C110.212 142 142 110.212 142 71C142 31.7878 110.212 0 71 0C31.7878 0 0 31.7878 0 71C0 110.212 31.7878 142 71 142ZM71 139C108.555 139 139 108.555 139 71C139 33.4446 108.555 3 71 3C33.4446 3 3 33.4446 3 71C3 108.555 33.4446 139 71 139Z"
-                        />
+                    <clipPath id={`bagel2-${uniqueId}`}>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M71 142C110.212 142 142 110.212 142 71C142 31.7878 110.212 0 71 0C31.7878 0 0 31.7878 0 71C0 110.212 31.7878 142 71 142ZM71 139C108.555 139 139 108.555 139 71C139 33.4446 108.555 3 71 3C33.4446 3 3 33.4446 3 71C3 108.555 33.4446 139 71 139Z"/>
                     </clipPath>
-                    <clipPath id="bagel3">
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M60 120C93.1372 120 120 93.1372 120 60C120 26.8628 93.1372 0 60 0C26.8628 0 0 26.8628 0 60C0 93.1372 26.8628 120 60 120ZM60 115C90.3757 115 115 90.3757 115 60C115 29.6243 90.3757 5 60 5C29.6243 5 5 29.6243 5 60C5 90.3757 29.6243 115 60 115Z"
-                        />
+                    <clipPath id={`bagel3-${uniqueId}`}>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M60 120C93.1372 120 120 93.1372 120 60C120 26.8628 93.1372 0 60 0C26.8628 0 0 26.8628 0 60C0 93.1372 26.8628 120 60 120ZM60 115C90.3757 115 115 90.3757 115 60C115 29.6243 90.3757 5 60 5C29.6243 5 5 29.6243 5 60C5 90.3757 29.6243 115 60 115Z"/>
                     </clipPath>
-                    <clipPath id="bagel4">
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M38 76C58.9868 76 76 58.9868 76 38C76 17.0132 58.9868 0 38 0C17.0132 0 0 17.0132 0 38C0 58.9868 17.0132 76 38 76ZM38 72C56.7777 72 72 56.7776 72 38C72 19.2224 56.7777 4 38 4C19.2223 4 4 19.2224 4 38C4 56.7776 19.2223 72 38 72Z"
-                        />
+                    <clipPath id={`bagel4-${uniqueId}`}>
+                        <path fillRule="evenodd" clipRule="evenodd" d="M38 76C58.9868 76 76 58.9868 76 38C76 17.0132 58.9868 0 38 0C17.0132 0 0 17.0132 0 38C0 58.9868 17.0132 76 38 76ZM38 72C56.7777 72 72 56.7776 72 38C72 19.2224 56.7777 4 38 4C19.2223 4 4 19.2224 4 38C4 56.7776 19.2223 72 38 72Z"/>
                     </clipPath>
                 </defs>
             </svg>
 
-            {/* Main Eye */}
             <div className="eye" />
 
-            {/* Animated Circles */}
+            {/* Arc circles - now with more sizes reaching edges */}
             <div className="circle-1" />
             <div className="circle-2" />
             <div className="circle-3" />
             <div className="circle-4" />
+            <div className="arc-5" />
+            <div className="arc-6" />
+            <div className="arc-7" />
+            <div className="arc-8" />
+            <div className="arc-9" />
+            <div className="arc-10" />
+
+            {/* Small concentric circles - more of them */}
             <div className="circle-5" />
+            <div className="circle-13" />
+            <div className="circle-14" />
+            <div className="small-circles-1" />
+            <div className="small-circles-2" />
+            <div className="small-circles-3" />
+            <div className="small-circles-4" />
+
+            {/* Iris texture circles */}
             <div className="circle-6" />
             <div className="circle-7" />
             <div className="circle-8" />
@@ -69,13 +62,8 @@ export function AnimatedEyeBackground() {
             <div className="circle-10" />
             <div className="circle-11" />
             <div className="circle-12" />
-            <div className="circle-13" />
-            <div className="circle-14" />
 
-            {/* Glitch Effect */}
             <div className="glitch" />
-
-            {/* Fragments */}
             <div className="fragment-1" />
             <div className="fragment-2" />
             <div className="fragment-3" />
@@ -83,6 +71,8 @@ export function AnimatedEyeBackground() {
             <style jsx>{`
         .eye, .eye::before, .eye::after,
         div[class^="circle-"], div[class^="circle-"]::before, div[class^="circle-"]::after,
+        div[class^="arc-"], div[class^="arc-"]::before, div[class^="arc-"]::after,
+        div[class^="small-"], div[class^="small-"]::before, div[class^="small-"]::after,
         .glitch, .glitch::before, .glitch::after,
         div[class^="fragment-"], div[class^="fragment-"]::before, div[class^="fragment-"]::after {
           content: '';
@@ -140,19 +130,6 @@ export function AnimatedEyeBackground() {
           }
         }
 
-        .eye::before {
-          width: 190px;
-          height: 190px;
-          border-radius: 50%;
-          background: repeating-conic-gradient(
-            from 0deg,
-            rgba(100, 100, 100, 0.7) 0deg 2deg,
-            transparent 2deg 4deg
-          );
-          clip-path: url(#bagel1);
-          transform: translate(-50%, -50%);
-        }
-
         .eye::after {
           width: 160px;
           height: 160px;
@@ -189,11 +166,13 @@ export function AnimatedEyeBackground() {
           }
         }
 
+        /* Original arc circles */
         .circle-1 {
           width: 475px;
           height: 475px;
           border-radius: 50%;
-          border: 1px solid transparent;
+          border: 2px solid transparent;
+          border-style: solid;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circle1AnimationOpacity 4s ease infinite, circle1AnimationMove 4s ease infinite;
         }
@@ -217,7 +196,8 @@ export function AnimatedEyeBackground() {
           width: 475px;
           height: 475px;
           border-radius: 50%;
-          border: 1px solid transparent;
+          border: 2px solid transparent;
+          border-style: solid;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circle2AnimationOpacity 4s ease infinite, circle2AnimationMove 4s ease infinite;
         }
@@ -251,7 +231,8 @@ export function AnimatedEyeBackground() {
           width: 393px;
           height: 393px;
           border-radius: 50%;
-          border: 1px solid transparent;
+          border: 2px solid transparent;
+          border-style: solid;
           border-right-color: rgba(200, 200, 200, 0.8);
           animation: circle3Animation 4s ease infinite;
         }
@@ -267,7 +248,8 @@ export function AnimatedEyeBackground() {
           width: 295px;
           height: 295px;
           border-radius: 50%;
-          border: 1px solid transparent;
+          border: 2px solid transparent;
+          border-style: solid;
           border-right-color: rgba(180, 180, 180, 0.7);
           border-left-color: rgba(200, 200, 200, 0.4);
           animation: circle4AnimationMove 4s cubic-bezier(1, 0, 1, 1) infinite, circle4AnimationOpacity 4s ease infinite;
@@ -293,6 +275,106 @@ export function AnimatedEyeBackground() {
           36%, 39% { opacity: 0; }
         }
 
+        /* New arc circles - larger, reaching edges */
+        .arc-5 {
+          width: 600px;
+          height: 600px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-top-color: rgba(190, 190, 190, 0.6);
+          animation: arc5Animation 5s ease infinite;
+        }
+
+        @keyframes arc5Animation {
+          0%, 100% { transform: translate(-50%, -50%) rotate(15deg); opacity: 1; }
+          20% { transform: translate(-50%, -50%) rotate(135deg); }
+          40%, 60% { opacity: 0; }
+          80% { transform: translate(-50%, -50%) rotate(340deg); opacity: 1; }
+        }
+
+        .arc-6 {
+          width: 550px;
+          height: 550px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-bottom-color: rgba(190, 190, 190, 0.5);
+          animation: arc6Animation 6s ease-in-out infinite;
+        }
+
+        @keyframes arc6Animation {
+          0%, 100% { transform: translate(-50%, -50%) rotate(190deg); opacity: 1; }
+          25% { transform: translate(-50%, -50%) rotate(90deg); }
+          50% { transform: translate(-50%, -50%) rotate(270deg); opacity: 0; }
+          75% { transform: translate(-50%, -50%) rotate(450deg); opacity: 1; }
+        }
+
+        .arc-7 {
+          width: 700px;
+          height: 700px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-left-color: rgba(180, 180, 180, 0.4);
+          animation: arc7Animation 7s linear infinite;
+        }
+
+        @keyframes arc7Animation {
+          0% { transform: translate(-50%, -50%) rotate(0deg); }
+          100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .arc-8 {
+          width: 650px;
+          height: 650px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-right-color: rgba(170, 170, 170, 0.5);
+          border-top-color: rgba(180, 180, 180, 0.3);
+          animation: arc8Animation 5.5s ease-in-out infinite;
+        }
+
+        @keyframes arc8Animation {
+          0%, 100% { transform: translate(-50%, -50%) rotate(45deg); }
+          50% { transform: translate(-50%, -50%) rotate(225deg); }
+        }
+
+        .arc-9 {
+          width: 380px;
+          height: 380px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-left-color: rgba(200, 200, 200, 0.7);
+          animation: arc9Animation 4.5s ease infinite;
+        }
+
+        @keyframes arc9Animation {
+          0%, 100% { transform: translate(-50%, -50%) rotate(120deg); opacity: 1; }
+          30% { transform: translate(-50%, -50%) rotate(240deg); }
+          50%, 70% { opacity: 0; }
+          90% { transform: translate(-50%, -50%) rotate(480deg); opacity: 1; }
+        }
+
+        .arc-10 {
+          width: 520px;
+          height: 520px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          border-style: solid;
+          border-bottom-color: rgba(190, 190, 190, 0.6);
+          border-right-color: rgba(180, 180, 180, 0.4);
+          animation: arc10Animation 6.5s ease-in-out infinite;
+        }
+
+        @keyframes arc10Animation {
+          0%, 100% { transform: translate(-50%, -50%) rotate(270deg); }
+          50% { transform: translate(-50%, -50%) rotate(90deg); }
+        }
+
+        /* Small concentric circles */
         .circle-5 {
           width: 100px;
           height: 100px;
@@ -325,109 +407,6 @@ export function AnimatedEyeBackground() {
           0%, 5.7%, 7.4%, 9.8%, 11.5%, 14%, 15.6%, 18.9%, 21.3%, 23.8%, 25.4%, 28.7%, 35.3%, 42%, 77.9%, 82.7%, 83.6%, 85.2%, 86.1%, 91.8%, 93.5%, 97.6%, 100% { opacity: 1; }
           2.5%, 6.6%, 8.2%, 10.7%, 14.8%, 18%, 20.5%, 22.1%, 24.6%, 27.9%, 36%, 88.6% { opacity: 0.5; }
           47%, 77.8%, 82.8%, 83.5%, 85.3%, 86%, 90.2%, 92.7%, 96.8%, 99.2% { opacity: 0; }
-        }
-
-        .circle-6 {
-          width: 190px;
-          height: 190px;
-          background: repeating-conic-gradient(from 0deg, rgba(150, 150, 150, 0.4) 0deg 1deg, transparent 1deg 2deg);
-          clip-path: url(#bagel1);
-          border-radius: 50%;
-          animation: circle6Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        @keyframes circle6Animation {
-          0% { transform: translate(-50%, -50%) scale(1); }
-          8%, 35% { transform: translate(-50%, -50%) scale(0.93); opacity: 1; }
-          40%, 90% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-          95%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        .circle-7 {
-          width: 142px;
-          height: 142px;
-          filter: blur(1px);
-          animation: circle6Animation 4s -0.1s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        .circle-7::before {
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: repeating-conic-gradient(from 0deg, rgba(80, 80, 80, 0.8) 0deg 2deg, transparent 2deg 8deg);
-          clip-path: url(#bagel2);
-          border-radius: 50%;
-        }
-
-        .circle-8 {
-          width: 120px;
-          height: 120px;
-          background: repeating-conic-gradient(from 0deg, rgba(120, 120, 120, 0.7) 0deg 1deg, transparent 1deg 2deg);
-          clip-path: url(#bagel3);
-          border-radius: 50%;
-          animation: circle6Animation 4s -0.13s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        .circle-9 {
-          width: 76px;
-          height: 76px;
-          background: repeating-conic-gradient(from 0deg, rgba(120, 120, 120, 0.7) 0deg 1deg, transparent 1deg 2deg);
-          clip-path: url(#bagel4);
-          border-radius: 50%;
-          animation: circle6Animation 4s -0.16s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        .circle-10 {
-          width: 190px;
-          height: 190px;
-          background: radial-gradient(rgba(240, 240, 240, 0.8), rgba(230, 230, 230, 0.6), rgba(200, 200, 200, 0.4), transparent 70%);
-          clip-path: url(#bagel1);
-          border-radius: 50%;
-          animation: circle10Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        @keyframes circle10Animation {
-          0% { transform: translate(-50%, -50%) scale(1); }
-          4%, 30% { transform: translate(-50%, -50%) scale(0.93); opacity: 1; }
-          35%, 93% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-          98%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        .circle-11 {
-          width: 190px;
-          height: 190px;
-          background: repeating-conic-gradient(from 0deg, rgba(150, 150, 150, 0.3) 0deg 1deg, transparent 1deg 8deg, rgba(140, 140, 140, 0.5) 8deg 9deg, transparent 9deg 10deg, rgba(150, 150, 150, 0.3) 10deg 11deg, transparent 11deg 72deg);
-          clip-path: url(#bagel1);
-          border-radius: 50%;
-          animation: circle11Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        @keyframes circle11Animation {
-          0%, 98%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
-          15% { transform: translate(-50%, -50%) rotate(45deg); }
-          25% { transform: translate(-50%, -50%) rotate(-10deg); }
-          30% { opacity: 1; }
-          35% { transform: translate(-50%, -50%) rotate(-20deg); opacity: 0; }
-          93% { transform: translate(-50%, -50%) rotate(80deg); opacity: 0; }
-        }
-
-        .circle-12 {
-          width: 190px;
-          height: 190px;
-          background: repeating-conic-gradient(from 0deg, rgba(130, 130, 130, 0.4) 20deg 21deg, transparent 21deg 40deg, rgba(120, 120, 120, 0.5) 40deg 41deg, transparent 41deg 43deg, rgba(140, 140, 140, 0.35) 43deg 44deg, transparent 44deg 76deg);
-          clip-path: url(#bagel1);
-          border-radius: 50%;
-          animation: circle12Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
-        }
-
-        @keyframes circle12Animation {
-          0%, 96%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
-          10% { transform: translate(-50%, -50%) rotate(45deg); }
-          25% { transform: translate(-50%, -50%) rotate(-45deg); }
-          30% { opacity: 1; }
-          35% { transform: translate(-50%, -50%) rotate(50deg); opacity: 0; }
-          93% { transform: translate(-50%, -50%) rotate(-90deg); opacity: 0; }
         }
 
         .circle-13 {
@@ -485,6 +464,239 @@ export function AnimatedEyeBackground() {
           border-radius: 50%;
           border: 1px solid rgba(220, 220, 220, 0.4);
           transform: translate(-50%, -50%);
+        }
+
+        /* Additional small circle groups */
+        .small-circles-1 {
+          width: 80px;
+          height: 80px;
+          transform: translate(-50%, -50%);
+          animation: smallCircles1Animation 5s ease infinite;
+        }
+
+        .small-circles-1::before {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          border: 1px solid rgba(170, 170, 170, 0.5);
+          transform: translate(-50%, -50%);
+        }
+
+        .small-circles-1::after {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          border: 1px solid rgba(170, 170, 170, 0.4);
+          transform: translate(-50%, -50%);
+        }
+
+        @keyframes smallCircles1Animation {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          50% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.3; }
+        }
+
+        .small-circles-2 {
+          width: 60px;
+          height: 60px;
+          transform: translate(-50%, -50%);
+          animation: smallCircles2Animation 6s ease infinite;
+        }
+
+        .small-circles-2::before {
+          width: 75px;
+          height: 75px;
+          border-radius: 50%;
+          border: 1px solid rgba(190, 190, 190, 0.6);
+          transform: translate(-50%, -50%);
+        }
+
+        .small-circles-2::after {
+          width: 85px;
+          height: 85px;
+          border-radius: 50%;
+          border: 1px solid rgba(190, 190, 190, 0.4);
+          transform: translate(-50%, -50%);
+        }
+
+        @keyframes smallCircles2Animation {
+          0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        .small-circles-3 {
+          width: 70px;
+          height: 70px;
+          transform: translate(-50%, -50%);
+          animation: smallCircles3Animation 4.5s ease infinite;
+        }
+
+        .small-circles-3::before {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          border: 1px solid rgba(180, 180, 180, 0.5);
+          transform: translate(-50%, -50%);
+        }
+
+        .small-circles-3::after {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          border: 1px solid rgba(180, 180, 180, 0.3);
+          transform: translate(-50%, -50%);
+        }
+
+        @keyframes smallCircles3Animation {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          25% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+          75% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+        }
+
+        .small-circles-4 {
+          width: 65px;
+          height: 65px;
+          transform: translate(-50%, -50%);
+          animation: smallCircles4Animation 5.5s ease infinite;
+        }
+
+        .small-circles-4::before {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          border: 1px solid rgba(200, 200, 200, 0.6);
+          transform: translate(-50%, -50%);
+        }
+
+        .small-circles-4::after {
+          width: 82px;
+          height: 82px;
+          border-radius: 50%;
+          border: 1px solid rgba(200, 200, 200, 0.4);
+          transform: translate(-50%, -50%);
+        }
+
+        @keyframes smallCircles4Animation {
+          0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+          50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        }
+
+        /* Iris texture circles */
+        .circle-6 {
+          width: 190px;
+          height: 190px;
+          background:
+            radial-gradient(circle, transparent 45%, rgba(100, 100, 100, 0.15) 45%, rgba(100, 100, 100, 0.15) 47%, transparent 47%),
+            radial-gradient(circle, transparent 50%, rgba(100, 100, 100, 0.15) 50%, rgba(100, 100, 100, 0.15) 52%, transparent 52%),
+            radial-gradient(circle, transparent 55%, rgba(100, 100, 100, 0.15) 55%, rgba(100, 100, 100, 0.15) 57%, transparent 57%);
+          clip-path: url(#bagel1-${uniqueId});
+          border-radius: 50%;
+          animation: circle6Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        @keyframes circle6Animation {
+          0% { transform: translate(-50%, -50%) scale(1); }
+          8%, 35% { transform: translate(-50%, -50%) scale(0.93); opacity: 1; }
+          40%, 90% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+          95%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .circle-7 {
+          width: 142px;
+          height: 142px;
+          filter: blur(1px);
+          animation: circle6Animation 4s -0.1s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        .circle-7::before {
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background:
+            radial-gradient(circle, transparent 45%, rgba(80, 80, 80, 0.2) 45%, rgba(80, 80, 80, 0.2) 47%, transparent 47%),
+            radial-gradient(circle, transparent 50%, rgba(80, 80, 80, 0.2) 50%, rgba(80, 80, 80, 0.2) 52%, transparent 52%);
+          clip-path: url(#bagel2-${uniqueId});
+          border-radius: 50%;
+        }
+
+        .circle-8 {
+          width: 120px;
+          height: 120px;
+          background:
+            radial-gradient(circle, transparent 45%, rgba(120, 120, 120, 0.2) 45%, rgba(120, 120, 120, 0.2) 47%, transparent 47%),
+            radial-gradient(circle, transparent 50%, rgba(120, 120, 120, 0.2) 50%, rgba(120, 120, 120, 0.2) 52%, transparent 52%);
+          clip-path: url(#bagel3-${uniqueId});
+          border-radius: 50%;
+          animation: circle6Animation 4s -0.13s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        .circle-9 {
+          width: 76px;
+          height: 76px;
+          background:
+            radial-gradient(circle, transparent 45%, rgba(120, 120, 120, 0.2) 45%, rgba(120, 120, 120, 0.2) 47%, transparent 47%),
+            radial-gradient(circle, transparent 50%, rgba(120, 120, 120, 0.2) 50%, rgba(120, 120, 120, 0.2) 52%, transparent 52%);
+          clip-path: url(#bagel4-${uniqueId});
+          border-radius: 50%;
+          animation: circle6Animation 4s -0.16s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        .circle-10 {
+          width: 190px;
+          height: 190px;
+          background: radial-gradient(rgba(240, 240, 240, 0.8), rgba(230, 230, 230, 0.6), rgba(200, 200, 200, 0.4), transparent 70%);
+          clip-path: url(#bagel1-${uniqueId});
+          border-radius: 50%;
+          animation: circle10Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        @keyframes circle10Animation {
+          0% { transform: translate(-50%, -50%) scale(1); }
+          4%, 30% { transform: translate(-50%, -50%) scale(0.93); opacity: 1; }
+          35%, 93% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          98%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .circle-11 {
+          width: 190px;
+          height: 190px;
+          background:
+            linear-gradient(0deg, rgba(150, 150, 150, 0.3) 0%, rgba(150, 150, 150, 0.3) 2%, transparent 2%),
+            linear-gradient(30deg, rgba(140, 140, 140, 0.5) 0%, rgba(140, 140, 140, 0.5) 2%, transparent 2%),
+            linear-gradient(60deg, rgba(150, 150, 150, 0.3) 0%, rgba(150, 150, 150, 0.3) 2%, transparent 2%);
+          clip-path: url(#bagel1-${uniqueId});
+          border-radius: 50%;
+          animation: circle11Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        @keyframes circle11Animation {
+          0%, 98%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+          15% { transform: translate(-50%, -50%) rotate(45deg); }
+          25% { transform: translate(-50%, -50%) rotate(-10deg); }
+          30% { opacity: 1; }
+          35% { transform: translate(-50%, -50%) rotate(-20deg); opacity: 0; }
+          93% { transform: translate(-50%, -50%) rotate(80deg); opacity: 0; }
+        }
+
+        .circle-12 {
+          width: 190px;
+          height: 190px;
+          background:
+            linear-gradient(20deg, rgba(130, 130, 130, 0.4) 0%, rgba(130, 130, 130, 0.4) 2%, transparent 2%),
+            linear-gradient(40deg, rgba(120, 120, 120, 0.5) 0%, rgba(120, 120, 120, 0.5) 2%, transparent 2%),
+            linear-gradient(43deg, rgba(140, 140, 140, 0.35) 0%, rgba(140, 140, 140, 0.35) 2%, transparent 2%);
+          clip-path: url(#bagel1-${uniqueId});
+          border-radius: 50%;
+          animation: circle12Animation 4s cubic-bezier(1, 0, 1, 1) infinite;
+        }
+
+        @keyframes circle12Animation {
+          0%, 96%, 100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+          10% { transform: translate(-50%, -50%) rotate(45deg); }
+          25% { transform: translate(-50%, -50%) rotate(-45deg); }
+          30% { opacity: 1; }
+          35% { transform: translate(-50%, -50%) rotate(50deg); opacity: 0; }
+          93% { transform: translate(-50%, -50%) rotate(-90deg); opacity: 0; }
         }
 
         .glitch {

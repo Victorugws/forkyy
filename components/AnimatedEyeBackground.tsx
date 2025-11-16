@@ -1,7 +1,7 @@
-import React, { useState } from "react"
+import React, { useId } from "react"
 
 export function AnimatedEyeBackground() {
-    const [uniqueId] = useState(() => Math.random().toString(36).substr(2, 9))
+    const uniqueId = useId()
 
     return (
         <div

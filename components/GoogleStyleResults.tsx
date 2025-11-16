@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { ResultCard } from './TabbedResultsPanel'
-import { ExternalLink, Clock, TrendingUp, Image as ImageIcon, Video, DollarSign } from 'lucide-react'
+import { ExternalLink, Clock, TrendingUp, Image as ImageIcon, Video, DollarSign, ChevronDown, ChevronUp, Play } from 'lucide-react'
 
 /**
  * GoogleStyleResults
@@ -36,6 +36,8 @@ export function GoogleStyleResults({
   videos = [],
   className = ''
 }: GoogleStyleResultsProps) {
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null)
+
   const defaultCommentary = `Based on current information about "${searchQuery}", here's what you need to know:`
 
   const defaultResults: SearchResult[] = [
@@ -63,10 +65,38 @@ export function GoogleStyleResults({
     }
   ]
 
+  const peopleAlsoAsk = [
+    {
+      question: `What is ${searchQuery}?`,
+      answer: `${searchQuery} refers to a specific topic or concept. It encompasses various aspects and has gained attention for its relevance in the current context.`
+    },
+    {
+      question: `How does ${searchQuery} work?`,
+      answer: `The underlying mechanisms involve several key components that work together to achieve the desired outcome. Understanding these principles is essential for practical application.`
+    },
+    {
+      question: `What are the benefits of ${searchQuery}?`,
+      answer: `There are numerous advantages including improved efficiency, better outcomes, and enhanced user experience. Many experts recommend considering these benefits when evaluating options.`
+    },
+    {
+      question: `Where can I learn more about ${searchQuery}?`,
+      answer: `Resources include academic publications, online courses, professional communities, and specialized websites dedicated to this subject matter.`
+    }
+  ]
+
+  const relatedSearches = [
+    `${searchQuery} tutorial`,
+    `${searchQuery} examples`,
+    `best ${searchQuery}`,
+    `${searchQuery} vs alternatives`,
+    `${searchQuery} guide`,
+    `how to use ${searchQuery}`,
+  ]
+
   const displayResults = results.length > 0 ? results : defaultResults
 
   return (
-    <div className={`space-y-12 ${className}`}>
+    <div className={`space-y-10 ${className}`}>
       {/* AI Commentary Section - Google-style summary */}
       <div className="neu-raised rounded-3xl p-8 border-l-4 border-primary/30">
         <div className="flex items-start gap-6">
@@ -89,8 +119,53 @@ export function GoogleStyleResults({
         </div>
       </div>
 
+      {/* Short Videos Carousel */}
+      {videos.length > 0 && (
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-foreground">Short videos</h3>
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+              {videos.slice(0, 6).map((video, i) => (
+                <a
+                  key={i}
+                  href={video.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="neu-card rounded-2xl overflow-hidden flex-shrink-0 w-64 snap-start group"
+                >
+                  <div className="relative aspect-video bg-background/50">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="neu-raised rounded-full p-3">
+                        <Play className="size-5 text-primary fill-primary" />
+                      </div>
+                    </div>
+                    {video.duration && (
+                      <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
+                        {video.duration}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <p className="text-sm text-foreground font-medium line-clamp-2 mb-1">
+                      {video.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{video.channel}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Grid: Search Results + Right Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Left Column: Search Results (2/3) */}
         <div className="lg:col-span-2 space-y-8">
           <h2 className="text-lg font-semibold text-foreground mb-6">
@@ -149,6 +224,37 @@ export function GoogleStyleResults({
                 </div>
               </ResultCard>
             ))}
+          </div>
+
+          {/* People Also Ask Section */}
+          <div className="neu-card rounded-2xl p-6 space-y-4 mt-8">
+            <h3 className="text-lg font-semibold text-foreground mb-4">People also ask</h3>
+            <div className="space-y-3">
+              {peopleAlsoAsk.map((item, index) => (
+                <div key={index} className="border-b border-border/50 last:border-0">
+                  <button
+                    onClick={() => setExpandedQuestion(expandedQuestion === index ? null : index)}
+                    className="w-full flex items-center justify-between py-4 text-left group"
+                  >
+                    <span className="text-base text-foreground font-medium group-hover:text-primary transition-colors pr-4">
+                      {item.question}
+                    </span>
+                    {expandedQuestion === index ? (
+                      <ChevronUp className="size-5 text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronDown className="size-5 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                  {expandedQuestion === index && (
+                    <div className="pb-4 pl-2">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -274,6 +380,46 @@ export function GoogleStyleResults({
             </a>
           </div>
         </div>
+      </div>
+
+      {/* People Also Search For */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-foreground">People also search for</h3>
+        <div className="flex flex-wrap gap-3">
+          {relatedSearches.map((search, index) => (
+            <button
+              key={index}
+              className="neu-card px-5 py-3 rounded-full text-sm text-foreground font-medium hover:bg-primary/5 transition-colors"
+            >
+              {search}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-center gap-2 pt-8">
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-muted-foreground hover:bg-primary/5 transition-colors">
+          ‹
+        </button>
+        <button className="neu-raised rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-blue-600">
+          1
+        </button>
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-foreground hover:bg-primary/5 transition-colors">
+          2
+        </button>
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-foreground hover:bg-primary/5 transition-colors">
+          3
+        </button>
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-foreground hover:bg-primary/5 transition-colors">
+          4
+        </button>
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-foreground hover:bg-primary/5 transition-colors">
+          5
+        </button>
+        <button className="neu-card rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-muted-foreground hover:bg-primary/5 transition-colors">
+          ›
+        </button>
       </div>
     </div>
   )

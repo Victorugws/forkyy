@@ -7,9 +7,10 @@ import {
   Image as ImageIcon,
   Video,
   TrendingUp,
-  Loader2
+  Loader2,
+  MessageCircle
 } from 'lucide-react'
-import { BinaryLoadingPlaceholder } from './BinaryLoadingPlaceholder'
+import { BinaryCardPlaceholder } from './BinaryLoadingOverlay'
 
 /**
  * TabbedResultsPanel
@@ -18,7 +19,7 @@ import { BinaryLoadingPlaceholder } from './BinaryLoadingPlaceholder'
  * Only appears in chat/search context
  */
 
-export type TabType = 'all' | 'images' | 'videos' | 'financials'
+export type TabType = 'chat' | 'all' | 'images' | 'videos' | 'financials'
 
 interface TabbedResultsPanelProps {
   initialTab?: TabType
@@ -37,6 +38,12 @@ interface TabConfig {
 }
 
 const tabs: TabConfig[] = [
+  {
+    id: 'chat',
+    label: 'Chat',
+    icon: MessageCircle,
+    description: 'Conversational AI responses'
+  },
   {
     id: 'all',
     label: 'All',
@@ -142,26 +149,27 @@ export function TabbedResultsPanel({
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div className="max-w-[1400px] mx-auto px-6 py-8">
           {isLoading ? (
-            <div className="space-y-8 animate-in fade-in duration-500">
-              {/* Loading State with Binary Placeholders */}
-              <div className="text-center mb-12">
+            <div className="space-y-6 animate-in fade-in duration-500">
+              {/* Loading State with Binary Placeholders ON component surfaces */}
+              <div className="text-center mb-8">
                 <div className="inline-flex items-center gap-3 neu-raised px-6 py-4 rounded-2xl">
                   <Loader2 className="size-5 animate-spin text-primary" />
                   <span className="text-sm font-medium text-foreground">
-                    Processing your query...
+                    Searching across sources...
                   </span>
                 </div>
               </div>
 
-              <BinaryLoadingPlaceholder lines={8} />
-
-              {/* Pulsing Status */}
-              <div className="flex justify-center">
-                <div className="neu-inset px-8 py-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Analyzing sources across {activeTab === 'all' ? 'all categories' : tabs.find(t => t.id === activeTab)?.label.toLowerCase()}
-                  </p>
-                </div>
+              {/* Binary Loading Cards - placeholders on actual component surfaces */}
+              <div className="grid gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <BinaryCardPlaceholder
+                    key={i}
+                    lines={4}
+                    className="animate-in fade-in duration-500"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  />
+                ))}
               </div>
             </div>
           ) : (

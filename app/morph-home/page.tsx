@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { MorphingCanvas } from '@/components/MorphingCanvas'
-import { TabbedResultsPanel, TabbedResultsPanelContent, ResultCard } from '@/components/TabbedResultsPanel'
+import { TabbedResultsPanel, TabbedResultsPanelContent, ResultCard, type TabType } from '@/components/TabbedResultsPanel'
+import { GoogleStyleResults } from '@/components/GoogleStyleResults'
 
 /**
  * Morphing Home Page
  * Replaces the traditional chat interface with the morphing experience:
- * Eye → Search → Loading → Tabbed Results
+ * Eye → Search → Loading → Tabbed Results with Chat and All (Google-style) tabs
  *
  * Navigate to /morph-home to see this in action
  */
@@ -15,6 +16,7 @@ import { TabbedResultsPanel, TabbedResultsPanelContent, ResultCard } from '@/com
 export default function MorphHomePage() {
   const [hasSearched, setHasSearched] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<TabType>('all')
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -22,7 +24,11 @@ export default function MorphHomePage() {
     // After morphing sequence completes, show results
     setTimeout(() => {
       setHasSearched(true)
-    }, 4500)
+    }, 7500) // Updated to match new slower timing
+  }
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab)
   }
 
   if (hasSearched) {
@@ -31,53 +37,87 @@ export default function MorphHomePage() {
         <TabbedResultsPanel
           searchQuery={searchQuery}
           isLoading={false}
+          initialTab={activeTab}
+          onTabChange={handleTabChange}
         >
           <TabbedResultsPanelContent>
-            <div className="grid gap-6">
-              <ResultCard>
-                <div className="space-y-3">
-                  <h3 className="text-xl font-semibold text-foreground">
-                    Welcome to the Morphing Interface
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    You&apos;ve just experienced the complete morphing sequence: Eye animation → Search interface → Binary loading → Results panel.
-                  </p>
-                  <div className="flex gap-2 flex-wrap mt-4">
-                    <span className="neu-inset px-3 py-1.5 rounded-lg text-xs text-foreground">
-                      Neumorphic Design
-                    </span>
-                    <span className="neu-inset px-3 py-1.5 rounded-lg text-xs text-foreground">
-                      Smooth Transitions
-                    </span>
-                    <span className="neu-inset px-3 py-1.5 rounded-lg text-xs text-foreground">
-                      Unified Canvas
-                    </span>
+            {/* Google-style results for "All" tab */}
+            {activeTab === 'all' && (
+              <GoogleStyleResults
+                searchQuery={searchQuery}
+                aiCommentary={`${searchQuery} encompasses several key aspects. Here's a comprehensive overview based on the latest information: The topic has evolved significantly, with recent developments showing promising directions for future applications and research.`}
+              />
+            )}
+
+            {/* Chat tab content */}
+            {activeTab === 'chat' && (
+              <div className="space-y-6">
+                <ResultCard>
+                  <div className="space-y-3">
+                    <h3 className="text-xl font-semibold text-foreground">
+                      Chat Mode
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Conversational AI responses about &quot;{searchQuery}&quot; appear here. This mode provides interactive dialogue with follow-up questions.
+                    </p>
                   </div>
-                </div>
-              </ResultCard>
+                </ResultCard>
+              </div>
+            )}
 
-              <ResultCard>
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Results for &quot;{searchQuery}&quot;
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    This is where your search results would appear. The interface maintains the neumorphic white theme throughout all morphing states.
-                  </p>
-                </div>
-              </ResultCard>
+            {/* Images tab content */}
+            {activeTab === 'images' && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="neu-card rounded-2xl p-2">
+                    <div className="neu-inset rounded-xl aspect-square bg-background/50 flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">Image {i}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-              <ResultCard>
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Explore More Pages
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Check out these other morphing demos:
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { href: '/morph-showcase', label: 'Showcase' },
+            {/* Videos tab content */}
+            {activeTab === 'videos' && (
+              <div className="grid gap-4">
+                {[1, 2, 3].map((i) => (
+                  <ResultCard key={i}>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold text-foreground">Video Result {i}</h3>
+                      <p className="text-sm text-muted-foreground">Video content about {searchQuery}</p>
+                    </div>
+                  </ResultCard>
+                ))}
+              </div>
+            )}
+
+            {/* Financials tab content */}
+            {activeTab === 'financials' && (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <ResultCard key={i}>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold text-foreground">Financial Data {i}</h3>
+                      <p className="text-sm text-muted-foreground">Market insights related to {searchQuery}</p>
+                    </div>
+                  </ResultCard>
+                ))}
+              </div>
+            )}
+
+            {/* Demo Info Card */}
+            <ResultCard className="mt-8">
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Explore More Pages
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Check out these other morphing demos:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { href: '/morph-showcase', label: 'Showcase' },
                       { href: '/images-morph', label: 'Images' },
                       { href: '/finance-morph', label: 'Finance' },
                       { href: '/morph-demo', label: 'Demo' }

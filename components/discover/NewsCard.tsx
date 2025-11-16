@@ -41,7 +41,7 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
           onClick={handleClick}
           className="flex-shrink-0 w-[380px] group cursor-pointer"
         >
-          <div className="rounded-xl border border-border bg-card hover:border-primary/50 transition-all overflow-hidden h-full flex flex-col">
+          <div className="neu-card rounded-2xl overflow-hidden h-full flex flex-col">
             {/* Image */}
             <div className="relative h-56 overflow-hidden bg-muted">
               {!imageError && article.image ? (
@@ -59,7 +59,7 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
 
               {/* Source badge */}
               <div className="absolute top-4 left-4">
-                <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-background/80 backdrop-blur-md border border-border text-foreground">
+                <span className="neu-inset px-3 py-1.5 rounded-full text-xs font-medium text-foreground">
                   {article.source}
                 </span>
               </div>
@@ -70,7 +70,7 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
                   e.stopPropagation()
                   window.open(article.url || `/search?q=${encodeURIComponent(article.title)}`, '_blank', 'noopener,noreferrer')
                 }}
-                className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-md border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 p-2.5 rounded-full neu-button opacity-0 group-hover:opacity-100"
                 aria-label="Open in new tab"
               >
                 <ExternalLink className="size-4 text-foreground" />
@@ -115,7 +115,7 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
         onClick={handleClick}
         className="block group cursor-pointer"
       >
-        <div className="flex gap-4 rounded-xl border border-border bg-card p-4 hover:border-primary/50 transition-all">
+        <div className="flex gap-4 neu-card rounded-2xl p-4">
           {/* Article Image */}
           <div className="relative w-48 h-32 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
             {!imageError && article.image ? (

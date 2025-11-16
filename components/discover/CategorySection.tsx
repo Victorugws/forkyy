@@ -127,7 +127,7 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full neu-raised opacity-0 group-hover:opacity-100"
             aria-label="Scroll left"
           >
             <ChevronLeft className="size-5 text-foreground" />
@@ -138,7 +138,7 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full neu-raised opacity-0 group-hover:opacity-100"
             aria-label="Scroll right"
           >
             <ChevronRight className="size-5 text-foreground" />

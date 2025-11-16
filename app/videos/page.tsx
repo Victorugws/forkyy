@@ -111,7 +111,7 @@ export default function VideosPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as any)}
-                className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full neu-input rounded-2xl px-12 py-4 text-base placeholder:text-muted-foreground"
               />
               {searchQuery && (
                 <button
@@ -126,7 +126,7 @@ export default function VideosPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`rounded-2xl border transition-colors ${showFilters ? 'border-primary bg-primary/10' : 'border-input bg-background hover:bg-accent'} p-4`}
+              className={`rounded-2xl neu-button p-4 ${showFilters ? 'bg-primary/10' : ''}`}
             >
               <Filter className="size-5" />
             </button>
@@ -145,8 +145,8 @@ export default function VideosPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === category
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border bg-card hover:border-primary/50 hover:bg-accent'
+                    ? 'neu-raised bg-primary text-primary-foreground'
+                    : 'neu-card'
                 }`}
               >
                 {category}
@@ -181,14 +181,14 @@ export default function VideosPage() {
                     onClick={() => handleVideoClick(video)}
                     className="group cursor-pointer"
                   >
-                <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted mb-3">
+                <div className="relative aspect-video overflow-hidden rounded-2xl neu-inset mb-3">
                   <img
                     src={video.thumbnail}
                     alt={video.title}
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="rounded-full bg-white/90 p-4">
+                    <div className="rounded-full neu-raised p-4">
                       <Play className="size-6 text-black fill-black" />
                     </div>
                   </div>
@@ -221,7 +221,7 @@ export default function VideosPage() {
               <div className="flex justify-center mt-12">
                 <button
                   onClick={() => alert('Loading more videos... (Would load from API in production)')}
-                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                  className="px-8 py-3 rounded-full neu-button bg-primary text-primary-foreground font-medium"
                 >
                   Load More Videos
                 </button>
@@ -239,7 +239,7 @@ export default function VideosPage() {
                   setSearchQuery('')
                   setSelectedCategory('All')
                 }}
-                className="mt-4 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+                className="mt-4 px-4 py-2 rounded-full neu-button bg-primary text-primary-foreground text-sm"
               >
                 Clear filters
               </button>

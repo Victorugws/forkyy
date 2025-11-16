@@ -167,7 +167,7 @@ export default function ImagesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as any)}
-                className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full neu-input rounded-2xl px-12 py-4 text-base placeholder:text-muted-foreground"
               />
               {searchQuery && (
                 <button
@@ -182,11 +182,11 @@ export default function ImagesPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`rounded-2xl border transition-colors ${showFilters ? 'border-primary bg-primary/10' : 'border-input bg-background hover:bg-accent'} p-4`}
+              className={`rounded-2xl neu-button p-4 ${showFilters ? 'bg-primary/10' : ''}`}
             >
               <Filter className="size-5" />
             </button>
-            <div className="flex gap-2 rounded-2xl border border-input bg-background p-1">
+            <div className="flex gap-2 rounded-2xl neu-inset p-1">
               <button
                 type="button"
                 onClick={() => setGridSize('large')}
@@ -217,10 +217,10 @@ export default function ImagesPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === category
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-card hover:border-primary/50 hover:bg-accent'
+                    ? 'neu-raised bg-primary text-primary-foreground'
+                    : 'neu-card'
                 }`}
               >
                 {category}
@@ -253,7 +253,7 @@ export default function ImagesPage() {
                   <div
                     key={index}
                     onClick={() => handleImageClick(image)}
-                    className="group relative aspect-square overflow-hidden rounded-2xl bg-muted cursor-pointer"
+                    className="group relative aspect-square overflow-hidden rounded-2xl neu-inset cursor-pointer"
                   >
                     <img
                       src={image.url}
@@ -279,7 +279,7 @@ export default function ImagesPage() {
               <div className="flex justify-center mt-12">
                 <button
                   onClick={() => alert('Loading more images... (Would load from API in production)')}
-                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                  className="px-8 py-3 rounded-full neu-button bg-primary text-primary-foreground font-medium"
                 >
                   Load More Images
                 </button>
@@ -297,7 +297,7 @@ export default function ImagesPage() {
                   setSearchQuery('')
                   setSelectedCategory('All')
                 }}
-                className="mt-4 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+                className="mt-4 px-4 py-2 rounded-full neu-button bg-primary text-primary-foreground text-sm"
               >
                 Clear filters
               </button>

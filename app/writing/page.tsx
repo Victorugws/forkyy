@@ -153,7 +153,7 @@ export default function WritingPage() {
 
           {/* Writing Input */}
           <div className="max-w-4xl">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
+            <div className="rounded-2xl neu-card p-6">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -165,7 +165,7 @@ export default function WritingPage() {
                   <button
                     onClick={handleImprove}
                     disabled={isProcessing}
-                    className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg neu-button text-sm font-medium disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <Loader2 className="size-4 inline mr-2 animate-spin" />
@@ -177,7 +177,7 @@ export default function WritingPage() {
                   <button
                     onClick={handleGrammarCheck}
                     disabled={isProcessing}
-                    className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg neu-button text-sm font-medium disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <Loader2 className="size-4 inline mr-2 animate-spin" />
@@ -190,7 +190,7 @@ export default function WritingPage() {
                 <button
                   onClick={handleGenerate}
                   disabled={isProcessing}
-                  className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="px-6 py-2 rounded-lg neu-button bg-primary text-primary-foreground font-medium disabled:opacity-50"
                 >
                   {isProcessing && <Loader2 className="size-4 inline mr-2 animate-spin" />}
                   Generate
@@ -213,7 +213,7 @@ export default function WritingPage() {
               <button
                 key={index}
                 onClick={() => handleTemplateClick(template.name)}
-                className="group relative flex items-start gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg text-left"
+                className="group relative flex items-start gap-4 rounded-2xl neu-card p-6 text-left"
               >
                 <div
                   className={`rounded-xl ${template.color} p-3 text-white flex-shrink-0`}
@@ -243,7 +243,7 @@ export default function WritingPage() {
               <button
                 key={index}
                 onClick={() => handleToolClick(tool.name)}
-                className="group text-left rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group text-left rounded-2xl neu-card p-5"
               >
                 <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors mb-1">
                   {tool.name}
@@ -262,7 +262,7 @@ export default function WritingPage() {
             Writing Tips
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl neu-card p-6">
               <h3 className="font-semibold text-lg text-foreground mb-3">
                 Be Specific
               </h3>
@@ -271,7 +271,7 @@ export default function WritingPage() {
                 you. Include details about tone, length, and target audience.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl neu-card p-6">
               <h3 className="font-semibold text-lg text-foreground mb-3">
                 Iterate and Refine
               </h3>
@@ -280,7 +280,7 @@ export default function WritingPage() {
                 as a starting point and refine it to match your voice.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl neu-card p-6">
               <h3 className="font-semibold text-lg text-foreground mb-3">
                 Provide Context
               </h3>
@@ -289,7 +289,7 @@ export default function WritingPage() {
                 generate more relevant and accurate content.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-2xl neu-card p-6">
               <h3 className="font-semibold text-lg text-foreground mb-3">
                 Review Carefully
               </h3>

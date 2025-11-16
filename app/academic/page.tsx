@@ -115,7 +115,7 @@ export default function AcademicPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search papers, authors, topics..."
-              className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full neu-input rounded-2xl px-12 py-4 text-base placeholder:text-muted-foreground"
             />
           </form>
         </div>
@@ -133,7 +133,7 @@ export default function AcademicPage() {
               <Link
                 key={index}
                 href={`/search?q=${field.name.toLowerCase()}+research+papers`}
-                className="group relative flex items-center gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group relative flex items-center gap-4 rounded-2xl neu-card p-6"
               >
                 <div className={`rounded-xl ${field.color} p-3 text-white`}>
                   <field.icon className="size-6" />
@@ -164,7 +164,7 @@ export default function AcademicPage() {
               <Link
                 key={index}
                 href={paper.href}
-                className="group block rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group block rounded-2xl neu-card p-6"
               >
                 <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors mb-2">
                   {paper.title}
@@ -203,7 +203,7 @@ export default function AcademicPage() {
                 <Link
                   key={index}
                   href={`/search?q=${encodeURIComponent(topic)}+research`}
-                  className="group rounded-2xl border border-border bg-card p-4 text-center hover:border-primary/50 hover:shadow-lg transition-all"
+                  className="group rounded-2xl neu-card p-4 text-center"
                 >
                   <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                     {topic}
@@ -221,7 +221,7 @@ export default function AcademicPage() {
             <div className="space-y-3">
               <Link
                 href="/search?q=arxiv+preprints"
-                className="block rounded-2xl border border-border bg-card p-4 hover:border-primary/50 hover:shadow-lg transition-all"
+                className="block rounded-2xl neu-card p-4"
               >
                 <h3 className="font-semibold text-sm text-foreground mb-1">
                   arXiv Preprints
@@ -232,7 +232,7 @@ export default function AcademicPage() {
               </Link>
               <Link
                 href="/search?q=peer+reviewed+journals"
-                className="block rounded-2xl border border-border bg-card p-4 hover:border-primary/50 hover:shadow-lg transition-all"
+                className="block rounded-2xl neu-card p-4"
               >
                 <h3 className="font-semibold text-sm text-foreground mb-1">
                   Peer-Reviewed Journals
@@ -243,7 +243,7 @@ export default function AcademicPage() {
               </Link>
               <Link
                 href="/search?q=conference+proceedings"
-                className="block rounded-2xl border border-border bg-card p-4 hover:border-primary/50 hover:shadow-lg transition-all"
+                className="block rounded-2xl neu-card p-4"
               >
                 <h3 className="font-semibold text-sm text-foreground mb-1">
                   Conference Proceedings
@@ -254,7 +254,7 @@ export default function AcademicPage() {
               </Link>
               <Link
                 href="/search?q=research+datasets"
-                className="block rounded-2xl border border-border bg-card p-4 hover:border-primary/50 hover:shadow-lg transition-all"
+                className="block rounded-2xl neu-card p-4"
               >
                 <h3 className="font-semibold text-sm text-foreground mb-1">
                   Research Datasets

@@ -116,7 +116,7 @@ export default function SpacesPage() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleCreateSpace}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 rounded-full neu-button bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
             >
               <Plus className="size-4" />
               Create Space
@@ -128,7 +128,7 @@ export default function SpacesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search spaces..."
-                className="w-full rounded-full border border-input bg-background px-10 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full rounded-full neu-input px-10 py-2.5 text-sm placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -157,7 +157,7 @@ export default function SpacesPage() {
               <Link
                 key={index}
                 href={`/spaces/${space.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="group relative flex flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group relative flex flex-col rounded-2xl neu-card p-6"
               >
                 <div className="flex items-start gap-4 mb-4">
                   <div
@@ -184,7 +184,7 @@ export default function SpacesPage() {
             {/* Create New Space Card */}
             <button
               onClick={handleCreateSpace}
-              className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card p-6 transition-all hover:border-primary/50 hover:bg-accent"
+              className="group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border neu-inset p-6 transition-all hover:border-primary/50"
             >
               <div className="rounded-full bg-primary/10 p-4 mb-4 group-hover:bg-primary/20 transition-colors">
                 <Plus className="size-8 text-primary" />
@@ -207,7 +207,7 @@ export default function SpacesPage() {
               Shared with Me
             </h2>
           </div>
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
+          <div className="rounded-2xl neu-card p-12 text-center">
             <div className="mx-auto w-fit rounded-full bg-muted p-6 mb-4">
               <Users className="size-12 text-muted-foreground" />
             </div>

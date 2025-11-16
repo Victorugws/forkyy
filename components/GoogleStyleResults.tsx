@@ -14,6 +14,8 @@ interface GoogleStyleResultsProps {
   searchQuery: string
   aiCommentary?: string
   results?: SearchResult[]
+  images?: any[]
+  videos?: any[]
   className?: string
 }
 
@@ -30,6 +32,8 @@ export function GoogleStyleResults({
   searchQuery,
   aiCommentary,
   results = [],
+  images = [],
+  videos = [],
   className = ''
 }: GoogleStyleResultsProps) {
   const defaultCommentary = `Based on current information about "${searchQuery}", here's what you need to know:`
@@ -157,11 +161,30 @@ export function GoogleStyleResults({
               <h3 className="text-base font-semibold text-foreground">Related Images</h3>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="neu-inset rounded-xl aspect-square bg-background/50 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer">
-                  <span className="text-xs text-muted-foreground">Image {i}</span>
-                </div>
-              ))}
+              {images.length > 0 ? (
+                images.slice(0, 4).map((image, i) => (
+                  <a
+                    key={i}
+                    href={image.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="neu-inset rounded-xl aspect-square bg-background/50 overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
+                  >
+                    <img
+                      src={image.thumbnail || image.url}
+                      alt={image.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  </a>
+                ))
+              ) : (
+                [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="neu-inset rounded-xl aspect-square bg-background/50 flex items-center justify-center">
+                    <span className="text-xs text-muted-foreground">Image {i}</span>
+                  </div>
+                ))
+              )}
             </div>
             <a href="#" className="text-sm text-primary hover:underline mt-4 inline-block font-medium">
               View all images →
@@ -175,16 +198,48 @@ export function GoogleStyleResults({
               <h3 className="text-base font-semibold text-foreground">Related Videos</h3>
             </div>
             <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="space-y-2">
-                  <div className="neu-inset rounded-xl aspect-video bg-background/50 flex items-center justify-center hover:scale-102 transition-transform cursor-pointer">
-                    <span className="text-xs text-muted-foreground">Video {i}</span>
+              {videos.length > 0 ? (
+                videos.slice(0, 2).map((video, i) => (
+                  <a
+                    key={i}
+                    href={video.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block space-y-2 group"
+                  >
+                    <div className="neu-inset rounded-xl aspect-video bg-background/50 overflow-hidden hover:scale-102 transition-transform cursor-pointer relative">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      {video.duration && (
+                        <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
+                          {video.duration}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-foreground font-medium line-clamp-2">
+                      {video.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {video.channel}
+                    </p>
+                  </a>
+                ))
+              ) : (
+                [1, 2].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="neu-inset rounded-xl aspect-video bg-background/50 flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">Video {i}</span>
+                    </div>
+                    <p className="text-xs text-foreground font-medium line-clamp-2">
+                      Video about {searchQuery}
+                    </p>
                   </div>
-                  <p className="text-xs text-foreground font-medium line-clamp-2">
-                    Video about {searchQuery}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             <a href="#" className="text-sm text-primary hover:underline mt-4 inline-block font-medium">
               View all videos →

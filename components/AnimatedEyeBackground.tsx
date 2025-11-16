@@ -140,6 +140,26 @@ export function AnimatedEyeBackground() {
           }
         }
 
+        .eye::before {
+          width: 190px;
+          height: 190px;
+          border-radius: 50%;
+          background: repeating-conic-gradient(
+            from 0deg,
+            rgba(160, 160, 160, 0.4) 0deg 0.5deg,
+            transparent 0.5deg 1deg
+          );
+          transform: translate(-50%, -50%);
+          clip-path: circle(47% at 50% 50%);
+          mask: radial-gradient(
+            circle at center,
+            transparent 0%,
+            transparent 30%,
+            black 30%,
+            black 47%,
+            transparent 47%
+          );
+        }
 
         .eye::after {
           width: 160px;

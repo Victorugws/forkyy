@@ -133,7 +133,6 @@ export default function MorphHomePage() {
                   </div>
                 </div>
               </ResultCard>
-            </div>
           </TabbedResultsPanelContent>
         </TabbedResultsPanel>
       </div>

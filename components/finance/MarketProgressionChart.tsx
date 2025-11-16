@@ -180,7 +180,7 @@ export function MarketProgressionChart({
         </div>
       </div>
 
-      <div className="relative rounded-xl border border-border bg-card p-4">
+      <div className="relative rounded-xl neu-card p-4">
         <canvas
           ref={canvasRef}
           className="w-full cursor-crosshair"

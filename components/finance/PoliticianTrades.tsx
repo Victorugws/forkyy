@@ -39,7 +39,7 @@ export function PoliticianTrades({ trades, loading, selectedCountry = 'United St
       <div className="space-y-3">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-xl border border-border bg-card h-24 animate-pulse">
+            <div key={i} className="p-4 rounded-xl neu-card h-24 animate-pulse">
               <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
               <div className="h-3 bg-muted rounded w-1/4"></div>
             </div>
@@ -48,7 +48,7 @@ export function PoliticianTrades({ trades, loading, selectedCountry = 'United St
           trades.map((trade, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+              className="flex items-center justify-between p-4 rounded-xl neu-card group"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">

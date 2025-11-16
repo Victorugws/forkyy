@@ -159,7 +159,7 @@ export default function FinancePage() {
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+              className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg neu-button"
             >
               <TrendingUp className="size-4" />
               <span className="text-sm font-medium">Watchlist</span>
@@ -179,8 +179,8 @@ export default function FinancePage() {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
                 activeTab === tab
-                  ? 'bg-primary/10 text-primary border-b-2 border-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  ? 'neu-raised text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground neu-card'
               }`}
             >
               {tab}

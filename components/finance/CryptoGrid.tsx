@@ -38,7 +38,7 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-4 rounded-xl border border-border bg-card h-32 animate-pulse">
+          <div key={i} className="p-4 rounded-xl neu-card h-32 animate-pulse">
             <div className="h-3 bg-muted rounded w-1/2 mb-2"></div>
             <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
             <div className="h-4 bg-muted rounded w-1/3"></div>
@@ -57,7 +57,7 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
           <Link
             key={crypto.name}
             href={`/search?q=${encodeURIComponent(crypto.name)}+cryptocurrency`}
-            className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+            className="p-4 rounded-xl neu-card group"
           >
             <div className="flex items-center gap-3 mb-3">
               <CryptoLogo symbol={crypto.symbol} name={crypto.name} size={48} />

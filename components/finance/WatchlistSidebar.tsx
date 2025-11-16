@@ -168,7 +168,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
         )}
 
         {/* Watchlist Section */}
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="rounded-2xl neu-card p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-foreground flex items-center gap-2">
             <TrendingUp className="size-4" />
@@ -232,7 +232,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
       </div>
 
       {/* Market Movers Section */}
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-2xl neu-card p-5">
         <h3 className="font-semibold text-foreground mb-4">Market Movers</h3>
 
         {/* Tabs */}

@@ -77,7 +77,7 @@ export function MarketSummary({ topic }: MarketSummaryProps) {
         </div>
         <div className="space-y-4">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="p-6 rounded-xl border border-border bg-card animate-pulse">
+            <div key={i} className="p-6 rounded-xl neu-card animate-pulse">
               <div className="h-5 bg-muted rounded w-3/4 mb-3"></div>
               <div className="h-4 bg-muted rounded w-full mb-2"></div>
               <div className="h-4 bg-muted rounded w-5/6"></div>
@@ -96,7 +96,7 @@ export function MarketSummary({ topic }: MarketSummaryProps) {
       </div>
       <div className="space-y-4">
         {articles.map((article, index) => (
-          <div key={index} className="p-6 rounded-xl border border-border bg-card">
+          <div key={index} className="p-6 rounded-xl neu-card">
             <h3 className="font-semibold text-foreground mb-3">{article.title}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">{article.content}</p>
           </div>

@@ -140,7 +140,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
           console.log('Country selector clicked, current state:', isOpen)
           setIsOpen(!isOpen)
         }}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors cursor-pointer"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg neu-button cursor-pointer"
         style={{ pointerEvents: 'auto' }}
       >
         <Globe className="size-4" />
@@ -154,7 +154,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-border bg-card shadow-lg z-[100] overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl neu-raised shadow-lg z-[100] overflow-hidden">
           {/* Search Input */}
           <div className="p-3 border-b border-border">
             <input
@@ -162,7 +162,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
               placeholder="Search countries..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 rounded-lg neu-input text-sm"
               autoFocus
             />
           </div>

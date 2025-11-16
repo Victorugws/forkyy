@@ -176,7 +176,7 @@ export function EarningsCalendar() {
       <div className="space-y-2">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-xl border border-border bg-card h-16 animate-pulse">
+            <div key={i} className="p-4 rounded-xl neu-card h-16 animate-pulse">
               <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
               <div className="h-3 bg-muted rounded w-1/4"></div>
             </div>
@@ -186,7 +186,7 @@ export function EarningsCalendar() {
             <Link
               key={index}
               href={`/search?q=${encodeURIComponent(call.ticker)}+earnings`}
-              className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all group"
+              className="flex items-center justify-between p-4 rounded-xl neu-card group"
             >
               <div className="flex items-center gap-4">
                 <CompanyLogo ticker={call.ticker} companyName={call.name} size={48} />

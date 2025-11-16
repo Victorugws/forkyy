@@ -318,7 +318,7 @@ export function AnimatedEyeBackground() {
         .circle-6 {
           width: 190px;
           height: 190px;
-          background: repeating-conic-gradient(from 0deg, rgba(100, 100, 100, 0.6) 0deg 1deg, transparent 1deg 2deg);
+          background: repeating-conic-gradient(from 0deg, rgba(150, 150, 150, 0.4) 0deg 1deg, transparent 1deg 2deg);
           clip-path: url(#bagel1);
           border-radius: 50%;
           animation: circle6Animation 4s cubic-bezier(1, 0, 1, 1) infinite;

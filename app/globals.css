@@ -196,4 +196,82 @@
     position: relative;
     z-index: 2;
   }
+
+  /* Neumorphic Design System - matching AnimatedEyeBackground */
+  .neu-raised {
+    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    box-shadow:
+      8px 8px 16px rgba(200, 200, 200, 0.4),
+      -8px -8px 16px rgba(255, 255, 255, 0.9),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.5);
+  }
+
+  .neu-inset {
+    background: linear-gradient(145deg, #f8f8f8, #ffffff);
+    box-shadow:
+      inset 6px 6px 12px rgba(200, 200, 200, 0.3),
+      inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+  }
+
+  .neu-button {
+    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    box-shadow:
+      4px 4px 8px rgba(200, 200, 200, 0.4),
+      -4px -4px 8px rgba(255, 255, 255, 0.9);
+    @apply transition-all duration-200;
+  }
+
+  .neu-button:hover {
+    box-shadow:
+      6px 6px 12px rgba(200, 200, 200, 0.5),
+      -6px -6px 12px rgba(255, 255, 255, 1);
+  }
+
+  .neu-button:active {
+    box-shadow:
+      inset 3px 3px 6px rgba(200, 200, 200, 0.4),
+      inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+  }
+
+  .neu-card {
+    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    box-shadow:
+      12px 12px 24px rgba(200, 200, 200, 0.4),
+      -12px -12px 24px rgba(255, 255, 255, 0.9),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+  }
+
+  .neu-input {
+    background: linear-gradient(145deg, #f8f8f8, #ffffff);
+    box-shadow:
+      inset 4px 4px 8px rgba(200, 200, 200, 0.3),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+    @apply transition-all duration-200;
+  }
+
+  .neu-input:focus {
+    box-shadow:
+      inset 6px 6px 12px rgba(200, 200, 200, 0.4),
+      inset -6px -6px 12px rgba(255, 255, 255, 0.9),
+      0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Neumorphic shadow variations */
+  .shadow-neu {
+    box-shadow:
+      8px 8px 16px rgba(200, 200, 200, 0.4),
+      -8px -8px 16px rgba(255, 255, 255, 0.9);
+  }
+
+  .shadow-neu-lg {
+    box-shadow:
+      12px 12px 24px rgba(200, 200, 200, 0.5),
+      -12px -12px 24px rgba(255, 255, 255, 1);
+  }
+
+  .shadow-neu-sm {
+    box-shadow:
+      4px 4px 8px rgba(200, 200, 200, 0.3),
+      -4px -4px 8px rgba(255, 255, 255, 0.8);
+  }
 }

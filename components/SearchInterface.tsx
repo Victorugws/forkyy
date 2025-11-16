@@ -95,17 +95,7 @@ export function SearchInterface({
               onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder="Ask anything..."
-              className="
-                w-full
-                bg-transparent
-                pl-16 pr-16
-                py-5
-                text-lg
-                text-foreground
-                placeholder:text-muted-foreground/60
-                focus:outline-none
-                transition-all duration-300
-              "
+              className="w-full bg-transparent pl-16 pr-16 py-5 text-lg text-foreground placeholder:text-muted-foreground/60 focus:outline-none transition-all duration-300"
               style={{
                 fontWeight: isFocused ? 500 : 400
               }}
@@ -116,14 +106,7 @@ export function SearchInterface({
               <div className="absolute right-6 flex items-center">
                 <button
                   type="submit"
-                  className="
-                    neu-button
-                    rounded-full
-                    p-3
-                    hover:scale-110
-                    active:scale-95
-                    transition-transform duration-200
-                  "
+                  className="neu-button rounded-full p-3 hover:scale-110 active:scale-95 transition-transform duration-200"
                   aria-label="Search"
                 >
                   <Sparkles className="size-5 text-primary" />
@@ -164,16 +147,7 @@ export function SearchInterface({
                   setQuery(suggestion)
                   inputRef.current?.focus()
                 }}
-                className="
-                  neu-button
-                  px-4 py-2
-                  rounded-full
-                  text-sm
-                  text-foreground/80
-                  hover:text-foreground
-                  transition-all duration-200
-                  hover:scale-105
-                "
+                className="neu-button px-4 py-2 rounded-full text-sm text-foreground/80 hover:text-foreground transition-all duration-200 hover:scale-105"
                 style={{
                   animationDelay: `${i * 0.1}s`
                 }}
@@ -233,16 +207,7 @@ export function MinimalSearchInterface({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ask anything..."
-            className="
-              w-full
-              bg-transparent
-              pl-10 pr-4
-              py-2
-              text-sm
-              text-foreground
-              placeholder:text-muted-foreground/60
-              focus:outline-none
-            "
+            className="w-full bg-transparent pl-10 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
           />
         </div>
       </div>

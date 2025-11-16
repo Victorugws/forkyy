@@ -22,10 +22,10 @@ export default function MorphHomePage() {
     setSearchQuery(query)
 
     // After morphing sequence completes, show results
-    // Total: 4500ms (search vanish) + 4500ms (content emerge) = 9000ms
+    // Total: 4500ms (search shrinks to canvas) + 3000ms (content grows from canvas) = 7500ms
     setTimeout(() => {
       setHasSearched(true)
-    }, 9500) // After full morphing sequence with no skipped frames
+    }, 7500) // After full morphing sequence - search shrinks, content grows
   }
 
   const handleTabChange = (tab: TabType) => {

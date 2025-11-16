@@ -88,7 +88,7 @@ export function TabbedResultsPanel({
   return (
     <div className={cn('w-full h-full flex flex-col', className)}>
       {/* Tab Navigation */}
-      <div className="sticky top-[72px] z-40 glass border-b border-border/40 px-6 py-4">
+      <div className="sticky top-[14px] z-40 glass border-b border-border/40 px-6 py-4">
         <div className="max-w-[1400px] mx-auto">
           {/* Search Query Display */}
           {searchQuery && (
@@ -147,7 +147,7 @@ export function TabbedResultsPanel({
 
       {/* Content Area with Morphing */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <div className="max-w-[1400px] mx-auto px-6 py-1.5">
           {isLoading ? (
             <div className="space-y-6 animate-in fade-in duration-500">
               {/* Loading State with Binary Placeholders ON component surfaces */}

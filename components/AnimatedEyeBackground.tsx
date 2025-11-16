@@ -146,8 +146,8 @@ export function AnimatedEyeBackground() {
           border-radius: 50%;
           background: repeating-conic-gradient(
             from 0deg,
-            rgba(120, 120, 120, 0.6) 0deg 0.5deg,
-            transparent 0.5deg 1deg
+            rgba(100, 100, 100, 0.7) 0deg 2deg,
+            transparent 2deg 4deg
           );
           clip-path: url(#bagel1);
           transform: translate(-50%, -50%);

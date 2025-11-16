@@ -1,7 +1,8 @@
-import React, { useId } from "react"
+import React from "react"
 
 export function AnimatedEyeBackground() {
-    const uniqueId = useId()
+    // Use a static ID since we only have one eye component on the page
+    const uniqueId = "animated-eye"
 
     return (
         <div

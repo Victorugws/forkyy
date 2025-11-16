@@ -95,26 +95,26 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
   return (
     <section className="relative">
       {/* Category Title */}
-      <div className="mb-16">
-        <div className="flex items-center gap-4 mb-12">
-          <span className="text-5xl">{category.emoji}</span>
-          <h2 className="text-5xl font-serif font-light italic text-white tracking-tight">
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-6">
+          <span className="text-4xl">{category.emoji}</span>
+          <h2 className="text-3xl font-bold text-foreground">
             {category.title}
           </h2>
         </div>
 
-        {/* AI Commentary - Exact template style */}
-        <div className="mb-16">
+        {/* AI Commentary */}
+        <div className="mb-8">
           {loading ? (
-            <div className="space-y-4">
-              <div className="h-5 bg-white/5 rounded w-full animate-pulse" />
-              <div className="h-5 bg-white/5 rounded w-11/12 animate-pulse" />
-              <div className="h-5 bg-white/5 rounded w-10/12 animate-pulse" />
-              <div className="h-5 bg-white/5 rounded w-full animate-pulse" />
-              <div className="h-5 bg-white/5 rounded w-9/12 animate-pulse" />
+            <div className="space-y-3">
+              <div className="h-4 bg-muted rounded w-full animate-pulse" />
+              <div className="h-4 bg-muted rounded w-11/12 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-10/12 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-full animate-pulse" />
+              <div className="h-4 bg-muted rounded w-9/12 animate-pulse" />
             </div>
           ) : (
-            <p className="text-[17px] text-white/80 leading-[1.8] tracking-wide">
+            <p className="text-base text-muted-foreground leading-relaxed">
               {aiCommentary}
             </p>
           )}
@@ -122,15 +122,15 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
       </div>
 
       {/* Horizontal Scrolling News Cards */}
-      <div className="relative group -mx-8">
+      <div className="relative group">
         {/* Left Scroll Button */}
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-8 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100 shadow-lg"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="size-5 text-white" />
+            <ChevronLeft className="size-5 text-foreground" />
           </button>
         )}
 
@@ -138,24 +138,24 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-8 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-background/90 backdrop-blur-sm border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100 shadow-lg"
             aria-label="Scroll right"
           >
-            <ChevronRight className="size-5 text-white" />
+            <ChevronRight className="size-5 text-foreground" />
           </button>
         )}
 
         {/* Scrollable Container */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto px-8 pb-6 scrollbar-hide scroll-smooth"
+          className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide scroll-smooth"
         >
           {loading ? (
             // Loading skeletons
             Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[380px] h-[520px] rounded-2xl bg-white/5 animate-pulse"
+                className="flex-shrink-0 w-[380px] h-[520px] rounded-xl bg-muted animate-pulse"
               />
             ))
           ) : articles.length > 0 ? (
@@ -163,8 +163,8 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
               <NewsCard key={article.id} article={article} variant="vertical" />
             ))
           ) : (
-            <div className="flex-shrink-0 w-full h-64 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center">
-              <p className="text-white/40">No articles available for this category</p>
+            <div className="flex-shrink-0 w-full h-64 rounded-xl border border-border bg-card flex items-center justify-center">
+              <p className="text-muted-foreground">No articles available for this category</p>
             </div>
           )}
         </div>

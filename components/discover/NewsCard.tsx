@@ -41,9 +41,9 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
           onClick={handleClick}
           className="flex-shrink-0 w-[380px] group cursor-pointer"
         >
-          <div className="rounded-2xl border border-white/10 bg-white/5 hover:border-white/20 transition-all overflow-hidden h-full flex flex-col backdrop-blur-sm">
+          <div className="rounded-xl border border-border bg-card hover:border-primary/50 transition-all overflow-hidden h-full flex flex-col">
             {/* Image */}
-            <div className="relative h-56 overflow-hidden bg-black/40">
+            <div className="relative h-56 overflow-hidden bg-muted">
               {!imageError && article.image ? (
                 <img
                   src={article.image}
@@ -52,17 +52,14 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-black/40">
-                  <FileText className="size-12 text-white/20" />
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <FileText className="size-12 text-muted-foreground" />
                 </div>
               )}
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
               {/* Source badge */}
               <div className="absolute top-4 left-4">
-                <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-black/60 backdrop-blur-md border border-white/10 text-white/90">
+                <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-background/80 backdrop-blur-md border border-border text-foreground">
                   {article.source}
                 </span>
               </div>
@@ -73,25 +70,25 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
                   e.stopPropagation()
                   window.open(article.url || `/search?q=${encodeURIComponent(article.title)}`, '_blank', 'noopener,noreferrer')
                 }}
-                className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-md border border-border hover:bg-accent transition-all opacity-0 group-hover:opacity-100"
                 aria-label="Open in new tab"
               >
-                <ExternalLink className="size-4 text-white" />
+                <ExternalLink className="size-4 text-foreground" />
               </button>
             </div>
 
             {/* Content */}
             <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-base font-medium text-white group-hover:text-white/80 transition-colors line-clamp-2 mb-3 leading-snug">
+              <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3 leading-snug">
                 {article.title}
               </h3>
 
-              <p className="text-sm text-white/60 line-clamp-3 mb-4 flex-1 leading-relaxed">
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1 leading-relaxed">
                 {article.summary}
               </p>
 
               {/* Footer */}
-              <div className="flex items-center gap-2 text-xs text-white/40 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border">
                 <Clock className="size-3.5" />
                 <span>{article.publishedAt || `${article.publishedHours}h ago`}</span>
               </div>

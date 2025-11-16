@@ -146,19 +146,11 @@ export function AnimatedEyeBackground() {
           border-radius: 50%;
           background: repeating-conic-gradient(
             from 0deg,
-            rgba(160, 160, 160, 0.4) 0deg 0.5deg,
+            rgba(120, 120, 120, 0.6) 0deg 0.5deg,
             transparent 0.5deg 1deg
           );
+          clip-path: url(#bagel1);
           transform: translate(-50%, -50%);
-          clip-path: circle(47% at 50% 50%);
-          mask: radial-gradient(
-            circle at center,
-            transparent 0%,
-            transparent 30%,
-            black 30%,
-            black 47%,
-            transparent 47%
-          );
         }
 
         .eye::after {

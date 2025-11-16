@@ -141,7 +141,7 @@ export default function MorphHomePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-background -mt-[72px]">
+    <div className="w-full min-h-screen bg-background">
       <MorphingCanvas
         onSearchSubmit={handleSearch}
         autoProgress={true}

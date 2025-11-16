@@ -161,30 +161,30 @@ export function MorphingCanvas({
   const getSearchStyle = (): React.CSSProperties => {
     switch (morphState) {
       case 'search-growing':
-        // Search physically grows from tiny point
+        // Search fades in from canvas surface (no scaling, follows mould narrative)
         return {
-          opacity: 1,
-          transform: 'scale(0.1)',
-          filter: 'blur(2px)'
+          opacity: 0.3,
+          transform: 'scale(1)',
+          filter: 'blur(4px)'
         }
       case 'search-active':
-        // Search fully grown and visible
+        // Search fully visible and sharp
         return {
           opacity: 1,
           transform: 'scale(1)',
           filter: 'blur(0px)'
         }
       case 'search-to-loading':
-        // Search shrinks back into canvas
+        // Search fades back into canvas (no shrinking)
         return {
-          opacity: 0.5,
-          transform: 'scale(0.1)',
-          filter: 'blur(8px)'
+          opacity: 0.2,
+          transform: 'scale(1)',
+          filter: 'blur(6px)'
         }
       default:
         return {
           opacity: 0,
-          transform: 'scale(0)',
+          transform: 'scale(1)',
           filter: 'blur(10px)',
           pointerEvents: 'none'
         }
@@ -194,14 +194,14 @@ export function MorphingCanvas({
   const getContentStyle = (): React.CSSProperties => {
     switch (morphState) {
       case 'content-growing':
-        // Content physically grows from canvas
+        // Content fades in from canvas surface (no scaling, follows mould narrative)
         return {
-          opacity: 1,
-          transform: 'scale(0.1)',
-          filter: 'blur(3px)'
+          opacity: 0.3,
+          transform: 'scale(1)',
+          filter: 'blur(5px)'
         }
       case 'content-visible':
-        // Content fully grown and visible
+        // Content fully visible and sharp
         return {
           opacity: 1,
           transform: 'scale(1)',
@@ -210,7 +210,7 @@ export function MorphingCanvas({
       default:
         return {
           opacity: 0,
-          transform: 'scale(0)',
+          transform: 'scale(1)',
           filter: 'blur(10px)',
           pointerEvents: 'none'
         }

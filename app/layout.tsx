@@ -1,8 +1,6 @@
-import AppSidebar from '@/components/app-sidebar'
 import ArtifactRoot from '@/components/artifact/artifact-root'
-import Header from '@/components/header'
+import HeaderNavbar from '@/components/header-navbar'
 import { ThemeProvider } from '@/components/theme-provider'
-import { SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -76,15 +74,12 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SidebarProvider defaultOpen>
-              <AppSidebar />
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <Header user={user} />
-                <main className="flex flex-1 min-h-0 overflow-y-auto">
-                  <ArtifactRoot>{children}</ArtifactRoot>
-                </main>
-              </div>
-            </SidebarProvider>
+            <div className="flex flex-col min-h-screen">
+              <HeaderNavbar user={user} />
+              <main className="flex-1 overflow-y-auto">
+                <ArtifactRoot>{children}</ArtifactRoot>
+              </main>
+            </div>
             <Toaster />
             <Analytics />
           </ThemeProvider>

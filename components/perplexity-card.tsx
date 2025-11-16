@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { LucideIcon } from 'lucide-react'
-import Image from 'next/image'
 
 interface PerplexityCardProps {
   title: string
@@ -11,7 +10,6 @@ interface PerplexityCardProps {
   href: string
   category?: string
   className?: string
-  trending?: boolean
 }
 
 export function PerplexityCard({
@@ -21,74 +19,93 @@ export function PerplexityCard({
   image,
   href,
   category,
-  className,
-  trending
+  className
 }: PerplexityCardProps) {
   return (
     <Link
       href={href}
       className={cn(
-        'group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-lg hover:scale-[1.02]',
+        'group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg',
         className
       )}
     >
-      {/* Image or Icon Header */}
-      {image ? (
-        <div className="relative h-40 w-full overflow-hidden bg-muted">
-          <Image
+      {image && (
+        <div className="relative h-48 w-full overflow-hidden bg-muted">
+          <img
             src={image}
             alt={title}
-            fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
-          {trending && (
-            <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-red-500 text-white text-xs font-medium">
-              Trending
-            </div>
-          )}
         </div>
-      ) : Icon ? (
-        <div className="flex items-center justify-center h-40 bg-gradient-to-br from-primary/10 to-primary/5">
-          <Icon className="size-16 text-primary opacity-50" />
-        </div>
-      ) : null}
-
-      {/* Content */}
-      <div className="p-4 space-y-2">
+      )}
+      <div className="flex flex-1 flex-col p-5">
         {category && (
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <span className="mb-2 text-xs font-medium text-primary uppercase tracking-wider">
             {category}
           </span>
         )}
-        <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-          {title}
-        </h3>
-        {description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {description}
-          </p>
-        )}
+        <div className="flex items-start gap-3">
+          {Icon && (
+            <div className="mt-1 rounded-lg bg-primary/10 p-2">
+              <Icon className="size-5 text-primary" />
+            </div>
+          )}
+          <div className="flex-1">
+            <h3 className="font-semibold text-base leading-snug text-foreground group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+            {description && (
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                {description}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   )
 }
 
-// Grid container for cards
-export function PerplexityCardGrid({
-  children,
-  className
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+interface TrendingCardProps {
+  title: string
+  description: string
+  views: string
+  image?: string
+  href: string
+}
+
+export function TrendingCard({
+  title,
+  description,
+  views,
+  image,
+  href
+}: TrendingCardProps) {
   return (
-    <div
-      className={cn(
-        'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4',
-        className
-      )}
+    <Link
+      href={href}
+      className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg"
     >
-      {children}
-    </div>
+      {image && (
+        <div className="relative h-40 w-full overflow-hidden bg-muted">
+          <img
+            src={image}
+            alt={title}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
+          <div className="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            {views}
+          </div>
+        </div>
+      )}
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="font-semibold text-sm leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          {title}
+        </h3>
+        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+          {description}
+        </p>
+      </div>
+    </Link>
   )
 }

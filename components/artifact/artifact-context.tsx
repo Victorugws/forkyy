@@ -6,10 +6,8 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useReducer
 } from 'react'
-import { useSidebar } from '../ui/sidebar'
 
 // Part types as seen in render-message.tsx
 export type TextPart = {
@@ -67,23 +65,14 @@ const ArtifactContext = createContext<ArtifactContextValue | undefined>(
 
 export function ArtifactProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(artifactReducer, initialState)
-  const { setOpen, open: sidebarOpen } = useSidebar()
 
   const close = useCallback(() => {
     dispatch({ type: 'CLOSE' })
   }, [])
 
-  // Close artifact when sidebar opens
-  useEffect(() => {
-    if (sidebarOpen && state.isOpen) {
-      close()
-    }
-  }, [sidebarOpen, state.isOpen, close])
-
-  const open = (part: Part) => {
+  const open = useCallback((part: Part) => {
     dispatch({ type: 'OPEN', payload: part })
-    setOpen(false)
-  }
+  }, [])
 
   return (
     <ArtifactContext.Provider value={{ state, open, close }}>

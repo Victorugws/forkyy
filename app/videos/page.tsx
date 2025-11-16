@@ -1,0 +1,252 @@
+'use client'
+
+import {
+  Video,
+  Search,
+  Filter,
+  Play,
+  Clock,
+  Eye,
+  TrendingUp,
+  X
+} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+
+const videoCategories = [
+  'All',
+  'Technology',
+  'Science',
+  'Education',
+  'News',
+  'Entertainment',
+  'How-to',
+  'Reviews'
+]
+
+export default function VideosPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
+  const [allVideos, setAllVideos] = useState<any[]>([])
+  const [filteredVideos, setFilteredVideos] = useState<any[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch videos when category changes
+  useEffect(() => {
+    const fetchVideos = async () => {
+      setLoading(true)
+      try {
+        const query = selectedCategory !== 'All' ? `${selectedCategory} videos` : 'technology trending'
+        const response = await fetch(`/api/videos?query=${encodeURIComponent(query)}&category=${selectedCategory}`)
+        const data = await response.json()
+
+        if (data.success || data.fallback) {
+          setAllVideos(data.data)
+          setFilteredVideos(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching videos:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchVideos()
+  }, [selectedCategory])
+
+  // Filter by search query
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filtered = allVideos.filter(video =>
+        video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.channel.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredVideos(filtered)
+    } else {
+      setFilteredVideos(allVideos)
+    }
+  }, [searchQuery, allVideos])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery + ' videos')}`)
+    }
+  }
+
+  const handleVideoClick = (video: typeof allVideos[0]) => {
+    // Open video link in new tab if available
+    if (video.link) {
+      window.open(video.link, '_blank')
+    } else {
+      // Fallback to search
+      router.push(`/search?q=${encodeURIComponent(video.title)}`)
+    }
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <div className="border-b border-border bg-gradient-to-br from-background via-background to-red-500/5">
+        <div className="container max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="rounded-full bg-red-500/10 p-3">
+              <Video className="size-6 text-red-500" />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground">Videos</h1>
+          </div>
+          <p className="text-lg text-muted-foreground max-w-2xl mb-6">
+            Discover educational and informative videos from across the web
+          </p>
+          <form onSubmit={handleSearch} className="flex gap-3 items-center">
+            <div className="relative flex-1 max-w-3xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search for videos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(e as any)}
+                className="w-full rounded-2xl border border-input bg-background px-12 py-4 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-5" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`rounded-2xl border transition-colors ${showFilters ? 'border-primary bg-primary/10' : 'border-input bg-background hover:bg-accent'} p-4`}
+            >
+              <Filter className="size-5" />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container max-w-7xl mx-auto px-6 py-10 flex-1">
+        {/* Categories */}
+        <section className="mb-8">
+          <div className="flex flex-wrap gap-2">
+            {videoCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-border bg-card hover:border-primary/50 hover:bg-accent'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Results Count */}
+        {(selectedCategory !== 'All' || searchQuery) && (
+          <div className="mb-4 text-sm text-muted-foreground">
+            Showing {filteredVideos.length} {filteredVideos.length === 1 ? 'result' : 'results'}
+            {selectedCategory !== 'All' && ` in ${selectedCategory}`}
+            {searchQuery && ` for "${searchQuery}"`}
+          </div>
+        )}
+
+        {/* Trending Section */}
+        <section className="mb-10">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="size-5 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">
+              {selectedCategory === 'All' ? 'Trending Videos' : `Trending in ${selectedCategory}`}
+            </h2>
+          </div>
+          {filteredVideos.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredVideos.map((video, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleVideoClick(video)}
+                    className="group cursor-pointer"
+                  >
+                <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted mb-3">
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="rounded-full bg-white/90 p-4">
+                      <Play className="size-6 text-black fill-black" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-medium text-white">
+                    {video.duration}
+                  </div>
+                </div>
+                <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                  {video.title}
+                </h3>
+                <div className="text-xs text-muted-foreground mb-1">
+                  {video.channel}
+                </div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Eye className="size-3" />
+                    <span>{video.views}</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <Clock className="size-3" />
+                    <span>{video.uploadedAt}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+              {/* Load More */}
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => alert('Loading more videos... (Would load from API in production)')}
+                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Load More Videos
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <Video className="size-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No videos found</h3>
+              <p className="text-sm text-muted-foreground">
+                Try adjusting your search or filters
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedCategory('All')
+                }}
+                className="mt-4 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  )
+}

@@ -27,14 +27,27 @@ export function EmptyScreen({
   className?: string
 }) {
   return (
-    <div className={`mx-auto w-full transition-all ${className}`}>
-      <div className="bg-background p-2">
+    <div className={`mx-auto w-full transition-all relative ${className}`}>
+      {/* Orbai-inspired background iframe */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 blur-sm">
+        <iframe
+          src="https://orbai-template.framer.website"
+          className="w-full h-full border-0 scale-110"
+          title="Background"
+        />
+      </div>
+
+      {/* Overlay gradient for better readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80 pointer-events-none" />
+
+      {/* Content */}
+      <div className="relative z-10 bg-background/40 backdrop-blur-md p-2 rounded-2xl border border-border/50">
         <div className="mt-2 flex flex-col items-start space-y-2 mb-4">
           {exampleMessages.map((message, index) => (
             <Button
               key={index}
               variant="link"
-              className="h-auto p-0 text-base"
+              className="h-auto p-0 text-base hover:text-primary transition-colors"
               name={message.message}
               onClick={async () => {
                 submitMessage(message.message)

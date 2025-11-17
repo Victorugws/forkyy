@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Image, Video, Globe } from 'lucide-react'
+import { FileText, Image, Video, Globe, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
-type TabType = 'all' | 'images' | 'videos' | 'news'
+type TabType = 'all' | 'images' | 'videos' | 'news' | 'templates'
 
 interface SearchTabsProps {
   activeTab: TabType
@@ -17,7 +17,8 @@ export function SearchTabs({ activeTab, onTabChange, query }: SearchTabsProps) {
     { id: 'all' as TabType, label: 'All', icon: Globe },
     { id: 'images' as TabType, label: 'Images', icon: Image },
     { id: 'videos' as TabType, label: 'Videos', icon: Video },
-    { id: 'news' as TabType, label: 'News', icon: FileText }
+    { id: 'news' as TabType, label: 'News', icon: FileText },
+    { id: 'templates' as TabType, label: 'Templates', icon: Sparkles }
   ]
 
   return (

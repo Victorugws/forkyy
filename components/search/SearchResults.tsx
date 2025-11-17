@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { SearchTabs } from './SearchTabs'
 import { LoadingSkeleton } from '../shared/LoadingSkeleton'
 import { Eye, FileText, ExternalLink } from 'lucide-react'
+import { TemplateGallery } from '../templates/TemplateGallery'
 
-type TabType = 'all' | 'images' | 'videos' | 'news'
+type TabType = 'all' | 'images' | 'videos' | 'news' | 'templates'
 
 interface SearchResultsProps {
   query: string
@@ -157,6 +158,11 @@ export function SearchResults({ query, initialTab = 'all' }: SearchResultsProps)
               <p className="text-muted-foreground text-center py-12">No news articles found for this search.</p>
             )}
           </div>
+        )}
+
+        {/* Templates Tab - AI Task Templates */}
+        {activeTab === 'templates' && (
+          <TemplateGallery />
         )}
       </div>
     </div>

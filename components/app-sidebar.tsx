@@ -21,7 +21,8 @@ import {
   Image as ImageIcon,
   Video,
   GraduationCap,
-  Pen
+  Pen,
+  Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -32,6 +33,7 @@ import { IconLogo } from './ui/icons'
 const navigationItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/discover', icon: Compass, label: 'Discover' },
+  { href: '/templates', icon: Sparkles, label: 'Templates' },
   { href: '/spaces', icon: Folder, label: 'Spaces' },
   { href: '/finance', icon: TrendingUp, label: 'Finance' },
   { href: '/images', icon: ImageIcon, label: 'Images' },

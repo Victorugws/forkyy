@@ -28,7 +28,7 @@ Make the itinerary practical, exciting, and culturally enriching.`,
 Destination: {{destination}}
 Duration: {{duration}} days
 Dates: {{travel_dates}}
-Budget: ${{budget}}
+Budget: {{budget}}
 Travelers: {{travelers}}
 Interests: {{interests}}
 

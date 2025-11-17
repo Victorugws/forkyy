@@ -5,6 +5,7 @@ import { MorphingCanvas } from '@/components/MorphingCanvas'
 import { TabbedResultsPanel, TabbedResultsPanelContent, ResultCard, type TabType } from '@/components/TabbedResultsPanel'
 import { GoogleStyleResults } from '@/components/GoogleStyleResults'
 import { Chat } from '@/components/chat'
+import { FeaturedTemplates } from '@/components/FeaturedTemplates'
 import { generateId } from 'ai'
 
 /**
@@ -273,11 +274,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-background">
+    <div className="w-full bg-background">
       <MorphingCanvas
         onSearchSubmit={handleSearch}
         autoProgress={true}
       />
+      <FeaturedTemplates />
     </div>
   )
 }

@@ -2,10 +2,15 @@
 
 import Link from 'next/link'
 import { Target, Lightbulb, ArrowRight } from 'lucide-react'
+import { HeaderNavbar } from '@/components/header-navbar'
+import { VideoBackground } from '@/components/VideoBackground'
 
 export function NeumorphicAboutPage() {
   return (
     <div className="min-h-screen bg-background overflow-auto">
+      <VideoBackground />
+      <div className="relative z-10">
+        <HeaderNavbar user={null} />
       {/* Hero Section */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="text-center">
@@ -107,6 +112,7 @@ export function NeumorphicAboutPage() {
           <ArrowRight className="size-5" />
         </a>
       </section>
+      </div>
     </div>
   )
 }

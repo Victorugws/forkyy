@@ -1,4 +1,4 @@
-import { BrowserClient } from '@/components/browser/browser-client'
+import { BrowserClientEnhanced } from '@/components/browser/browser-client-enhanced'
 import { getModels } from '@/lib/config/models'
 import { generateId } from 'ai'
 
@@ -6,5 +6,5 @@ export default async function BrowsePage() {
   const id = generateId()
   const models = await getModels()
 
-  return <BrowserClient id={id} models={models} />
+  return <BrowserClientEnhanced id={id} models={models} />
 }

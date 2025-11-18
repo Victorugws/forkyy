@@ -148,7 +148,7 @@ export default function FinancePage() {
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/finance" className="hover:text-primary transition-colors">
-              Perplexity Finance
+              ORB AI Finance
             </Link>
             <ChevronRight className="size-4" />
             <span className="text-foreground">{activeTab}</span>

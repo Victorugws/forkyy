@@ -16,8 +16,8 @@ const fontSans = FontSans({
   variable: '--font-sans',
 })
 
-const title = 'Morphic'
-const description = 'A fully open-source AI-powered answer engine with a generative UI.'
+const title = 'ORB AI - Transforming Business with Intelligent AI Solutions'
+const description = 'ORB AI delivers custom AI solutions, automation, and strategic consulting to drive business growth. Transform your operations with cutting-edge AI technology.'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://morphic.sh'),

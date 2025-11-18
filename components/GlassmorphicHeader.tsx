@@ -62,7 +62,7 @@ export function GlassmorphicHeader({ user }: GlassmorphicHeaderProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <IconLogo className="size-6" />
-            <span className="font-semibold text-lg hidden sm:inline">Perplexity</span>
+            <span className="font-semibold text-lg hidden sm:inline">ORB AI</span>
           </Link>
 
           {/* Navigation - Desktop */}

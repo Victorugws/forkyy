@@ -6,6 +6,9 @@ import { TabbedResultsPanel, TabbedResultsPanelContent, ResultCard, type TabType
 import { GoogleStyleResults } from '@/components/GoogleStyleResults'
 import { Chat } from '@/components/chat'
 import { FeaturedTemplates } from '@/components/FeaturedTemplates'
+import { ContactForm } from '@/components/ContactForm'
+import { CalBooking } from '@/components/CalBooking'
+import { StripeButton } from '@/components/StripeButton'
 import { generateId } from 'ai'
 
 /**
@@ -509,7 +512,8 @@ export default function HomePage() {
                 "Real-Time Reporting",
                 "Basic Chatbot Integration"
               ],
-              popular: false
+              popular: false,
+              paymentLink: process.env.NEXT_PUBLIC_STRIPE_STARTER_LINK
             },
             {
               name: "Pro",
@@ -522,7 +526,8 @@ export default function HomePage() {
                 "Premium Chatbot Features",
                 "Cross-Platform Integrations"
               ],
-              popular: true
+              popular: true,
+              paymentLink: process.env.NEXT_PUBLIC_STRIPE_PRO_LINK
             },
             {
               name: "Enterprise",
@@ -536,7 +541,8 @@ export default function HomePage() {
                 "Team Collaboration Features",
                 "Priority Feature Access"
               ],
-              popular: false
+              popular: false,
+              paymentLink: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_LINK
             }
           ].map((plan, i) => (
             <div key={i} className={`neu-card rounded-3xl p-8 bg-gradient-to-br from-background via-background to-muted/10 hover:shadow-neu-lg transition-all duration-300 ${plan.popular ? 'ring-2 ring-foreground/20' : ''}`}>
@@ -548,9 +554,11 @@ export default function HomePage() {
               </div>
               <div className="text-5xl font-bold mb-2">{plan.price}<span className="text-lg text-muted-foreground">/month</span></div>
               <p className="text-muted-foreground text-base leading-relaxed mb-8">{plan.description}</p>
-              <button className={`w-full py-4 rounded-2xl font-semibold transition-all duration-300 mb-8 ${plan.popular ? 'bg-foreground text-background hover:shadow-lg' : 'neu-card hover:shadow-neu-lg'}`}>
-                Get Started →
-              </button>
+              <div className="mb-8">
+                <StripeButton paymentLink={plan.paymentLink} popular={plan.popular}>
+                  Get Started →
+                </StripeButton>
+              </div>
               <div className="space-y-3">
                 {plan.features.map((feature, j) => (
                   <div key={j} className="flex items-center gap-2 text-sm">
@@ -633,66 +641,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-center mb-4">
-          <div className="neu-card rounded-full px-6 py-2 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <span className="text-sm font-medium uppercase tracking-wider">TEAM</span>
-          </div>
-        </div>
-        <h2 className="text-5xl md:text-6xl font-bold text-center mb-4 section-header">
-          Team Behind Success
-        </h2>
-        <p className="section-description mx-auto mb-16 text-lg text-muted-foreground">
-          Meet the experts behind our AI—driven to deliver smart solutions.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              name: "Gwen chase",
-              role: "Marketing",
-              avatar: "👩‍🦰",
-              socials: ["𝕏", "in", "✉"]
-            },
-            {
-              name: "James Bond",
-              role: "Designer",
-              avatar: "👨",
-              socials: ["𝕏", "in", "✉"]
-            },
-            {
-              name: "Emily Gwen",
-              role: "Support Team",
-              avatar: "👩",
-              socials: ["𝕏", "in", "✉"]
-            }
-          ].map((member, i) => (
-            <div key={i} className="neu-card rounded-3xl p-8 bg-gradient-to-br from-background via-background to-muted/10 hover:shadow-neu-lg transition-all duration-300 group">
-              <div className="text-center mb-4">
-                <h3 className="text-xl font-semibold mb-1">{member.name}</h3>
-                <p className="text-sm text-muted-foreground">{member.role}</p>
-              </div>
-              <div className="flex justify-center gap-3 mb-6">
-                {member.socials.map((social, j) => (
-                  <button key={j} className="neu-card w-10 h-10 rounded-xl flex items-center justify-center text-sm hover:shadow-neu-lg transition-all">
-                    {social}
-                  </button>
-                ))}
-              </div>
-              <div className="neu-inset rounded-2xl aspect-square bg-gradient-to-br from-muted/20 to-muted/5 flex items-center justify-center text-8xl overflow-hidden">
-                <div className="relative group-hover:scale-110 transition-transform duration-300">
-                  {member.avatar}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Contact Section */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-center mb-4">
@@ -731,54 +679,11 @@ export default function HomePage() {
               <p className="text-base text-muted-foreground mb-4 leading-relaxed">
                 Feel free to book a call if that's more convenient and easier for you
               </p>
-              <button className="text-foreground font-semibold underline">
-                Book a call
-              </button>
+              <CalBooking />
             </div>
           </div>
 
-          <div className="neu-card rounded-3xl p-8 bg-gradient-to-br from-background via-background to-muted/10">
-            <form className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Ikta Sollork"
-                  className="w-full neu-inset rounded-2xl px-6 py-4 bg-background/50 focus:outline-none focus:ring-2 focus:ring-foreground/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="orbai@support.com"
-                  className="w-full neu-inset rounded-2xl px-6 py-4 bg-background/50 focus:outline-none focus:ring-2 focus:ring-foreground/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Subject Of Interest</label>
-                <input
-                  type="text"
-                  placeholder="Regarding Project"
-                  className="w-full neu-inset rounded-2xl px-6 py-4 bg-background/50 focus:outline-none focus:ring-2 focus:ring-foreground/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">How may we assist you?</label>
-                <textarea
-                  placeholder="Give us more info.."
-                  rows={4}
-                  className="w-full neu-inset rounded-2xl px-6 py-4 bg-background/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-4 rounded-2xl font-semibold bg-foreground text-background hover:shadow-lg transition-all duration-300"
-              >
-                Send Your Message
-              </button>
-            </form>
-          </div>
+          <ContactForm />
         </div>
       </section>
 

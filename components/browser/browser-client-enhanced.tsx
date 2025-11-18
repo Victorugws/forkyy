@@ -32,9 +32,10 @@ import { generateId } from 'ai'
 interface BrowserClientEnhancedProps {
   id: string
   models?: Model[]
+  initialUrl?: string
 }
 
-export function BrowserClientEnhanced({ id, models }: BrowserClientEnhancedProps) {
+export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserClientEnhancedProps) {
   // Tabs
   const [tabs, setTabs] = useState<BrowserTab[]>([])
   const [activeTabId, setActiveTabId] = useState<string>('')
@@ -63,8 +64,8 @@ export function BrowserClientEnhanced({ id, models }: BrowserClientEnhancedProps
       setTabs(savedTabs)
       setActiveTabId(savedActiveTab || savedTabs[0].id)
     } else {
-      // Create initial tab with neumorphic homepage
-      createNewTab('/')
+      // Create initial tab with specified URL
+      createNewTab(initialUrl)
     }
 
     setBookmarks(savedBookmarks)

@@ -3,6 +3,7 @@
 import { ChevronRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { HeaderNavbar } from '@/components/header-navbar'
 import { MarketIndicesGrid } from '@/components/finance/MarketIndicesGrid'
 import { CryptoGrid } from '@/components/finance/CryptoGrid'
 import { MarketSummary } from '@/components/finance/MarketSummary'
@@ -141,9 +142,11 @@ export default function FinancePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Main Content */}
-      <div className="flex-1 px-6 py-6 max-w-6xl">
+    <div className="flex flex-col min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="flex flex-1">
+        {/* Main Content */}
+        <div className="flex-1 px-6 py-6 max-w-6xl">
         {/* Breadcrumb and Actions */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -275,6 +278,7 @@ export default function FinancePage() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
+      </div>
     </div>
   )
 }

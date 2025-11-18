@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 const videoCategories = [
   'All',
@@ -90,6 +91,7 @@ export default function VideosPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <HeaderNavbar user={null} />
       {/* Hero Section */}
       <div className="border-b border-border bg-gradient-to-br from-background via-background to-red-500/5">
         <div className="container max-w-7xl mx-auto px-6 py-12">

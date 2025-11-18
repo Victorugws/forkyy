@@ -1,13 +1,10 @@
-import AppSidebar from '@/components/app-sidebar'
-import ArtifactRoot from '@/components/artifact/artifact-root'
-import Header from '@/components/header'
 import { ThemeProvider } from '@/components/theme-provider'
-import { SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { ConditionalLayout } from '@/components/conditional-layout'
 // import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -81,15 +78,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider defaultOpen>
-            <AppSidebar />
-            <div className="flex flex-col flex-1">
-              <Header user={user} />
-              <main className="flex flex-1 min-h-0">
-                <ArtifactRoot>{children}</ArtifactRoot>
-              </main>
-            </div>
-          </SidebarProvider>
+          <ConditionalLayout user={user}>
+            {children}
+          </ConditionalLayout>
           <Toaster />
           <Analytics />
         </ThemeProvider>

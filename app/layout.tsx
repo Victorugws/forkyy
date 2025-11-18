@@ -74,12 +74,8 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <VideoBackground />
-            <div className="flex flex-col min-h-screen relative z-10">
-              <HeaderNavbar user={user} />
-              <main className="flex-1">
-                <ArtifactRoot>{children}</ArtifactRoot>
-              </main>
+            <div className="h-screen w-screen overflow-hidden">
+              <ArtifactRoot>{children}</ArtifactRoot>
             </div>
             <Toaster />
             <Analytics />

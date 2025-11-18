@@ -77,7 +77,7 @@ export default async function RootLayout({
             <VideoBackground />
             <div className="flex flex-col min-h-screen relative z-10">
               <HeaderNavbar user={user} />
-              <main className="flex-1 overflow-y-auto">
+              <main className="flex-1">
                 <ArtifactRoot>{children}</ArtifactRoot>
               </main>
             </div>

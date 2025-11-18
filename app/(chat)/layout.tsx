@@ -1,21 +1,14 @@
+import AppSidebar from '@/components/app-sidebar'
+import ArtifactRoot from '@/components/artifact/artifact-root'
+import Header from '@/components/header'
 import { ThemeProvider } from '@/components/theme-provider'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { ConditionalLayout } from '@/components/conditional-layout'
-// import { Inter } from 'next/font/google'
-import './globals.css'
-
-// Temporarily using system fonts due to network restrictions
-// const fontSans = Inter({
-//   subsets: ['latin'],
-//   variable: '--font-sans',
-//   display: 'swap',
-//   fallback: ['system-ui', 'arial'],
-//   adjustFontFallback: false,
-// })
+import '../globals.css'
 
 const fontSans = {
   variable: '--font-sans',
@@ -47,7 +40,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
 }
 
-export default async function RootLayout({
+export default async function ChatLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -78,9 +71,15 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ConditionalLayout user={user}>
-            {children}
-          </ConditionalLayout>
+          <SidebarProvider defaultOpen>
+            <AppSidebar />
+            <div className="flex flex-col flex-1">
+              <Header user={user} />
+              <main className="flex flex-1 min-h-0">
+                <ArtifactRoot>{children}</ArtifactRoot>
+              </main>
+            </div>
+          </SidebarProvider>
           <Toaster />
           <Analytics />
         </ThemeProvider>

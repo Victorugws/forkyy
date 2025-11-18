@@ -1,12 +1,15 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 import { PenTool, FileText, Sparkles } from 'lucide-react'
 
 export function NeumorphicWritingPage() {
   return (
-    <div className="w-full min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="neu-card rounded-3xl p-8">
+    <div className="w-full min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="neu-card rounded-3xl p-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="neu-raised rounded-full p-3">
               <PenTool className="size-6 text-primary" />
@@ -31,6 +34,7 @@ export function NeumorphicWritingPage() {
               <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

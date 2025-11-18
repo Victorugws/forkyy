@@ -1,4 +1,5 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 import { Video, Play } from 'lucide-react'
 
@@ -10,8 +11,10 @@ export function NeumorphicVideosPage() {
   }))
 
   return (
-    <div className="w-full min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="w-full min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
         <div className="neu-card rounded-3xl p-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="neu-raised rounded-full p-3">
@@ -39,6 +42,7 @@ export function NeumorphicVideosPage() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )

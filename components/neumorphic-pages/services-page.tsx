@@ -1,4 +1,5 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 /**
  * Neumorphic Services Page Component
@@ -39,9 +40,11 @@ export function NeumorphicServicesPage() {
   ]
 
   return (
-    <div className="w-full min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="neu-card rounded-3xl p-8">
+    <div className="w-full min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="neu-card rounded-3xl p-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">Our Services</h1>
           <p className="text-lg text-muted-foreground">
             Comprehensive AI solutions tailored to your needs
@@ -66,6 +69,7 @@ export function NeumorphicServicesPage() {
               </button>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

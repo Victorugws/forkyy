@@ -2,6 +2,7 @@
 
 import { TrendingUp, TrendingDown, DollarSign, BarChart3, LineChart } from 'lucide-react'
 import { useState } from 'react'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 const marketData = [
   { symbol: 'SPY', name: 'S&P 500 ETF', price: 452.31, change: 2.34, changePercent: 0.52, trending: 'up' },
@@ -22,6 +23,7 @@ export function NeumorphicFinancePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <HeaderNavbar user={null} />
       {/* Header Section with Neumorphic Styling */}
       <div className="neu-card border-b border-border/20">
         <div className="container max-w-7xl mx-auto px-6 py-12">

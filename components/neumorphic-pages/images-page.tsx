@@ -1,4 +1,5 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 import { Image as ImageIcon, Search, Filter, Grid3x3, Grid2x2, X } from 'lucide-react'
 import { useState } from 'react'
@@ -73,6 +74,7 @@ export function NeumorphicImagesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <HeaderNavbar user={null} />
       {/* Header Section with Neumorphic Styling */}
       <div className="neu-card border-b border-border/20">
         <div className="container max-w-7xl mx-auto px-6 py-12">

@@ -1,4 +1,5 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 import { GraduationCap, BookOpen, FileText } from 'lucide-react'
 
@@ -10,9 +11,11 @@ export function NeumorphicAcademicPage() {
   ]
 
   return (
-    <div className="w-full min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="neu-card rounded-3xl p-8">
+    <div className="w-full min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="neu-card rounded-3xl p-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="neu-raised rounded-full p-3">
               <GraduationCap className="size-6 text-primary" />
@@ -34,6 +37,7 @@ export function NeumorphicAcademicPage() {
               <p className="text-sm text-muted-foreground">{resource.count}</p>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

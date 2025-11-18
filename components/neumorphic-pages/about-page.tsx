@@ -1,4 +1,5 @@
 'use client'
+import { HeaderNavbar } from '@/components/header-navbar'
 
 /**
  * Neumorphic About Page Component
@@ -6,9 +7,11 @@
 
 export function NeumorphicAboutPage() {
   return (
-    <div className="w-full min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="neu-card rounded-3xl p-8">
+    <div className="w-full min-h-screen bg-background">
+      <HeaderNavbar user={null} />
+      <div className="p-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="neu-card rounded-3xl p-8">
           <h1 className="text-4xl font-bold text-foreground mb-6">About ORB AI</h1>
           <p className="text-lg text-muted-foreground mb-4">
             ORB AI is a cutting-edge artificial intelligence platform designed to transform how businesses and individuals interact with technology.
@@ -29,6 +32,7 @@ export function NeumorphicAboutPage() {
               <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>

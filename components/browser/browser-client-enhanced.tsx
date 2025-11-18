@@ -63,8 +63,8 @@ export function BrowserClientEnhanced({ id, models }: BrowserClientEnhancedProps
       setTabs(savedTabs)
       setActiveTabId(savedActiveTab || savedTabs[0].id)
     } else {
-      // Create initial tab
-      createNewTab()
+      // Create initial tab with neumorphic homepage
+      createNewTab('/')
     }
 
     setBookmarks(savedBookmarks)

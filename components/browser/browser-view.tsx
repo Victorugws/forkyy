@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { AlertCircle } from 'lucide-react'
+import { NeumorphicHomePage } from '@/components/neumorphic-pages/home-page'
+import { NeumorphicAboutPage } from '@/components/neumorphic-pages/about-page'
+import { NeumorphicServicesPage } from '@/components/neumorphic-pages/services-page'
 
 interface BrowserViewProps {
   url: string
@@ -12,6 +15,59 @@ interface BrowserViewProps {
   onContentChange: (content: string) => void
   onCanGoBackChange: (canGoBack: boolean) => void
   onCanGoForwardChange: (canGoForward: boolean) => void
+}
+
+// Define internal routes
+const INTERNAL_ROUTES = [
+  '/',
+  '/about',
+  '/services',
+  '/discover',
+  '/spaces',
+  '/finance',
+  '/images',
+  '/videos',
+  '/academic',
+  '/writing'
+]
+
+// Check if URL is an internal route
+function isInternalRoute(url: string): boolean {
+  if (!url) return false
+
+  try {
+    // Check if it's just a path (no protocol)
+    if (url.startsWith('/')) {
+      return INTERNAL_ROUTES.includes(url.split('?')[0])
+    }
+
+    // Check if it's a full URL pointing to our domain
+    const urlObj = new URL(url)
+    const currentDomain = typeof window !== 'undefined' ? window.location.hostname : ''
+
+    if (urlObj.hostname === currentDomain || urlObj.hostname === 'localhost') {
+      return INTERNAL_ROUTES.includes(urlObj.pathname.split('?')[0])
+    }
+  } catch {
+    // Invalid URL, treat as external
+    return false
+  }
+
+  return false
+}
+
+// Get internal route path
+function getInternalRoutePath(url: string): string {
+  if (url.startsWith('/')) {
+    return url.split('?')[0]
+  }
+
+  try {
+    const urlObj = new URL(url)
+    return urlObj.pathname.split('?')[0]
+  } catch {
+    return '/'
+  }
 }
 
 export function BrowserView({
@@ -28,13 +84,40 @@ export function BrowserView({
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [error, setError] = useState<string | null>(null)
   const [iframeUrl, setIframeUrl] = useState('')
+  const [isInternal, setIsInternal] = useState(false)
+  const [internalPath, setInternalPath] = useState('/')
 
   // Handle URL changes
   useEffect(() => {
     if (url && url !== iframeUrl) {
-      setIframeUrl(url)
-      setError(null)
-      onLoadingChange(true)
+      const internal = isInternalRoute(url)
+      setIsInternal(internal)
+
+      if (internal) {
+        const path = getInternalRoutePath(url)
+        setInternalPath(path)
+        setIframeUrl(url)
+
+        // Set page title based on route
+        const titles: Record<string, string> = {
+          '/': 'ORB AI - AI Solutions',
+          '/about': 'About Us - ORB AI',
+          '/services': 'Services - ORB AI',
+          '/discover': 'Discover - ORB AI',
+          '/spaces': 'Spaces - ORB AI',
+          '/finance': 'Finance - ORB AI',
+          '/images': 'Images - ORB AI',
+          '/videos': 'Videos - ORB AI',
+          '/academic': 'Academic - ORB AI',
+          '/writing': 'Writing - ORB AI'
+        }
+        onTitleChange(titles[path] || 'ORB AI')
+        onLoadingChange(false)
+      } else {
+        setIframeUrl(url)
+        setError(null)
+        onLoadingChange(true)
+      }
 
       // Add to history
       const newHistory = history.slice(0, currentIndex + 1)
@@ -148,9 +231,30 @@ export function BrowserView({
     }
   }
 
+  // Render internal neumorphic page
+  const renderInternalPage = () => {
+    switch (internalPath) {
+      case '/':
+        return <NeumorphicHomePage />
+      case '/about':
+        return <NeumorphicAboutPage />
+      case '/services':
+        return <NeumorphicServicesPage />
+      default:
+        return (
+          <div className="flex items-center justify-center h-full bg-background">
+            <div className="text-center p-8">
+              <h2 className="text-2xl font-bold mb-2">{internalPath}</h2>
+              <p className="text-muted-foreground">Page under construction</p>
+            </div>
+          </div>
+        )
+    }
+  }
+
   return (
     <div className="relative w-full h-full bg-background">
-      {error && (
+      {error && !isInternal && (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
           <div className="text-center p-8 max-w-md">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
@@ -177,7 +281,15 @@ export function BrowserView({
         </div>
       )}
 
-      {iframeUrl && (
+      {/* Render internal neumorphic pages */}
+      {iframeUrl && isInternal && (
+        <div className="w-full h-full overflow-auto">
+          {renderInternalPage()}
+        </div>
+      )}
+
+      {/* Render external pages in iframe */}
+      {iframeUrl && !isInternal && (
         <iframe
           ref={iframeRef}
           src={iframeUrl}

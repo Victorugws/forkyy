@@ -218,7 +218,10 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
       <div className="flex items-center border-b">
         <div className="flex-1">
           <BrowserBar
-            currentUrl={activeTab?.url || ''}
+            currentUrl={
+              // Only show external URLs in address bar, hide internal routes
+              activeTab?.url?.startsWith('/') ? '' : activeTab?.url || ''
+            }
             onUrlChange={(url) => handleNavigate(url)}
             canGoBack={activeTab?.canGoBack || false}
             canGoForward={activeTab?.canGoForward || false}

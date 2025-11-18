@@ -40,13 +40,10 @@ export function HeaderNavbar({ user }: HeaderNavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/' } }))}
-          className="flex items-center gap-2"
-        >
+        <Link href="/" className="flex items-center gap-2">
           <IconLogo className="size-6" />
           <span className="font-semibold text-lg hidden md:inline-block">Morphic</span>
-        </button>
+        </Link>
 
         {/* Navigation - Centered */}
         <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
@@ -55,9 +52,9 @@ export function HeaderNavbar({ user }: HeaderNavbarProps) {
             const Icon = item.icon
 
             return (
-              <button
+              <Link
                 key={item.href}
-                onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: item.href } }))}
+                href={item.href}
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   'hover:bg-accent hover:text-accent-foreground',
@@ -68,7 +65,7 @@ export function HeaderNavbar({ user }: HeaderNavbarProps) {
               >
                 <Icon className="size-4" />
                 <span className="hidden lg:inline-block">{item.label}</span>
-              </button>
+              </Link>
             )
           })}
         </nav>

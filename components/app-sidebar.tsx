@@ -1,5 +1,3 @@
-
-
 import {
   Sidebar,
   SidebarContent,
@@ -8,96 +6,96 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger
+  SidebarTrigger,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import {
+  Plus,
   Home,
   Compass,
   Folder,
-  DollarSign,
-  Image,
+  TrendingUp,
+  Image as ImageIcon,
   Video,
   GraduationCap,
-  Plus
+  Pen,
+  Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { ChatHistorySection } from './sidebar/chat-history-section'
 import { ChatHistorySkeleton } from './sidebar/chat-history-skeleton'
 import { IconLogo } from './ui/icons'
-import { AppSidebarClient } from './app-sidebar-client'
 
-const mainNavItems = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/discover', label: 'Discover', icon: Compass },
-  { href: '/spaces', label: 'Spaces', icon: Folder },
-  { href: '/finance', label: 'Finance', icon: DollarSign },
-  { href: '/images', label: 'Images', icon: Image },
-  { href: '/videos', label: 'Videos', icon: Video },
-  { href: '/academic', label: 'Academic', icon: GraduationCap }
+const navigationItems = [
+  { href: '/', icon: Home, label: 'Home' },
+  { href: '/discover', icon: Compass, label: 'Discover' },
+  { href: '/templates', icon: Sparkles, label: 'Templates' },
+  { href: '/spaces', icon: Folder, label: 'Spaces' },
+  { href: '/finance', icon: TrendingUp, label: 'Finance' },
+  { href: '/images', icon: ImageIcon, label: 'Images' },
+  { href: '/videos', icon: Video, label: 'Videos' },
+  { href: '/academic', icon: GraduationCap, label: 'Academic' },
+  { href: '/writing', icon: Pen, label: 'Writing' }
 ]
 
 export default function AppSidebar() {
   return (
-    <AppSidebarClient>
-      <Sidebar side="left" collapsible="offcanvas">
-        <SidebarHeader className="flex flex-row justify-between items-center border-b">
-          <Link href="/" className="flex items-center gap-2 px-4 py-4">
-            <IconLogo className={cn('size-6')} />
-            <span className="font-bold text-base">Perplexity</span>
-          </Link>
-          <SidebarTrigger className="mr-2" />
-        </SidebarHeader>
+    <Sidebar side="left" variant="sidebar" collapsible="offcanvas">
+      <SidebarHeader className="flex flex-row justify-between items-center">
+        <Link href="/" className="flex items-center gap-2 px-2 py-3">
+          <IconLogo className={cn('size-5')} />
+          <span className="font-semibold text-sm">ORB AI</span>
+        </Link>
+        <SidebarTrigger />
+      </SidebarHeader>
+      <SidebarContent className="flex flex-col px-2 py-4 h-full">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/" className="flex items-center gap-2">
+                <Plus className="size-4" />
+                <span>New Thread</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
 
-        <SidebarContent className="flex flex-col h-full">
-          {/* New Search Button */}
-          <div className="px-3 py-3 border-b">
-            <Link
-              href="/"
-              className="neu-button flex items-center justify-center gap-2 px-4 py-2.5"
-            >
-              <Plus className="size-4" />
-              <span className="font-medium">New Search</span>
-            </Link>
-          </div>
-
-          {/* Main Navigation */}
-          <div className="px-3 py-4 border-b">
-            <SidebarMenu className="space-y-1">
-              {mainNavItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild>
-                      <Link
-                        href={item.href}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors"
-                      >
-                        <Icon className="size-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-xs text-muted-foreground px-2 mb-2">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.href} className="flex items-center gap-3 px-2 py-2">
+                      <item.icon className="size-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
-          </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-          {/* Chat History */}
-          <div className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="mb-2 px-3">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Recent
-              </h3>
-            </div>
+        <SidebarGroup className="flex-1 overflow-y-auto mt-4">
+          <SidebarGroupLabel className="text-xs text-muted-foreground px-2 mb-2">
+            Recent Threads
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
             <Suspense fallback={<ChatHistorySkeleton />}>
               <ChatHistorySection />
             </Suspense>
-          </div>
-        </SidebarContent>
-        <SidebarRail />
-      </Sidebar>
-    </AppSidebarClient>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   )
 }

@@ -3,20 +3,16 @@
 import { CHAT_ID } from '@/lib/constants'
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
-import { useChat } from '@ai-sdk/react'
-import { ChatRequestOptions } from 'ai'
-import { Message } from 'ai/react'
-import { useEffect, useMemo, useRef, useState, createContext, useContext } from 'react'
+import { ChatRequestOptions, Message, useChat } from 'ai/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { SearchResults } from '@/lib/types'
 import { ChatMessages } from './chat-messages'
 import { ChatPanel } from './chat-panel'
+import { AssistantSidebar } from './assistant-sidebar'
 
-const PrePromptContext = createContext<boolean>(false)
-export const usePrePrompt = () => useContext(PrePromptContext)
-
+// Define section structure
 interface ChatSection {
-  id: string
+  id: string // User message ID
   userMessage: Message
   assistantMessages: Message[]
 }
@@ -34,7 +30,6 @@ export function Chat({
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
-  const [searchResults, setSearchResults] = useState<SearchResults | undefined>()
 
   const {
     messages,
@@ -56,57 +51,26 @@ export function Chat({
       id
     },
     onFinish: () => {
-      // Only redirect if chat history is enabled
-      const enableSaveChatHistory = process.env.NEXT_PUBLIC_ENABLE_SAVE_CHAT_HISTORY === 'true'
-      if (enableSaveChatHistory) {
-        window.history.replaceState({}, '', `/search/${id}`)
-        window.dispatchEvent(new CustomEvent('chat-history-updated'))
-      }
+      window.history.replaceState({}, '', `/search/${id}`)
+      window.dispatchEvent(new CustomEvent('chat-history-updated'))
     },
     onError: error => {
       toast.error(`Error in chat: ${error.message}`)
     },
-    sendExtraMessageFields: false,
+    sendExtraMessageFields: false, // Disable extra message fields,
     experimental_throttle: 100
   })
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
-  // Extract search results from message parts when available
-  useEffect(() => {
-    if (messages.length > 0) {
-      // Look for search tool results in assistant messages
-      for (const message of messages) {
-        if (message.role === 'assistant' && message.parts) {
-          for (const part of message.parts) {
-            if (part.type === 'tool-invocation' &&
-                part.toolInvocation.toolName === 'search' &&
-                part.toolInvocation.state === 'result') {
-              const results = part.toolInvocation.result as SearchResults
-              if (results && results.results) {
-                console.log('Found search results in tool invocation:', results)
-                setSearchResults(prev => {
-                  // Only update if it's actually different
-                  if (JSON.stringify(prev) !== JSON.stringify(results)) {
-                    return results
-                  }
-                  return prev
-                })
-                return // Use the first search results found
-              }
-            }
-          }
-        }
-      }
-    }
-  }, [messages])
-
+  // Convert messages array to sections array
   const sections = useMemo<ChatSection[]>(() => {
     const result: ChatSection[] = []
     let currentSection: ChatSection | null = null
 
     for (const message of messages) {
       if (message.role === 'user') {
+        // Start a new section when a user message is found
         if (currentSection) {
           result.push(currentSection)
         }
@@ -116,10 +80,13 @@ export function Chat({
           assistantMessages: []
         }
       } else if (currentSection && message.role === 'assistant') {
+        // Add assistant message to the current section
         currentSection.assistantMessages.push(message)
       }
+      // Ignore other role types like 'system' for now
     }
 
+    // Add the last section if exists
     if (currentSection) {
       result.push(currentSection)
     }
@@ -127,13 +94,14 @@ export function Chat({
     return result
   }, [messages])
 
+  // Detect if scroll container is at the bottom
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container
-      const threshold = 50
+      const threshold = 50 // threshold in pixels
       if (scrollHeight - scrollTop - clientHeight < threshold) {
         setIsAtBottom(true)
       } else {
@@ -142,15 +110,17 @@ export function Chat({
     }
 
     container.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
+    handleScroll() // Set initial state
 
     return () => container.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Scroll to the section when a new user message is sent
   useEffect(() => {
     if (sections.length > 0) {
       const lastMessage = messages[messages.length - 1]
       if (lastMessage && lastMessage.role === 'user') {
+        // If the last message is from user, find the corresponding section
         const sectionId = lastMessage.id
         requestAnimationFrame(() => {
           const sectionElement = document.getElementById(`section-${sectionId}`)
@@ -160,15 +130,10 @@ export function Chat({
     }
   }, [sections, messages])
 
-  // FIXED: Only update messages if savedMessages has content and is different
   useEffect(() => {
-    if (savedMessages.length > 0) {
-      setMessages(savedMessages)
-    } else if (savedMessages.length === 0) {
-      // Only clear messages if we're explicitly loading an empty chat
-      setMessages([])
-    }
-  }, [id, savedMessages, setMessages])
+    setMessages(savedMessages)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   const onQuerySelect = (query: string) => {
     append({
@@ -194,6 +159,7 @@ export function Chat({
       const messagesUpToEdited = messages.slice(0, messageIndex + 1)
 
       setMessages(messagesUpToEdited)
+
       setData(undefined)
 
       await reload({
@@ -232,10 +198,28 @@ export function Chat({
     handleSubmit(e)
   }
 
-  const isPrePrompt = messages.length === 0
+  // Extract sources from data if available
+  const sources =
+    data?.length > 0 && data[0]?.results
+      ? data[0].results.slice(0, 8).map((result: any) => ({
+          title: result.title || '',
+          url: result.url || '',
+          snippet: result.content || result.description || '',
+          favicon: `https://www.google.com/s2/favicons?domain=${new URL(result.url).hostname}&sz=32`
+        }))
+      : []
+
+  // Sample related questions (can be populated from API response)
+  const relatedQuestions = messages.length > 0
+    ? [
+        { question: 'What are the latest developments in this field?', href: '/search?q=latest+developments' },
+        { question: 'How does this compare to previous research?', href: '/search?q=compare+research' },
+        { question: 'What are the practical applications?', href: '/search?q=practical+applications' }
+      ]
+    : []
 
   return (
-    <PrePromptContext.Provider value={isPrePrompt}>
+    <>
       <div
         className={cn(
           'relative flex h-full min-w-0 flex-1 flex-col',
@@ -243,6 +227,20 @@ export function Chat({
         )}
         data-testid="full-chat"
       >
+        {/* Orbai-inspired background for empty state */}
+        {messages.length === 0 && (
+          <>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+              <iframe
+                src="https://orbai-template.framer.website"
+                className="w-full h-full border-0 scale-110 blur-[2px]"
+                title="Background"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-radial from-background/60 via-background/80 to-background pointer-events-none" />
+          </>
+        )}
+
         <ChatMessages
           sections={sections}
           data={data}
@@ -253,7 +251,6 @@ export function Chat({
           scrollContainerRef={scrollContainerRef}
           onUpdateMessage={handleUpdateAndReloadMessage}
           reload={handleReloadFrom}
-          searchResults={searchResults}
         />
         <ChatPanel
           input={input}
@@ -270,6 +267,17 @@ export function Chat({
           scrollContainerRef={scrollContainerRef}
         />
       </div>
-    </PrePromptContext.Provider>
+      {messages.length > 0 && (
+        <AssistantSidebar
+          sources={sources}
+          relatedQuestions={relatedQuestions}
+          summary={
+            messages.length > 1
+              ? 'This conversation explores various topics with AI assistance. Use the sources and related questions to dive deeper.'
+              : undefined
+          }
+        />
+      )}
+    </>
   )
 }

@@ -46,6 +46,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
   const [showDevTools, setShowDevTools] = useState(false)
   const [showFindInPage, setShowFindInPage] = useState(false)
   const [showBookmarksBar, setShowBookmarksBar] = useState(true)
+  const [showAIAssistant, setShowAIAssistant] = useState(false)
 
   // Data
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
@@ -196,7 +197,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-screen w-full overflow-hidden">
       {/* Tab Bar */}
       <TabBar
         tabs={tabs}
@@ -238,7 +239,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
           onOpenHistory={() => setShowHistoryPanel(true)}
           onOpenBookmarks={() => setShowBookmarksBar(!showBookmarksBar)}
           onOpenDevTools={() => setShowDevTools(!showDevTools)}
-          onOpenSettings={() => {}}
+          onOpenSettings={() => setShowAIAssistant(!showAIAssistant)}
           isSecure={activeTab?.url?.startsWith('https://') || false}
           zoom={activeTab?.zoomLevel || 1}
         />
@@ -298,62 +299,101 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
         )}
 
         {/* Browser + AI Chat */}
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
-          {/* Web Content Panel */}
-          <ResizablePanel defaultSize={60} minSize={30}>
-            <div className="h-full flex flex-col">
-              <div className="flex-1">
-                {activeTab && (
-                  <BrowserView
-                    key={activeTab.id}
-                    url={activeTab.url}
-                    onNavigate={(url) => updateTab(activeTab.id, { url })}
-                    onLoadingChange={(isLoading) =>
-                      updateTab(activeTab.id, { isLoading })
-                    }
-                    onTitleChange={(title) =>
-                      updateTab(activeTab.id, { title })
-                    }
-                    onContentChange={(content) =>
-                      updateTab(activeTab.id, { pageContent: content })
-                    }
-                    onCanGoBackChange={(canGoBack) =>
-                      updateTab(activeTab.id, { canGoBack })
-                    }
-                    onCanGoForwardChange={(canGoForward) =>
-                      updateTab(activeTab.id, { canGoForward })
-                    }
-                  />
+        {showAIAssistant ? (
+          <ResizablePanelGroup direction="horizontal" className="flex-1">
+            {/* Web Content Panel */}
+            <ResizablePanel defaultSize={60} minSize={30}>
+              <div className="h-full flex flex-col">
+                <div className="flex-1">
+                  {activeTab && (
+                    <BrowserView
+                      key={activeTab.id}
+                      url={activeTab.url}
+                      onNavigate={(url) => updateTab(activeTab.id, { url })}
+                      onLoadingChange={(isLoading) =>
+                        updateTab(activeTab.id, { isLoading })
+                      }
+                      onTitleChange={(title) =>
+                        updateTab(activeTab.id, { title })
+                      }
+                      onContentChange={(content) =>
+                        updateTab(activeTab.id, { pageContent: content })
+                      }
+                      onCanGoBackChange={(canGoBack) =>
+                        updateTab(activeTab.id, { canGoBack })
+                      }
+                      onCanGoForwardChange={(canGoForward) =>
+                        updateTab(activeTab.id, { canGoForward })
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* Dev Tools */}
+                {showDevTools && activeTab && (
+                  <div className="h-64 border-t">
+                    <DevToolsPanel
+                      onClose={() => setShowDevTools(false)}
+                      pageUrl={activeTab.url}
+                    />
+                  </div>
                 )}
               </div>
+            </ResizablePanel>
 
-              {/* Dev Tools */}
-              {showDevTools && activeTab && (
-                <div className="h-64 border-t">
-                  <DevToolsPanel
-                    onClose={() => setShowDevTools(false)}
-                    pageUrl={activeTab.url}
-                  />
-                </div>
+            <ResizableHandle withHandle />
+
+            {/* AI Chat Panel */}
+            <ResizablePanel defaultSize={40} minSize={25}>
+              {activeTab && (
+                <BrowserChat
+                  id={id}
+                  models={models}
+                  currentUrl={activeTab.url}
+                  pageTitle={activeTab.title}
+                  pageContent={activeTab.pageContent}
+                />
+              )}
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1">
+              {activeTab && (
+                <BrowserView
+                  key={activeTab.id}
+                  url={activeTab.url}
+                  onNavigate={(url) => updateTab(activeTab.id, { url })}
+                  onLoadingChange={(isLoading) =>
+                    updateTab(activeTab.id, { isLoading })
+                  }
+                  onTitleChange={(title) =>
+                    updateTab(activeTab.id, { title })
+                  }
+                  onContentChange={(content) =>
+                    updateTab(activeTab.id, { pageContent: content })
+                  }
+                  onCanGoBackChange={(canGoBack) =>
+                    updateTab(activeTab.id, { canGoBack })
+                  }
+                  onCanGoForwardChange={(canGoForward) =>
+                    updateTab(activeTab.id, { canGoForward })
+                  }
+                />
               )}
             </div>
-          </ResizablePanel>
 
-          <ResizableHandle withHandle />
-
-          {/* AI Chat Panel */}
-          <ResizablePanel defaultSize={40} minSize={25}>
-            {activeTab && (
-              <BrowserChat
-                id={id}
-                models={models}
-                currentUrl={activeTab.url}
-                pageTitle={activeTab.title}
-                pageContent={activeTab.pageContent}
-              />
+            {/* Dev Tools */}
+            {showDevTools && activeTab && (
+              <div className="h-64 border-t">
+                <DevToolsPanel
+                  onClose={() => setShowDevTools(false)}
+                  pageUrl={activeTab.url}
+                />
+              </div>
             )}
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -28,9 +28,11 @@ export function BrowserBar({
   const handleNavigate = () => {
     let url = urlInput.trim()
 
-    // Check if it's an internal route (starts with /)
+    // Block internal routes - those should only be accessed via navbar
     if (url.startsWith('/')) {
-      onUrlChange(url)
+      // Don't navigate to internal routes via address bar
+      // Reset to current URL
+      setUrlInput(currentUrl)
       return
     }
 
@@ -69,9 +71,10 @@ export function BrowserBar({
   }
 
   const handleHome = () => {
-    const homeUrl = '/'
-    setUrlInput(homeUrl)
-    onUrlChange(homeUrl)
+    // Home button navigates to internal homepage using browser event
+    window.dispatchEvent(new CustomEvent('browser:navigate', {
+      detail: { url: '/' }
+    }))
   }
 
   // Update input when URL changes externally

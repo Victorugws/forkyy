@@ -92,6 +92,9 @@
   "pnpm": {
     "overrides": {
       "zod": "^4.1.12"
+    },
+    "peerDependencyRules": {
+      "ignoreMissing": ["zod"]
     }
   }
 }

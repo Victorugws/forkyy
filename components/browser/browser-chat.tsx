@@ -79,58 +79,24 @@ export function BrowserChat({
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="border-b p-4">
-        <h2 className="font-semibold text-lg mb-1">AI Assistant</h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="border-b p-6">
+        <h2 className="font-semibold text-base mb-1.5">AI Assistant</h2>
+        <p className="text-xs text-gray-600">
           {currentUrl ? `Analyzing: ${pageTitle || 'Current page'}` : 'Ready to help you browse'}
         </p>
       </div>
 
-      {/* Quick Actions */}
-      {currentUrl && pageContent && (
-        <div className="border-b p-3 flex gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleQuickAction(`Summarize this page: ${pageTitle || currentUrl}`)}
-            disabled={isLoading}
-            className="text-xs"
-          >
-            <FileText className="h-3 w-3 mr-1" />
-            Summarize
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleQuickAction(`What are the key points from this page: ${pageTitle || currentUrl}`)}
-            disabled={isLoading}
-            className="text-xs"
-          >
-            <List className="h-3 w-3 mr-1" />
-            Key Points
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleQuickAction(`Explain the main concepts on this page: ${pageTitle || currentUrl}`)}
-            disabled={isLoading}
-            className="text-xs"
-          >
-            <Sparkles className="h-3 w-3 mr-1" />
-            Explain
-          </Button>
-        </div>
-      )}
-
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-6">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <Sparkles className="h-12 w-12 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">AI Browser Assistant</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
+          <div className="flex flex-col items-center justify-center h-full text-center px-8">
+            <div className="mb-6">
+              <Sparkles className="h-16 w-16 text-gray-800 mx-auto" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-xl font-semibold mb-3 text-gray-900">AI Browser Assistant</h3>
+            <p className="text-sm text-gray-600 max-w-sm leading-relaxed">
               Ask me anything about the page you&apos;re viewing, or request a summary, explanation, or key points.
             </p>
           </div>
@@ -142,20 +108,20 @@ export function BrowserChat({
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-900'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-lg px-4 py-2">
-                  <p className="text-sm text-muted-foreground">Thinking...</p>
+                <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                  <p className="text-sm text-gray-600">Thinking...</p>
                 </div>
               </div>
             )}
@@ -164,13 +130,13 @@ export function BrowserChat({
       </div>
 
       {/* Input */}
-      <div className="border-t p-4">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="border-t p-6">
+        <form onSubmit={handleSubmit} className="relative">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about this page..."
-            className="flex-1 resize-none min-h-[44px] max-h-[200px]"
+            className="w-full resize-none min-h-[48px] max-h-[200px] pr-12 py-3 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100 bg-gray-50"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -182,6 +148,7 @@ export function BrowserChat({
             type="submit"
             disabled={!input.trim() || isLoading}
             size="icon"
+            className="absolute right-2 bottom-2 h-8 w-8 rounded-lg"
           >
             <Sparkles className="h-4 w-4" />
           </Button>

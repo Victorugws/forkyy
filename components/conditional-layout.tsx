@@ -2,28 +2,15 @@
 
 import { usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
-import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
-
-// Dynamically import components that depend on AI SDK (which has zod issues)
-const AppSidebar = dynamic(() => import('@/components/app-sidebar'), {
-  ssr: false,
-})
-const Header = dynamic(() => import('@/components/header'), {
-  ssr: false,
-})
-const ArtifactRoot = dynamic(() => import('@/components/artifact/artifact-root'), {
-  ssr: false,
-})
-const SidebarProvider = dynamic(
-  () => import('@/components/ui/sidebar').then((mod) => ({ default: mod.SidebarProvider })),
-  { ssr: false }
-)
+import { Suspense, lazy } from 'react'
 
 interface ConditionalLayoutProps {
   children: React.ReactNode
   user: User | null
 }
+
+// Lazy load the chat layout to avoid importing AI SDK components on homepage
+const ChatLayout = lazy(() => import('./chat-layout'))
 
 export function ConditionalLayout({ children, user }: ConditionalLayoutProps) {
   const pathname = usePathname()
@@ -38,18 +25,16 @@ export function ConditionalLayout({ children, user }: ConditionalLayoutProps) {
     )
   }
 
-  // Chat/Search pages: Show sidebar and header
+  // Chat/Search pages: Lazy load the layout with sidebar and header
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SidebarProvider defaultOpen>
-        <AppSidebar />
-        <div className="flex flex-col flex-1">
-          <Header user={user} />
-          <main className="flex flex-1 min-h-0">
-            <ArtifactRoot>{children}</ArtifactRoot>
-          </main>
-        </div>
-      </SidebarProvider>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
+      </div>
+    }>
+      <ChatLayout user={user}>
+        {children}
+      </ChatLayout>
     </Suspense>
   )
 }

@@ -1,5 +1,16 @@
 'use client'
 
+// Extend Window interface to include SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any
+    webkitSpeechRecognition: any
+  }
+}
+
+type SpeechRecognition = any
+type SpeechRecognitionEvent = any
+
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
 import { withCustomNames } from '@/lib/utils/modelDisplayNames'

@@ -2,6 +2,7 @@ import ArtifactRoot from '@/components/artifact/artifact-root'
 import HeaderNavbar from '@/components/header-navbar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { VideoBackground } from '@/components/VideoBackground'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { Analytics } from '@vercel/analytics/next'
@@ -73,7 +74,8 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="flex flex-col min-h-screen">
+            <VideoBackground />
+            <div className="flex flex-col min-h-screen relative z-10">
               <HeaderNavbar user={user} />
               <main className="flex-1 overflow-y-auto">
                 <ArtifactRoot>{children}</ArtifactRoot>

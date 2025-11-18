@@ -22,7 +22,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
       className="group relative rounded-2xl neu-card p-6 hover:neu-raised transition-all cursor-pointer"
     >
       {/* Icon */}
-      <div className="w-12 h-12 rounded-xl neu-inset flex items-center justify-center mb-4 bg-gradient-to-br from-background to-primary/5">
+      <div className="w-12 h-12 neu-inset flex items-center justify-center mb-4">
         <span className="text-2xl">{template.icon}</span>
       </div>
 
@@ -75,7 +75,7 @@ export function TemplateCard({ template, onClick }: TemplateCardProps) {
       )}
 
       {/* Use Button */}
-      <button className="absolute bottom-6 right-6 p-2.5 rounded-full neu-button opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110 bg-primary text-primary-foreground">
+      <button className="absolute bottom-6 right-6 p-2.5 neu-button opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110">
         <ArrowRight className="size-4" />
       </button>
     </div>

@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 96.1%;
     --foreground: 0 0% 3.9%;
 
     --card: 0 0% 96.1%;
     --card-foreground: 0 0% 45.1%;
 
-    --popover: 0 0% 100%;
+    --popover: 0 0% 96.1%;
     --popover-foreground: 0 0% 3.9%;
 
     --primary: 0 0% 9%;
@@ -199,79 +199,171 @@
 
   /* Neumorphic Design System - matching AnimatedEyeBackground */
   .neu-raised {
-    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    background-color: #f5f5f5;
+    border-radius: 20px;
     box-shadow:
-      8px 8px 16px rgba(200, 200, 200, 0.4),
-      -8px -8px 16px rgba(255, 255, 255, 0.9),
-      inset 2px 2px 4px rgba(255, 255, 255, 0.5);
+      0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+      0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
   }
 
   .neu-inset {
-    background: linear-gradient(145deg, #f8f8f8, #ffffff);
+    background-color: #f5f5f5;
+    border-radius: 20px;
     box-shadow:
-      inset 6px 6px 12px rgba(200, 200, 200, 0.3),
-      inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+      inset 0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      inset 0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      inset 0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      inset 0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      inset 0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05);
   }
 
   .neu-button {
-    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    background-color: #f5f5f5;
+    border-radius: 20px;
     box-shadow:
-      4px 4px 8px rgba(200, 200, 200, 0.4),
-      -4px -4px 8px rgba(255, 255, 255, 0.9);
+      0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+      0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
     @apply transition-all duration-200;
   }
 
   .neu-button:hover {
     box-shadow:
-      6px 6px 12px rgba(200, 200, 200, 0.5),
-      -6px -6px 12px rgba(255, 255, 255, 1);
+      0px 1px 1px -0.6666666666666666px rgba(0, 0, 0, 0.1),
+      0px 2.5px 2.5px -1.3333333333333333px rgba(0, 0, 0, 0.1),
+      0px 5px 5px -2px rgba(0, 0, 0, 0.09),
+      0px 9px 9px -2.6666666666666665px rgba(0, 0, 0, 0.09),
+      0px 18px 18px -3.3333333333333335px rgba(0, 0, 0, 0.07),
+      0px 40px 40px -4px rgba(0, 0, 0, 0.04),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
   }
 
   .neu-button:active {
     box-shadow:
-      inset 3px 3px 6px rgba(200, 200, 200, 0.4),
-      inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+      inset 0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      inset 0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      inset 0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07);
   }
 
   .neu-card {
-    background: linear-gradient(145deg, #ffffff, #f8f8f8);
+    background-color: #f5f5f5;
+    border-radius: 20px;
     box-shadow:
-      12px 12px 24px rgba(200, 200, 200, 0.4),
-      -12px -12px 24px rgba(255, 255, 255, 0.9),
-      inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+      0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+      0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
   }
 
   .neu-input {
-    background: linear-gradient(145deg, #f8f8f8, #ffffff);
+    background-color: #f5f5f5;
+    border-radius: 20px;
     box-shadow:
-      inset 4px 4px 8px rgba(200, 200, 200, 0.3),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+      inset 0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      inset 0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      inset 0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      inset 0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07);
     @apply transition-all duration-200;
   }
 
   .neu-input:focus {
     box-shadow:
-      inset 6px 6px 12px rgba(200, 200, 200, 0.4),
-      inset -6px -6px 12px rgba(255, 255, 255, 0.9),
+      inset 0px 1px 1px -0.6666666666666666px rgba(0, 0, 0, 0.1),
+      inset 0px 2.5px 2.5px -1.3333333333333333px rgba(0, 0, 0, 0.1),
+      inset 0px 5px 5px -2px rgba(0, 0, 0, 0.09),
       0 0 0 2px rgba(0, 0, 0, 0.1);
   }
 
   /* Neumorphic shadow variations */
   .shadow-neu {
     box-shadow:
-      8px 8px 16px rgba(200, 200, 200, 0.4),
-      -8px -8px 16px rgba(255, 255, 255, 0.9);
+      0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+      0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
   }
 
   .shadow-neu-lg {
     box-shadow:
-      12px 12px 24px rgba(200, 200, 200, 0.5),
-      -12px -12px 24px rgba(255, 255, 255, 1);
+      0px 1px 1px -0.6666666666666666px rgba(0, 0, 0, 0.1),
+      0px 2.5px 2.5px -1.3333333333333333px rgba(0, 0, 0, 0.1),
+      0px 5px 5px -2px rgba(0, 0, 0, 0.09),
+      0px 9px 9px -2.6666666666666665px rgba(0, 0, 0, 0.09),
+      0px 18px 18px -3.3333333333333335px rgba(0, 0, 0, 0.07),
+      0px 40px 40px -4px rgba(0, 0, 0, 0.04),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
   }
 
   .shadow-neu-sm {
     box-shadow:
-      4px 4px 8px rgba(200, 200, 200, 0.3),
-      -4px -4px 8px rgba(255, 255, 255, 0.8);
+      0px 0.5px 0.5px -0.6666666666666666px rgba(0, 0, 0, 0.06),
+      0px 1.2px 1.2px -1.3333333333333333px rgba(0, 0, 0, 0.06),
+      0px 2.4px 2.4px -2px rgba(0, 0, 0, 0.05),
+      0px 4.5px 4.5px -2.6666666666666665px rgba(0, 0, 0, 0.05),
+      inset 0px 2px 1px 0px rgb(255, 255, 255);
+  }
+
+  /* Icon card styling from template */
+  .icon-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 30px;
+    box-shadow:
+      0px 0.7065919983928324px 0.7065919983928324px -0.6666666666666666px rgba(0, 0, 0, 0.08),
+      0px 1.8065619053231785px 1.8065619053231785px -1.3333333333333333px rgba(0, 0, 0, 0.08),
+      0px 3.6217592146567767px 3.6217592146567767px -2px rgba(0, 0, 0, 0.07),
+      0px 6.8655999097303715px 6.8655999097303715px -2.6666666666666665px rgba(0, 0, 0, 0.07),
+      0px 13.646761411524492px 13.646761411524492px -3.3333333333333335px rgba(0, 0, 0, 0.05),
+      0px 30px 30px -4px rgba(0, 0, 0, 0.02),
+      inset 0px 3px 1px 0px rgb(255, 255, 255);
+    background-color: #f5f5f5;
+    overflow: hidden;
+    gap: 24px;
+    border-radius: 20px;
+  }
+
+  /* Section header gradient from template */
+  .section-header {
+    width: 100%;
+    height: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.2;
+    background: linear-gradient(180deg, #000000 0%, #666666 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Description styling from template */
+  .section-description {
+    width: 100%;
+    height: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 500px;
+    opacity: 0.8;
+    text-align: center;
+    line-height: 1.2;
   }
 }

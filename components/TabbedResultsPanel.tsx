@@ -102,8 +102,8 @@ export function TabbedResultsPanel({
             </div>
           )}
 
-          {/* Tab Buttons */}
-          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+          {/* Tab Buttons - Hidden to consolidate with GoogleStyleResults tabs */}
+          {/* <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
@@ -130,18 +130,18 @@ export function TabbedResultsPanel({
                   <span className="text-sm">{tab.label}</span>
 
                   {/* Active indicator */}
-                  {isActive && (
+                  {/*{isActive && (
                     <div
                       className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-primary rounded-full"
                       style={{
                         animation: 'scale-in 0.3s ease-out'
                       }}
                     />
-                  )}
-                </button>
+                  )}*/}
+                {/*</button>
               )
             })}
-          </div>
+          </div> */}
         </div>
       </div>
 

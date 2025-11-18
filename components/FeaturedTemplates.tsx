@@ -36,7 +36,7 @@ export function FeaturedTemplates() {
           </div>
           <Link
             href="/templates"
-            className="neu-button rounded-xl px-6 py-3 bg-primary text-primary-foreground font-medium flex items-center gap-2 hover:scale-105 transition-transform"
+            className="neu-button px-6 py-3 font-medium flex items-center gap-2 hover:scale-105 transition-transform"
           >
             View All Templates
             <ArrowRight className="size-4" />
@@ -55,7 +55,7 @@ export function FeaturedTemplates() {
         </div>
 
         {/* Stats Bar */}
-        <div className="neu-card rounded-2xl p-6 bg-gradient-to-br from-background to-primary/5">
+        <div className="neu-card p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <p className="text-3xl font-bold text-primary">{allTemplates.length}+</p>
@@ -82,7 +82,7 @@ export function FeaturedTemplates() {
             <Link
               key={category}
               href={`/templates?category=${category.toLowerCase()}`}
-              className="neu-button px-4 py-2 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="neu-button px-4 py-2 text-sm font-medium hover:text-foreground transition-colors"
             >
               {category}
             </Link>

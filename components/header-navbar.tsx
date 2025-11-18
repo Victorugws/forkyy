@@ -38,15 +38,15 @@ export function HeaderNavbar({ user }: HeaderNavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+      <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 mr-8">
+        <Link href="/" className="flex items-center gap-2">
           <IconLogo className="size-6" />
           <span className="font-semibold text-lg hidden md:inline-block">Morphic</span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex items-center gap-1 flex-1">
+        {/* Navigation - Centered */}
+        <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
           {navigationItems.map((item) => {
             const isActive = pathname === item.href
             const Icon = item.icon
@@ -71,7 +71,7 @@ export function HeaderNavbar({ user }: HeaderNavbarProps) {
         </nav>
 
         {/* User Menu */}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2">
           {user ? <UserMenu user={user} /> : <GuestMenu />}
         </div>
       </div>

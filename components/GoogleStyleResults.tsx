@@ -95,7 +95,7 @@ export function GoogleStyleResults({
 
   const displayResults = results.length > 0 ? results : defaultResults
   const [activeTab, setActiveTab] = useState('All')
-  const tabs = ['All', 'Images', 'Videos', 'News', 'Shopping', 'Maps']
+  const tabs = ['Chat', 'All', 'Images', 'Videos', 'News', 'Shopping', 'Maps', 'Financials']
 
   return (
     <div className={`${className}`}>

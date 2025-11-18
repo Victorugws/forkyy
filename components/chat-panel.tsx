@@ -66,7 +66,7 @@ export function ChatPanel({
   const [enterDisabled, setEnterDisabled] = useState(false)
   const { close: closeArtifact } = useArtifact()
   const [isListening, setIsListening] = useState(false)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<any | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const backgroundUrl = 'https://orbai-template.framer.website'
@@ -174,7 +174,7 @@ export function ChatPanel({
     recognition.onend = () => setIsListening(false)
     recognition.onerror = () => setIsListening(false)
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.trim()
       if (transcript) submitMessage(transcript)
     }

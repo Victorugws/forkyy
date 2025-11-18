@@ -19,7 +19,8 @@ import {
   Image,
   Video,
   GraduationCap,
-  Plus
+  Plus,
+  Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -30,6 +31,7 @@ import { AppSidebarClient } from './app-sidebar-client'
 
 const mainNavItems = [
   { href: '/', label: 'Home', icon: Home },
+  { href: '/browse', label: 'Browser', icon: Globe },
   { href: '/discover', label: 'Discover', icon: Compass },
   { href: '/spaces', label: 'Spaces', icon: Folder },
   { href: '/finance', label: 'Finance', icon: DollarSign },

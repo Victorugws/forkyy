@@ -14,6 +14,9 @@ import { NeumorphicAcademicPage } from '@/components/neumorphic-pages/academic-p
 import { NeumorphicSpacesPage } from '@/components/neumorphic-pages/spaces-page'
 import { NeumorphicWritingPage } from '@/components/neumorphic-pages/writing-page'
 
+// Check if running in Electron
+const isElectron = typeof window !== 'undefined' && window.electron?.isElectron
+
 interface BrowserViewProps {
   url: string
   onNavigate: (url: string) => void
@@ -87,12 +90,61 @@ export function BrowserView({
   onCanGoForwardChange
 }: BrowserViewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [history, setHistory] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [error, setError] = useState<string | null>(null)
   const [iframeUrl, setIframeUrl] = useState('')
   const [isInternal, setIsInternal] = useState(false)
   const [internalPath, setInternalPath] = useState('/')
+
+  // Electron-specific state
+  const [activeTabId, setActiveTabId] = useState<string | null>(null)
+
+  // Handle URL changes in Electron
+  useEffect(() => {
+    if (!isElectron || !url || isInternalRoute(url)) return
+
+    const handleElectronNavigation = async () => {
+      try {
+        if (!activeTabId) {
+          // Create first tab
+          const tabId = await window.electron!.browser.createTab(url)
+          setActiveTabId(tabId)
+        } else {
+          // Navigate existing tab
+          await window.electron!.browser.navigate(activeTabId, url)
+        }
+      } catch (error) {
+        console.error('Electron navigation error:', error)
+        setError('Failed to navigate in Electron browser')
+      }
+    }
+
+    handleElectronNavigation()
+  }, [url, activeTabId])
+
+  // Listen for Electron tab updates
+  useEffect(() => {
+    if (!isElectron || !activeTabId) return
+
+    const unsubscribe = window.electron!.browser.onTabUpdated(async (tabId) => {
+      if (tabId === activeTabId) {
+        const tabInfo = await window.electron!.browser.getTabInfo(tabId)
+        if (tabInfo) {
+          onTitleChange(tabInfo.title)
+          onLoadingChange(tabInfo.isLoading)
+          onCanGoBackChange(tabInfo.canGoBack)
+          onCanGoForwardChange(tabInfo.canGoForward)
+          if (tabInfo.url !== url) {
+            onNavigate(tabInfo.url)
+          }
+        }
+      }
+    })
+
+    return unsubscribe
+  }, [isElectron, activeTabId])
 
   // Handle URL changes
   useEffect(() => {
@@ -146,8 +198,10 @@ export function BrowserView({
 
   // Handle browser navigation events
   useEffect(() => {
-    const handleBack = () => {
-      if (currentIndex > 0) {
+    const handleBack = async () => {
+      if (isElectron && activeTabId) {
+        await window.electron!.browser.goBack(activeTabId)
+      } else if (currentIndex > 0) {
         const newIndex = currentIndex - 1
         setCurrentIndex(newIndex)
         setIframeUrl(history[newIndex])
@@ -155,8 +209,10 @@ export function BrowserView({
       }
     }
 
-    const handleForward = () => {
-      if (currentIndex < history.length - 1) {
+    const handleForward = async () => {
+      if (isElectron && activeTabId) {
+        await window.electron!.browser.goForward(activeTabId)
+      } else if (currentIndex < history.length - 1) {
         const newIndex = currentIndex + 1
         setCurrentIndex(newIndex)
         setIframeUrl(history[newIndex])
@@ -164,8 +220,10 @@ export function BrowserView({
       }
     }
 
-    const handleRefresh = () => {
-      if (iframeRef.current) {
+    const handleRefresh = async () => {
+      if (isElectron && activeTabId) {
+        await window.electron!.browser.reload(activeTabId)
+      } else if (iframeRef.current) {
         setError(null)
         onLoadingChange(true)
         iframeRef.current.src = iframeUrl
@@ -283,8 +341,8 @@ export function BrowserView({
   }
 
   return (
-    <div className="relative w-full h-full bg-background">
-      {error && !isInternal && (
+    <div ref={containerRef} className="relative w-full h-full bg-background">
+      {error && !isInternal && !isElectron && (
         <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
           <div className="text-center p-8 max-w-md">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
@@ -297,7 +355,7 @@ export function BrowserView({
         </div>
       )}
 
-      {!iframeUrl && (
+      {!iframeUrl && !url && (
         <div className="absolute inset-0 flex items-center justify-center bg-background">
           <div className="text-center p-8 max-w-md">
             <h2 className="text-2xl font-bold mb-2">AI Browser</h2>
@@ -312,14 +370,21 @@ export function BrowserView({
       )}
 
       {/* Render internal neumorphic pages */}
-      {iframeUrl && isInternal && (
+      {(iframeUrl || url) && isInternal && (
         <div className="w-full h-full overflow-auto">
           {renderInternalPage()}
         </div>
       )}
 
-      {/* Render external pages in iframe */}
-      {iframeUrl && !isInternal && (
+      {/* Render external pages in Electron (placeholder for BrowserView) */}
+      {isElectron && url && !isInternal && (
+        <div className="w-full h-full bg-background">
+          {/* Electron BrowserView will be rendered here by the main process */}
+        </div>
+      )}
+
+      {/* Render external pages in iframe (web version) */}
+      {!isElectron && iframeUrl && !isInternal && (
         <iframe
           ref={iframeRef}
           src={iframeUrl}

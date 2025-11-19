@@ -103,7 +103,7 @@ export function MorphingCanvas({
   )
 
   // Render eye with varying opacity and scale based on state
-  // Concentric absorption/expulsion like mass being absorbed into skin
+  // Eye now continues animating behind search interface
   const getEyeStyle = (): React.CSSProperties => {
     switch (morphState) {
       case 'eye-landing':
@@ -113,28 +113,28 @@ export function MorphingCanvas({
           filter: 'blur(0px)'
         }
       case 'eye-to-search':
-        // Eye concentrically absorbs into canvas
+        // Eye fades slightly but stays visible
         return {
-          opacity: 0,
-          transform: 'scale(0.1)',
-          filter: 'blur(15px)'
+          opacity: 0.8,
+          transform: 'scale(1)',
+          filter: 'blur(0px)'
         }
       case 'blank-canvas':
       case 'search-growing':
       case 'search-active':
-        // Eye completely absorbed into blank canvas
+        // Eye continues animating behind search tab
         return {
-          opacity: 0,
-          transform: 'scale(0)',
-          filter: 'blur(20px)',
+          opacity: 1,
+          transform: 'scale(1)',
+          filter: 'blur(0px)',
           pointerEvents: 'none'
         }
       case 'search-to-loading':
-        // Search shrinks back into canvas
+        // Eye stays visible as search transitions
         return {
-          opacity: 0,
-          transform: 'scale(0)',
-          filter: 'blur(15px)'
+          opacity: 1,
+          transform: 'scale(1)',
+          filter: 'blur(0px)'
         }
       case 'loading-eye':
         // Eye fully visible during loading
@@ -227,12 +227,12 @@ export function MorphingCanvas({
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-background">
-      {/* Eye Background Layer */}
+      {/* Eye Background Layer - continues animating behind search tab */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           ...getEyeStyle(),
-          transition: 'all 4500ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 4.5 second smooth transition, no skipped frames
+          transition: 'all 2000ms cubic-bezier(0.25, 0.1, 0.25, 1)' // Smooth transition
         }}
       >
         <AnimatedEyeBackground />

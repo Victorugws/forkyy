@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron:compile": "tsc -p electron/tsconfig.json",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && npm run electron:compile && electron .\"",
+    "electron:build": "npm run build && npm run electron:compile",
+    "electron:package:mac": "npm run electron:build && electron-builder --mac",
+    "electron:package:win": "npm run electron:build && electron-builder --win",
+    "electron:package:linux": "npm run electron:build && electron-builder --linux"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.10",
@@ -88,5 +95,30 @@
   },
   "engines": {
     "bun": "1.2.12"
+  },
+  "build": {
+    "appId": "com.forkyy.app",
+    "productName": "Forkyy",
+    "files": [
+      "dist-electron/**/*",
+      ".next/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    }
   }
 }

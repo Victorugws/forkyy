@@ -21,7 +21,7 @@ export class BrowserManager {
   private window: BrowserWindow
   private tabs: Map<string, Tab> = new Map()
   private activeTabId: string | null = null
-  private headerHeight: number = 120 // Default height of your UI header
+  private headerHeight: number = 80 // Default height of browser UI header (compact)
 
   constructor(window: BrowserWindow) {
     this.window = window

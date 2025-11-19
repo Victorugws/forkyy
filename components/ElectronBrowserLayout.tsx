@@ -5,7 +5,11 @@ import { BrowserTab } from './BrowserTab'
 import { AddressBar } from './AddressBar'
 import type { TabInfo } from '../types/electron'
 
-export function BrowserInterface() {
+interface ElectronBrowserLayoutProps {
+  children?: React.ReactNode
+}
+
+export function ElectronBrowserLayout({ children }: ElectronBrowserLayoutProps) {
   const [tabs, setTabs] = useState<TabInfo[]>([])
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [isElectron, setIsElectron] = useState(false)
@@ -35,8 +39,8 @@ export function BrowserInterface() {
         setTabs(prev => prev.filter(tab => tab.id !== tabId))
       })
 
-      // Notify Electron about header height (120px for your UI)
-      window.electron.browser.updateHeight(120)
+      // Notify Electron about header height (80px for compact UI)
+      window.electron.browser.updateHeight(80)
 
       return () => {
         unsubUpdate()
@@ -112,56 +116,67 @@ export function BrowserInterface() {
 
   const activeTab = tabs.find(t => t.id === activeTabId)
 
-  // If not in Electron, show message
+  // If not in Electron, show web version without browser chrome
   if (!isElectron) {
-    return (
-      <div className="flex items-center justify-center h-32 text-gray-500">
-        Browser mode available in Electron app only
-      </div>
-    )
+    return <>{children}</>
   }
 
   return (
-    <div className="flex flex-col w-full bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-      {/* Tab Bar */}
-      <div className="flex items-center gap-1 px-2 pt-2 border-b border-gray-200">
-        <div className="flex items-center gap-1 overflow-x-auto flex-1">
-          {tabs.map(tab => (
-            <BrowserTab
-              key={tab.id}
-              tab={tab}
-              isActive={tab.id === activeTabId}
-              onSwitch={() => handleSwitchTab(tab.id)}
-              onClose={() => handleCloseTab(tab.id)}
-            />
-          ))}
+    <div className="fixed inset-0 flex flex-col bg-gray-50">
+      {/* Browser Chrome - Fixed at top */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm">
+        {/* Tab Bar */}
+        <div className="flex items-center gap-1 px-2 pt-2 bg-gray-100">
+          <div className="flex items-center gap-1 overflow-x-auto flex-1 scrollbar-hide">
+            {tabs.map(tab => (
+              <BrowserTab
+                key={tab.id}
+                tab={tab}
+                isActive={tab.id === activeTabId}
+                onSwitch={() => handleSwitchTab(tab.id)}
+                onClose={() => handleCloseTab(tab.id)}
+              />
+            ))}
+          </div>
+          <button
+            onClick={handleNewTab}
+            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+            title="New Tab"
+          >
+            +
+          </button>
         </div>
-        <button
-          onClick={handleNewTab}
-          className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
-          title="New Tab"
-        >
-          +
-        </button>
+
+        {/* Address Bar */}
+        <div className="bg-white">
+          <AddressBar
+            url={activeTab?.url || ''}
+            isLoading={activeTab?.isLoading || false}
+            canGoBack={activeTab?.canGoBack || false}
+            canGoForward={activeTab?.canGoForward || false}
+            onNavigate={handleNavigate}
+            onBack={handleGoBack}
+            onForward={handleGoForward}
+            onReload={handleReload}
+            onStop={handleStop}
+          />
+        </div>
       </div>
 
-      {/* Navigation Bar */}
-      <AddressBar
-        url={activeTab?.url || ''}
-        isLoading={activeTab?.isLoading || false}
-        canGoBack={activeTab?.canGoBack || false}
-        canGoForward={activeTab?.canGoForward || false}
-        onNavigate={handleNavigate}
-        onBack={handleGoBack}
-        onForward={handleGoForward}
-        onReload={handleReload}
-        onStop={handleStop}
-      />
-
-      {/* BrowserView renders here (managed by Electron) */}
-      <div className="h-4 text-xs text-center text-gray-400 py-1">
-        Browser content appears below
+      {/* BrowserView Content Area - Managed by Electron */}
+      {/* The actual web pages render here via BrowserView */}
+      <div className="flex-1 relative">
+        {/* This space is where Electron positions the BrowserView */}
       </div>
+
+      {/* Optional: Show Next.js children as overlay/sidebar if needed */}
+      {children && (
+        <div className="absolute top-20 right-4 max-w-sm pointer-events-none">
+          <div className="pointer-events-auto">
+            {children}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

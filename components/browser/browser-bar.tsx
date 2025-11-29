@@ -28,9 +28,9 @@ export function BrowserBar({
   const handleNavigate = () => {
     let url = urlInput.trim()
 
-    // Block internal routes - those should only be accessed via navbar
-    if (url.startsWith('/')) {
-      // Don't navigate to internal routes via address bar
+    // Allow /search/ routes but block other internal routes from address bar
+    if (url.startsWith('/') && !url.startsWith('/search/')) {
+      // Don't navigate to non-search internal routes via address bar
       // Reset to current URL
       setUrlInput(currentUrl)
       return
@@ -42,8 +42,9 @@ export function BrowserBar({
       if (url.includes('.') && !url.includes(' ')) {
         url = 'https://' + url
       } else {
-        // Search Google if it doesn't look like a URL
-        url = `https://www.google.com/search?q=${encodeURIComponent(url)}`
+        // Navigate to morphic chat page instead of Google search
+        const newChatId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+        url = `/search/${newChatId}?q=${encodeURIComponent(url)}`
       }
     }
 

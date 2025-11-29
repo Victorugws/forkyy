@@ -1,7 +1,7 @@
 'use client'
 
 import { Model } from '@/lib/types/models'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BrowserTab, Bookmark, BrowserHistory, Download } from '@/lib/types/browser'
 import { TabBar } from './tab-bar'
 import { BrowserBar } from './browser-bar'
@@ -13,6 +13,7 @@ import { HistoryPanel } from './history-panel'
 import { DownloadsPanel } from './downloads-panel'
 import { DevToolsPanel } from './dev-tools-panel'
 import { FindInPage } from './find-in-page'
+// TargetCursor is now handled by Electron overlay window
 import {
   saveTabs,
   loadTabs,
@@ -35,6 +36,9 @@ interface BrowserClientEnhancedProps {
 }
 
 export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserClientEnhancedProps) {
+  // Mounted state to prevent hydration issues
+  const [mounted, setMounted] = useState(false)
+
   // Tabs
   const [tabs, setTabs] = useState<BrowserTab[]>([])
   const [activeTabId, setActiveTabId] = useState<string>('')
@@ -51,6 +55,11 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [history, setHistory] = useState<BrowserHistory[]>([])
   const [downloads, setDownloads] = useState<Download[]>([])
+
+  // Set mounted state
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Load saved data
   useEffect(() => {
@@ -83,7 +92,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
 
   const activeTab = tabs.find(t => t.id === activeTabId)
 
-  const createNewTab = (url = '') => {
+  const createNewTab = (url = '/') => {
     const newTab: BrowserTab = {
       id: generateId(),
       url,
@@ -197,8 +206,10 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
-      {/* Tab Bar */}
-      <TabBar
+      {/* Header */}
+      <div>
+        {/* Tab Bar */}
+        <TabBar
         tabs={tabs}
         activeTabId={activeTabId}
         onTabSelect={setActiveTabId}
@@ -229,22 +240,24 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
             pageTitle={activeTab?.title || ''}
           />
         </div>
-        <BrowserToolbar
-          isBookmarked={isBookmarked}
-          onToggleBookmark={toggleBookmark}
-          onZoomIn={() => handleZoom('in')}
-          onZoomOut={() => handleZoom('out')}
-          onZoomReset={() => handleZoom('reset')}
-          onPrint={handlePrint}
-          onFind={() => setShowFindInPage(true)}
-          onOpenDownloads={() => setShowDownloadsPanel(true)}
-          onOpenHistory={() => setShowHistoryPanel(true)}
-          onOpenBookmarks={() => setShowBookmarksBar(!showBookmarksBar)}
-          onOpenDevTools={() => setShowDevTools(!showDevTools)}
-          onOpenSettings={() => setShowAIAssistant(!showAIAssistant)}
-          isSecure={activeTab?.url?.startsWith('https://') || false}
-          zoom={activeTab?.zoomLevel || 1}
-        />
+        {mounted && (
+          <BrowserToolbar
+            isBookmarked={isBookmarked}
+            onToggleBookmark={toggleBookmark}
+            onZoomIn={() => handleZoom('in')}
+            onZoomOut={() => handleZoom('out')}
+            onZoomReset={() => handleZoom('reset')}
+            onPrint={handlePrint}
+            onFind={() => setShowFindInPage(true)}
+            onOpenDownloads={() => setShowDownloadsPanel(true)}
+            onOpenHistory={() => setShowHistoryPanel(true)}
+            onOpenBookmarks={() => setShowBookmarksBar(!showBookmarksBar)}
+            onOpenDevTools={() => setShowDevTools(!showDevTools)}
+            onOpenSettings={() => setShowAIAssistant(!showAIAssistant)}
+            isSecure={activeTab?.url?.startsWith('https://') || false}
+            zoom={activeTab?.zoomLevel || 1}
+          />
+        )}
       </div>
 
       {/* Bookmarks Bar */}
@@ -262,13 +275,14 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
         />
       )}
 
-      {/* Find in Page */}
-      {showFindInPage && (
-        <FindInPage
-          onClose={() => setShowFindInPage(false)}
-          onFind={handleFind}
-        />
-      )}
+        {/* Find in Page */}
+        {showFindInPage && (
+          <FindInPage
+            onClose={() => setShowFindInPage(false)}
+            onFind={handleFind}
+          />
+        )}
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 flex">
@@ -303,8 +317,8 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
         {/* Browser + AI Chat */}
         <div className="flex-1 flex min-h-0">
           {/* Main Browser Content */}
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1">
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-hidden">
               {activeTab && (
                 <BrowserView
                   key={activeTab.id}
@@ -354,6 +368,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
           )}
         </div>
       </div>
+      {/* TargetCursor is now rendered in Electron overlay window */}
     </div>
   )
 }

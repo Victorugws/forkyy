@@ -13,6 +13,8 @@ import {
   Square,
   Mail,
   Paperclip,
+  Image as ImageIcon,
+  Video,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -214,6 +216,30 @@ export function ChatPanel({
           disabled={isLoading || isToolInvocationInProgress()}
         >
           <Paperclip size={18} />
+        </Button>
+
+        <Button
+          size="icon"
+          variant="outline"
+          className={buttonBaseClass}
+          onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/images' } }))}
+          aria-label="Search images"
+          title="Search images"
+          disabled={isLoading || isToolInvocationInProgress()}
+        >
+          <ImageIcon size={18} />
+        </Button>
+
+        <Button
+          size="icon"
+          variant="outline"
+          className={buttonBaseClass}
+          onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/videos' } }))}
+          aria-label="Search videos"
+          title="Search videos"
+          disabled={isLoading || isToolInvocationInProgress()}
+        >
+          <Video size={18} />
         </Button>
 
         <ModelSelector

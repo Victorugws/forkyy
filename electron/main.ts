@@ -1,9 +1,22 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
-import { BrowserManager } from './browser-manager'
 
 let mainWindow: BrowserWindow | null = null
-let browserManager: BrowserManager | null = null
+let cursorOverlay: BrowserWindow | null = null
+
+const ENABLE_CURSOR_OVERLAY = true
+
+function getWindowContentMetrics(window: BrowserWindow) {
+  const windowBounds = window.getBounds()
+  const contentBounds = window.getContentBounds()
+
+  return {
+    windowBounds,
+    contentBounds,
+    offsetX: contentBounds.x - windowBounds.x,
+    offsetY: contentBounds.y - windowBounds.y
+  }
+}
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -17,12 +30,12 @@ async function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      webSecurity: true
+      webSecurity: true,
+      webviewTag: true // Enable webview tag for embedded browsing
     }
   })
 
-  // Initialize browser tab manager
-  browserManager = new BrowserManager(mainWindow)
+  // Webview tags are now managed in React, no need for BrowserManager
 
   // Load your Next.js app
   if (isDev) {
@@ -32,65 +45,184 @@ async function createWindow() {
     await mainWindow.loadFile(join(__dirname, '../.next/server/app/index.html'))
   }
 
-  // Setup IPC handlers for browser control
-  setupBrowserIPC()
+  // Create cursor overlay window (full-screen, bulletproof)
+  if (ENABLE_CURSOR_OVERLAY) {
+  createCursorOverlay()
+  setupCursorIPC()
+  }
 }
 
-function setupBrowserIPC() {
-  // Create new tab
-  ipcMain.handle('browser:create-tab', async (event, url?: string) => {
-    const tabId = await browserManager!.createTab(url || 'https://google.com')
-    return tabId
+function createCursorOverlay() {
+  if (!ENABLE_CURSOR_OVERLAY || !mainWindow) return
+
+  // Get the main window's CONTENT bounds (excludes title bar and frame)
+  const contentBounds = mainWindow.getContentBounds()
+
+  // Add padding at the top to avoid covering window control buttons (traffic lights)
+  // macOS traffic lights are about 22px tall and positioned at the top left
+  const TOP_PADDING = 40 // Enough space for traffic lights
+
+  cursorOverlay = new BrowserWindow({
+    width: contentBounds.width,
+    height: contentBounds.height - TOP_PADDING,
+    x: contentBounds.x,
+    y: contentBounds.y + TOP_PADDING,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    fullscreen: false,
+    resizable: false,
+    hasShadow: false,
+    focusable: false,
+    skipTaskbar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
   })
 
-  // Navigate tab to URL
-  ipcMain.handle('browser:navigate', async (event, tabId: string, url: string) => {
-    await browserManager!.navigate(tabId, url)
+  // CRITICAL: Set ignore mouse events with forward BEFORE loading content
+  cursorOverlay.setIgnoreMouseEvents(true, { forward: true })
+  // Use 'floating' instead of 'screen-saver' to avoid covering system UI like dock
+  cursorOverlay.setAlwaysOnTop(true, 'floating')
+  // Don't make it visible on all workspaces to avoid interfering with system UI
+  // cursorOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+  // Load cursor overlay HTML - always from electron directory
+  const overlayPath = isDev
+    ? join(__dirname, '..', 'electron', 'cursorOverlay.html')
+    : join(__dirname, 'cursorOverlay.html')
+
+  cursorOverlay.loadFile(overlayPath)
+
+  // Re-apply ignore mouse events after page loads (important!)
+  cursorOverlay.webContents.on('did-finish-load', () => {
+    cursorOverlay?.setIgnoreMouseEvents(true, { forward: true })
+    console.log('[Main] Cursor overlay loaded and click-through enabled')
   })
 
-  // Close tab
-  ipcMain.handle('browser:close-tab', async (event, tabId: string) => {
-    await browserManager!.closeTab(tabId)
+  // Update overlay position/size to match main window's CONTENT area
+  const updateOverlayBounds = () => {
+    if (!cursorOverlay || cursorOverlay.isDestroyed() || !mainWindow || mainWindow.isDestroyed()) return
+
+    const contentBounds = mainWindow.getContentBounds()
+    const TOP_PADDING = 40 // Match the padding used during creation
+    const newBounds = {
+      x: contentBounds.x,
+      y: contentBounds.y + TOP_PADDING,
+      width: contentBounds.width,
+      height: contentBounds.height - TOP_PADDING
+    }
+    console.log('[Main] Updating overlay bounds:', newBounds, 'isMaximized:', mainWindow.isMaximized())
+    cursorOverlay.setBounds(newBounds)
+
+    // Ensure overlay stays visible and on top
+    if (!cursorOverlay.isVisible()) {
+      cursorOverlay.showInactive()
+    }
+    cursorOverlay.setAlwaysOnTop(true, 'floating')
+  }
+
+  // Track main window movements and resizes
+  mainWindow.on('move', updateOverlayBounds)
+  mainWindow.on('resize', updateOverlayBounds)
+  mainWindow.on('maximize', updateOverlayBounds)
+  mainWindow.on('unmaximize', updateOverlayBounds)
+  mainWindow.on('enter-full-screen', updateOverlayBounds)
+  mainWindow.on('leave-full-screen', updateOverlayBounds)
+
+  // Ensure overlay stays on top and click-through
+  setInterval(() => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      if (!cursorOverlay.isAlwaysOnTop()) {
+        cursorOverlay.setAlwaysOnTop(true, 'screen-saver')
+      }
+      if (!cursorOverlay.isVisible()) {
+        cursorOverlay.showInactive()
+      }
+      // Re-enforce click-through every cycle
+      cursorOverlay.setIgnoreMouseEvents(true, { forward: true })
+    }
+  }, 100)
+}
+
+// Handle getting webview preload path
+ipcMain.handle('get-webview-preload-path', () => {
+  const { app } = require('electron')
+  const path = require('path')
+  const isDev = process.env.NODE_ENV === 'development'
+
+  // Use the simple JS version (no TypeScript compilation needed)
+  let filePath: string
+  if (isDev) {
+    // In dev, use the source JS file directly
+    filePath = path.resolve(__dirname, '..', 'electron', 'webview-preload-simple.js')
+  } else {
+    filePath = path.join(app.getAppPath(), 'electron', 'webview-preload-simple.js')
+  }
+
+  console.log('[Main] Webview preload absolute path:', filePath)
+
+  // Convert to file:// URL format (required by webview preload attribute)
+  // On Windows, we need to convert backslashes to forward slashes
+  const normalizedPath = process.platform === 'win32'
+    ? filePath.replace(/\\/g, '/')
+    : filePath
+
+  const fileUrl = `file://${normalizedPath}`
+  console.log('[Main] Webview preload file URL:', fileUrl)
+
+  return fileUrl
+})
+
+function setupCursorIPC() {
+  if (!ENABLE_CURSOR_OVERLAY) return
+
+  // Receive cursor positions from renderer (screen coordinates)
+  ipcMain.on('cursor-move', (_event, data) => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('cursor-update', data)
+    }
   })
 
-  // Switch active tab
-  ipcMain.handle('browser:switch-tab', async (event, tabId: string) => {
-    await browserManager!.switchTab(tabId)
+  // Receive hover target updates from renderer
+  ipcMain.on('hover-target', (_event, data) => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('hover-target-update', data)
+    }
   })
 
-  // Go back
-  ipcMain.handle('browser:go-back', async (event, tabId: string) => {
-    await browserManager!.goBack(tabId)
+  // Receive mouse events from renderer
+  ipcMain.on('cursor-mousedown', () => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('cursor-mousedown')
+    }
   })
 
-  // Go forward
-  ipcMain.handle('browser:go-forward', async (event, tabId: string) => {
-    await browserManager!.goForward(tabId)
+  ipcMain.on('cursor-mouseup', () => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('cursor-mouseup')
+    }
   })
 
-  // Reload
-  ipcMain.handle('browser:reload', async (event, tabId: string) => {
-    await browserManager!.reload(tabId)
+  // Webview-specific events (from webview-preload-simple.js)
+  ipcMain.on('cursor-down', () => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('cursor-mousedown')
+    }
   })
 
-  // Stop loading
-  ipcMain.handle('browser:stop', async (event, tabId: string) => {
-    await browserManager!.stop(tabId)
+  ipcMain.on('cursor-up', () => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.webContents.send('cursor-mouseup')
+    }
   })
 
-  // Get tab info
-  ipcMain.handle('browser:get-tab-info', async (event, tabId: string) => {
-    return browserManager!.getTabInfo(tabId)
-  })
-
-  // Get all tabs
-  ipcMain.handle('browser:get-all-tabs', async () => {
-    return browserManager!.getAllTabs()
-  })
-
-  // Update BrowserView height when UI changes
-  ipcMain.handle('browser:update-height', async (event, headerHeight: number) => {
-    browserManager!.updateHeaderHeight(headerHeight)
+  // Handle window close
+  mainWindow?.on('closed', () => {
+    if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+      cursorOverlay.close()
+    }
   })
 }
 

@@ -3,7 +3,7 @@
 import { Image as ImageIcon, Search, Filter, Grid3x3, Grid2x2, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { HeaderNavbar } from '@/components/header-navbar'
+import { CustomDock } from '@/components/CustomDock'
 
 const sampleCategories = [
   'All',
@@ -146,7 +146,7 @@ export default function ImagesPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <HeaderNavbar user={null} />
+      <CustomDock />
       {/* Hero Section */}
       <div className="border-b border-border bg-gradient-to-br from-background via-background to-purple-500/5">
         <div className="container max-w-7xl mx-auto px-6 py-12">

@@ -6,7 +6,14 @@ export const useCurrentUserName = () => {
 
   useEffect(() => {
     const fetchProfileName = async () => {
-      const { data, error } = await createClient().auth.getSession()
+      const client = createClient()
+
+      // Skip if Supabase is not configured
+      if (!client) {
+        return
+      }
+
+      const { data, error } = await client.auth.getSession()
       if (error) {
         console.error(error)
       }

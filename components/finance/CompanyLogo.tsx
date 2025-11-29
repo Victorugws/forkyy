@@ -3,6 +3,7 @@
 import { Building2 } from 'lucide-react'
 import { useState } from 'react'
 import Image from 'next/image'
+import { IconWrapper } from '@/components/ui/icons'
 
 interface CompanyLogoProps {
   ticker: string
@@ -28,37 +29,41 @@ export function CompanyLogo({ ticker, companyName, size = 40, className = '' }: 
     // Fallback to icon with colored background
     const bgColor = getColorFromTicker(ticker)
     return (
-      <div
-        className={`flex items-center justify-center rounded-lg ${className}`}
-        style={{
-          width: size,
-          height: size,
-          backgroundColor: bgColor,
-          minWidth: size,
-          minHeight: size
-        }}
-      >
-        <span className="text-white font-bold text-sm">
-          {ticker.slice(0, 2).toUpperCase()}
-        </span>
-      </div>
+      <IconWrapper isLogo={true} className={className}>
+        <div
+          className="flex items-center justify-center rounded-lg"
+          style={{
+            width: size,
+            height: size,
+            backgroundColor: bgColor,
+            minWidth: size,
+            minHeight: size
+          }}
+        >
+          <span className="text-white font-bold text-sm">
+            {ticker.slice(0, 2).toUpperCase()}
+          </span>
+        </div>
+      </IconWrapper>
     )
   }
 
   return (
-    <div
-      className={`relative flex items-center justify-center rounded-lg overflow-hidden bg-white ${className}`}
-      style={{ width: size, height: size, minWidth: size, minHeight: size }}
-    >
-      <Image
-        src={currentSource}
-        alt={`${companyName} logo`}
-        width={size}
-        height={size}
-        className="object-contain p-1"
-        onError={() => setImageError(true)}
-      />
-    </div>
+    <IconWrapper isLogo={true} className={className}>
+      <div
+        className="relative flex items-center justify-center rounded-lg overflow-hidden bg-white"
+        style={{ width: size, height: size, minWidth: size, minHeight: size }}
+      >
+        <Image
+          src={currentSource}
+          alt={`${companyName} logo`}
+          width={size}
+          height={size}
+          className="object-contain p-1"
+          onError={() => setImageError(true)}
+        />
+      </div>
+    </IconWrapper>
   )
 }
 

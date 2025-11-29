@@ -3,7 +3,8 @@
 import { ChevronRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { HeaderNavbar } from '@/components/header-navbar'
+import { CustomDock } from '@/components/CustomDock'
+import { IconWrapper } from '@/components/ui/icons'
 import { MarketIndicesGrid } from '@/components/finance/MarketIndicesGrid'
 import { CryptoGrid } from '@/components/finance/CryptoGrid'
 import { MarketSummary } from '@/components/finance/MarketSummary'
@@ -14,6 +15,11 @@ import { WatchlistSidebar } from '@/components/finance/WatchlistSidebar'
 import { MarketProgressionChart } from '@/components/finance/MarketProgressionChart'
 import { MarketInsights } from '@/components/finance/MarketInsights'
 import { CountrySelector, type Country } from '@/components/finance/CountrySelector'
+import { RecentDevelopments } from '@/components/finance/RecentDevelopments'
+import { PopularSpaces } from '@/components/finance/PopularSpaces'
+import { Standouts } from '@/components/finance/Standouts'
+import { CryptoLeaderboard } from '@/components/finance/CryptoLeaderboard'
+import { CoinbaseIndex } from '@/components/finance/CoinbaseIndex'
 import { useWatchlist } from '@/hooks/useWatchlist'
 
 export default function FinancePage() {
@@ -143,7 +149,7 @@ export default function FinancePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <HeaderNavbar user={null} />
+      <CustomDock />
       <div className="flex flex-1">
         {/* Main Content */}
         <div className="flex-1 px-6 py-6 max-w-6xl">
@@ -164,7 +170,9 @@ export default function FinancePage() {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-lg neu-button"
             >
-              <TrendingUp className="size-4" />
+              <IconWrapper>
+                <TrendingUp className="size-4" />
+              </IconWrapper>
               <span className="text-sm font-medium">Watchlist</span>
             </button>
 
@@ -174,16 +182,16 @@ export default function FinancePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-border overflow-x-auto scrollbar-hide">
+        <div className="flex justify-center gap-2 mb-8 pb-4 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+              className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                 activeTab === tab
-                  ? 'neu-raised text-primary border-b-2 border-primary'
-                  : 'text-muted-foreground hover:text-foreground neu-card'
+                  ? 'neu-inset text-primary bg-primary/10'
+                  : 'neu-button hover:neu-inset text-muted-foreground hover:text-foreground'
               }`}
             >
               {tab}
@@ -201,12 +209,10 @@ export default function FinancePage() {
               onAddToWatchlist={addToWatchlist}
               watchlist={watchlist}
             />
-            <MarketProgressionChart
-              title={`${selectedCountry} Market Performance`}
-              timeframe={timeframe}
-              onTimeframeChange={setTimeframe}
-            />
             <MarketSummary topic={`${selectedCountry} Markets`} />
+            <RecentDevelopments topic={`${selectedCountry} Markets`} limit={3} />
+            <PopularSpaces type="markets" />
+            <Standouts type="stocks" />
           </>
         )}
 
@@ -214,12 +220,12 @@ export default function FinancePage() {
           <>
             <MarketInsights type="Crypto" data={cryptoData} timeframe={timeframe} />
             <CryptoGrid cryptos={cryptoData} loading={loading} />
-            <MarketProgressionChart
-              title="Crypto Market Trends"
-              timeframe={timeframe}
-              onTimeframeChange={setTimeframe}
-            />
+            <CryptoLeaderboard />
             <MarketSummary topic="Crypto" />
+            <RecentDevelopments topic="Crypto" limit={3} />
+            <PopularSpaces type="crypto" />
+            <CoinbaseIndex />
+            <Standouts type="crypto" />
           </>
         )}
 

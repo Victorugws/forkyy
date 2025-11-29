@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react'
 import { NewsCard } from './NewsCard'
 
 interface Category {
@@ -34,23 +34,77 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
 
+  // Generate dummy articles
+  const generateDummyArticles = (count: number): NewsArticle[] => {
+    const dummyTitles = [
+      'AI breakthrough promises to revolutionize healthcare diagnostics',
+      'New quantum computer achieves unprecedented processing speeds',
+      'Climate change impacts accelerate across global regions',
+      'Tech giants announce major sustainability initiatives',
+      'Revolutionary battery technology extends EV range significantly',
+      'International trade agreements reshape economic landscape',
+      'Breakthrough in renewable energy storage unveiled',
+      'Global markets respond to central bank policy changes',
+      'Advanced robotics transform manufacturing sector',
+      'Cybersecurity threats evolve with new attack vectors',
+      'Space exploration reaches new milestone achievements',
+      'Medical research yields promising cancer treatment',
+      'Sustainable agriculture practices gain momentum worldwide',
+      'Financial markets adapt to digital transformation',
+      'Emerging technologies reshape workforce dynamics',
+      'Environmental policies drive corporate strategy shifts',
+      'Innovation in materials science opens new possibilities',
+      'Global education systems embrace digital learning',
+      'Transportation sector undergoes electric revolution',
+      'Data privacy regulations impact tech industry',
+      'Scientific discoveries challenge existing theories',
+      'Urban development prioritizes sustainability goals',
+      'Healthcare systems adopt AI-powered solutions',
+      'Economic indicators signal shifting market trends',
+      'Technological advances enable new communication methods',
+      'Energy sector transitions toward renewable sources',
+      'International cooperation addresses global challenges',
+      'Digital currencies reshape financial landscape',
+      'Research institutions pioneer breakthrough innovations',
+      'Policy changes influence business strategies',
+      'Environmental conservation efforts show progress',
+      'Industry leaders embrace circular economy principles'
+    ]
+
+    return Array.from({ length: count }, (_, i) => ({
+      id: `${category.id}-dummy-${i}`,
+      title: dummyTitles[i % dummyTitles.length],
+      summary: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+      image: `https://picsum.photos/seed/${category.id}-${i}/800/600`,
+      source: ['Reuters', 'BBC', 'CNN', 'Bloomberg', 'NYT', 'WSJ', 'AP'][i % 7],
+      publishedAt: `${Math.floor(Math.random() * 24)}h ago`,
+      url: '#',
+      category: category.id,
+      sources: Math.floor(Math.random() * 80) + 20
+    }))
+  }
+
   // Fetch news articles for this category
   useEffect(() => {
     const fetchCategoryNews = async () => {
       setLoading(true)
       try {
-        const res = await fetch(`/api/news?category=${category.id}&limit=10`)
+        const res = await fetch(`/api/news?category=${category.id}&limit=32`)
         const data = await res.json()
 
-        if (data.success || data.fallback) {
-          setArticles(data.data || [])
+        if (data.success && data.data && data.data.length > 0) {
+          setArticles(data.data)
+        } else {
+          // Use dummy articles if API fails or returns no data
+          setArticles(generateDummyArticles(32))
         }
 
         // Generate AI commentary based on category
         setAiCommentary(generateAICommentary(category))
       } catch (error) {
         console.error(`Error fetching ${category.id} news:`, error)
-        // Use fallback commentary
+        // Use dummy articles on error
+        setArticles(generateDummyArticles(32))
         setAiCommentary(generateAICommentary(category))
       } finally {
         setLoading(false)
@@ -103,74 +157,125 @@ export function CategorySection({ category, isFirst }: CategorySectionProps) {
           </h2>
         </div>
 
-        {/* AI Commentary */}
+        {/* AI Commentary - Styled like Finance Page */}
         <div className="mb-8">
           {loading ? (
-            <div className="space-y-3">
-              <div className="h-4 bg-muted rounded w-full animate-pulse" />
-              <div className="h-4 bg-muted rounded w-11/12 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-10/12 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-full animate-pulse" />
-              <div className="h-4 bg-muted rounded w-9/12 animate-pulse" />
+            <div className="neu-card p-6 rounded-xl">
+              <div className="space-y-3">
+                <div className="h-4 bg-muted rounded w-full animate-pulse" />
+                <div className="h-4 bg-muted rounded w-11/12 animate-pulse" />
+                <div className="h-4 bg-muted rounded w-10/12 animate-pulse" />
+                <div className="h-4 bg-muted rounded w-full animate-pulse" />
+                <div className="h-4 bg-muted rounded w-9/12 animate-pulse" />
+              </div>
             </div>
           ) : (
-            <p className="text-base text-muted-foreground leading-relaxed">
-              {aiCommentary}
-            </p>
+            <div className="neu-card p-6 rounded-xl bg-gradient-to-br from-background to-primary/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="size-5 text-primary" />
+                  <h3 className="text-lg font-bold text-foreground">
+                    {getCategoryTitle(category)}
+                  </h3>
+                </div>
+                <span className="px-2 py-1 rounded-md neu-inset text-xs font-medium text-primary bg-primary/10">
+                  1D
+                </span>
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                {aiCommentary}
+              </p>
+
+              <div className="flex items-start gap-2 p-3 rounded-lg neu-inset bg-primary/5">
+                <div className="w-5 h-5 rounded-full neu-button flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs">💡</span>
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-foreground">Pro tip: </span>
+                  <span className="text-xs text-muted-foreground">
+                    Stay informed about the latest developments. Trends change rapidly, so checking back regularly helps you stay ahead.
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Horizontal Scrolling News Cards */}
-      <div className="relative group">
-        {/* Left Scroll Button */}
-        {canScrollLeft && (
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full neu-raised opacity-0 group-hover:opacity-100"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="size-5 text-foreground" />
-          </button>
-        )}
-
-        {/* Right Scroll Button */}
-        {canScrollRight && (
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full neu-raised opacity-0 group-hover:opacity-100"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="size-5 text-foreground" />
-          </button>
-        )}
-
-        {/* Scrollable Container */}
-        <div
-          ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide scroll-smooth"
-        >
-          {loading ? (
-            // Loading skeletons
-            Array.from({ length: 5 }).map((_, i) => (
+      {/* Masonry Grid Layout - Mixed Variants */}
+      <div>
+        {loading ? (
+          // Loading skeletons in grid
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[380px] h-[520px] rounded-xl bg-muted animate-pulse"
+                className={`rounded-xl bg-muted animate-pulse ${
+                  i === 0 ? 'lg:col-span-2 h-[320px]' :
+                  i === 3 ? 'lg:col-span-2 h-[280px]' :
+                  'h-[240px]'
+                }`}
               />
-            ))
-          ) : articles.length > 0 ? (
-            articles.map((article) => (
-              <NewsCard key={article.id} article={article} variant="vertical" />
-            ))
-          ) : (
-            <div className="flex-shrink-0 w-full h-64 rounded-xl border border-border bg-card flex items-center justify-center">
-              <p className="text-muted-foreground">No articles available for this category</p>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : articles.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {articles.map((article, index) => {
+              // Varied layout pattern matching Perplexity
+              let variant: 'large-horizontal' | 'horizontal' | 'vertical-compact' | 'small-horizontal' = 'vertical-compact'
+              let className = ''
+
+              // Pattern: large horizontal, 2 vertical, horizontal, 3 small, repeat
+              const pattern = index % 8
+
+              if (pattern === 0) {
+                variant = 'large-horizontal'
+                className = 'lg:col-span-2'
+              } else if (pattern === 1 || pattern === 2) {
+                variant = 'vertical-compact'
+                className = ''
+              } else if (pattern === 3) {
+                variant = 'horizontal'
+                className = 'lg:col-span-2'
+              } else if (pattern >= 4 && pattern <= 6) {
+                variant = 'small-horizontal'
+                className = ''
+              } else {
+                variant = 'vertical-compact'
+                className = ''
+              }
+
+              return (
+                <div key={article.id} className={className}>
+                  <NewsCard article={article} variant={variant} />
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="w-full h-64 rounded-xl border border-border bg-card flex items-center justify-center">
+            <p className="text-muted-foreground">No articles available for this category</p>
+          </div>
+        )}
       </div>
     </section>
   )
+}
+
+// Generate category title
+function getCategoryTitle(category: Category): string {
+  const titles: Record<string, string> = {
+    technology: 'Tech Innovation Accelerates',
+    politics: 'Political Landscape Shifts',
+    business: 'Markets Navigate Uncertainty',
+    science: 'Scientific Breakthroughs Continue',
+    health: 'Healthcare Transforms',
+    sports: 'Major Leagues Evolve',
+    entertainment: 'Streaming Era Expands',
+    world: 'Global Dynamics Reshape'
+  }
+  return titles[category.id] || `${category.title} Updates Today`
 }
 
 // Generate AI commentary based on category

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ExternalLink, Clock, Eye, FileText } from 'lucide-react'
-import { BrowserModal } from '../shared/BrowserModal'
+import { TiltedImage } from './TiltedImage'
 
 interface Article {
   id: string
@@ -21,16 +21,232 @@ interface Article {
 interface NewsCardProps {
   article: Article
   onClick?: () => void
-  variant?: 'vertical' | 'horizontal'
+  variant?: 'vertical' | 'horizontal' | 'featured' | 'compact' | 'large-horizontal' | 'vertical-compact' | 'small-horizontal'
 }
 
 export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardProps) {
   const [imageError, setImageError] = useState(false)
-  const [showBrowser, setShowBrowser] = useState(false)
 
   const handleClick = () => {
-    setShowBrowser(true)
+    // Generate a new chat ID and navigate to chat page with prompt
+    const newChatId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+    window.dispatchEvent(new CustomEvent('browser:navigate', {
+      detail: { url: `/search/${newChatId}?q=${encodeURIComponent(article.title)}` }
+    }))
     onClick?.()
+  }
+
+  // Large horizontal card (text left, large image right) - spans 2 columns
+  if (variant === 'large-horizontal') {
+    return (
+      <div onClick={handleClick} className="group cursor-pointer h-full">
+          <div className="neu-card rounded-xl overflow-hidden h-full flex flex-col md:flex-row gap-4 p-4">
+            {/* Text content on left */}
+            <div className="flex-1 flex flex-col">
+              <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-2 leading-tight">
+                {article.title}
+              </h3>
+              <p className="text-xs text-muted-foreground mb-2">
+                Published {article.publishedAt || `${article.publishedHours || 13}h ago`}
+              </p>
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
+                {article.summary}
+              </p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+                <span className="flex items-center gap-1">
+                  <FileText className="size-3" />
+                  {article.sources || 50} sources
+                </span>
+              </div>
+            </div>
+            {/* Image on right */}
+            <div className="relative w-full md:w-64 h-48 md:h-auto rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              {!imageError && article.image ? (
+                <TiltedImage
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <FileText className="size-12 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          </div>
+      </div>
+    )
+  }
+
+  // Vertical compact card (image top, compact text)
+  if (variant === 'vertical-compact') {
+    return (
+      <div onClick={handleClick} className="group cursor-pointer h-full">
+          <div className="neu-card rounded-xl overflow-hidden h-full flex flex-col">
+            <div className="relative h-36 overflow-hidden bg-muted">
+              {!imageError && article.image ? (
+                <TiltedImage
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <FileText className="size-10 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="p-3 flex flex-col flex-1">
+              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-3 mb-2 leading-snug">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+                <span className="flex items-center gap-1">
+                  <FileText className="size-3" />
+                  {article.sources || 45} sources
+                </span>
+              </div>
+            </div>
+          </div>
+      </div>
+    )
+  }
+
+  // Small horizontal card (text left, small image right)
+  if (variant === 'small-horizontal') {
+    return (
+      <div onClick={handleClick} className="group cursor-pointer h-full">
+          <div className="neu-card rounded-xl overflow-hidden h-full flex gap-3 p-3">
+            <div className="flex-1 flex flex-col min-w-0">
+              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+                <span className="flex items-center gap-1">
+                  <FileText className="size-3" />
+                  {article.sources || 40} sources
+                </span>
+              </div>
+            </div>
+            <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              {!imageError && article.image ? (
+                <TiltedImage
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <FileText className="size-8 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          </div>
+      </div>
+    )
+  }
+
+  // Featured card (large, for first article)
+  if (variant === 'featured') {
+    return (
+      <>
+        <div
+          onClick={handleClick}
+          className="group cursor-pointer h-full"
+        >
+          <div className="neu-card rounded-2xl overflow-hidden h-full flex flex-col">
+            {/* Image */}
+            <div className="relative h-72 overflow-hidden bg-muted">
+              {!imageError && article.image ? (
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <FileText className="size-16 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="p-6 flex flex-col flex-1">
+              <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-3 leading-tight">
+                {article.title}
+              </h3>
+
+              <p className="text-sm text-muted-foreground line-clamp-4 mb-4 flex-1 leading-relaxed">
+                {article.summary}
+              </p>
+
+              {/* Footer */}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground pt-4 border-t border-border">
+                <span className="flex items-center gap-1">
+                  <FileText className="size-3.5" />
+                  {article.sources || 38} sources
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="size-3.5" />
+                  {article.publishedAt || `${article.publishedHours || 2}h ago`}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </>
+    )
+  }
+
+  // Compact card for grid
+  if (variant === 'compact') {
+    return (
+      <>
+        <div
+          onClick={handleClick}
+          className="group cursor-pointer h-full"
+        >
+          <div className="neu-card rounded-2xl overflow-hidden h-full flex flex-col">
+            {/* Image */}
+            <div className="relative h-40 overflow-hidden bg-muted">
+              {!imageError && article.image ? (
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <FileText className="size-10 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-3 mb-2 leading-snug">
+                {article.title}
+              </h3>
+
+              {/* Footer */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto pt-3 border-t border-border">
+                <span className="flex items-center gap-1">
+                  <FileText className="size-3" />
+                  {article.sources || 24} sources
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </>
+    )
   }
 
   // Vertical card for horizontal scrolling
@@ -97,13 +313,6 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
         </div>
 
         {/* Browser Modal */}
-        {showBrowser && (
-          <BrowserModal
-            url={article.url || `/search?q=${encodeURIComponent(article.title)}`}
-            title={article.title}
-            onClose={() => setShowBrowser(false)}
-          />
-        )}
       </>
     )
   }
@@ -176,15 +385,6 @@ export function NewsCard({ article, onClick, variant = 'horizontal' }: NewsCardP
           </div>
         </div>
       </div>
-
-      {/* Browser Modal */}
-      {showBrowser && (
-        <BrowserModal
-          url={article.url}
-          title={article.title}
-          onClose={() => setShowBrowser(false)}
-        />
-      )}
     </>
   )
 }

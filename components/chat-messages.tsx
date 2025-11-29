@@ -8,6 +8,7 @@ import { RenderMessage } from './render-message'
 import { ToolSection } from './tool-section'
 import { Spinner } from './ui/spinner'
 import { ImpactAnalysisDisplay } from './impact-analysis-display'
+import { ThoughtProcess } from './ThoughtProcess'
 
 interface ChatSection {
   id: string
@@ -413,10 +414,13 @@ export function ChatMessages({
               {showLoading && (
                 <div className="mb-24">
                   <div
-                    className="p-12 flex items-center justify-center h-96"
+                    className="p-12 flex items-center justify-center min-h-[24rem]"
                     style={projectCardStyle}
                   >
-                    <Spinner />
+                    <ThoughtProcess
+                      toolName={lastToolData?.toolName}
+                      isSearching={lastToolData?.toolName === 'retrieve'}
+                    />
                   </div>
                 </div>
               )}

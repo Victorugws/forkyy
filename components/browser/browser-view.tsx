@@ -97,54 +97,88 @@ export function BrowserView({
   const [iframeUrl, setIframeUrl] = useState('')
   const [isInternal, setIsInternal] = useState(false)
   const [internalPath, setInternalPath] = useState('/')
+  const [pageContent, setPageContent] = useState('')
+  const [webviewPreloadPath, setWebviewPreloadPath] = useState<string>('')
 
-  // Electron-specific state
-  const [activeTabId, setActiveTabId] = useState<string | null>(null)
-
-  // Handle URL changes in Electron
+  // Load webview preload path for Electron
   useEffect(() => {
-    if (!isElectron || !url || isInternalRoute(url)) return
+    if (isElectron && typeof window !== 'undefined' && (window as any).electron?.getWebviewPreloadPath) {
+      (window as any).electron.getWebviewPreloadPath().then((path: string) => {
+        console.log('[BrowserView] ✅ Webview preload path loaded:', path)
+        console.log('[BrowserView] Path starts with file://?', path.startsWith('file://'))
 
-    const handleElectronNavigation = async () => {
-      try {
-        if (!activeTabId) {
-          // Create first tab
-          const tabId = await window.electron!.browser.createTab(url)
-          setActiveTabId(tabId)
+        // Ensure path has file:// protocol
+        if (!path.startsWith('file://')) {
+          console.error('[BrowserView] ❌ Path does not start with file://, fixing...')
+          const fixedPath = path.startsWith('/') ? `file://${path}` : `file:///${path}`
+          console.log('[BrowserView] Fixed path:', fixedPath)
+          setWebviewPreloadPath(fixedPath)
         } else {
-          // Navigate existing tab
-          await window.electron!.browser.navigate(activeTabId, url)
+          setWebviewPreloadPath(path)
         }
-      } catch (error) {
-        console.error('Electron navigation error:', error)
-        setError('Failed to navigate in Electron browser')
+      }).catch((err: any) => {
+        console.error('[BrowserView] ❌ Failed to get webview preload path:', err)
+      })
+    } else {
+      console.warn('[BrowserView] ⚠️ Electron API not available or not in Electron')
+    }
+  }, [])
+
+  // Set up webview IPC message handlers to relay cursor events
+  useEffect(() => {
+    if (!isElectron || !iframeRef.current || isInternal) return
+
+    const webview = iframeRef.current as any
+    const electronAPI = (window as any).electronAPI
+
+    console.log('[BrowserView] Setting up webview for:', iframeUrl, 'Element tag:', webview?.tagName)
+
+    if (!electronAPI) {
+      console.warn('[BrowserView] electronAPI not available for webview cursor relay')
+      return
+    }
+
+    const handleIpcMessage = (event: any) => {
+      const { channel, args } = event
+      console.log('[BrowserView] IPC message received:', channel, args)
+
+      // Relay cursor messages from webview to main process
+      if (channel === 'cursor-move') {
+        const [data] = args
+        console.log('[BrowserView] Relaying cursor-move:', data)
+        electronAPI.sendCursorMove?.(data)
+      } else if (channel === 'hover-target') {
+        const [data] = args
+        electronAPI.sendHoverTarget?.(data)
+      } else if (channel === 'cursor-mousedown' || channel === 'cursor-down') {
+        console.log('[BrowserView] Relaying cursor-down')
+        electronAPI.sendCursorMouseDown?.()
+      } else if (channel === 'cursor-mouseup' || channel === 'cursor-up') {
+        console.log('[BrowserView] Relaying cursor-up')
+        electronAPI.sendCursorMouseUp?.()
       }
     }
 
-    handleElectronNavigation()
-  }, [url, activeTabId])
+    // Forward console messages from webview to main console for debugging
+    const handleConsoleMessage = (event: any) => {
+      console.log(`[Webview Console] ${event.message}`)
+    }
 
-  // Listen for Electron tab updates
-  useEffect(() => {
-    if (!isElectron || !activeTabId) return
+    // Wait for webview to be ready before adding listener
+    const setupListener = () => {
+      console.log('[BrowserView] ✅ Webview ready! Setting up IPC listener for:', iframeUrl)
+      webview.addEventListener('ipc-message', handleIpcMessage)
+      webview.addEventListener('console-message', handleConsoleMessage)
+    }
 
-    const unsubscribe = window.electron!.browser.onTabUpdated(async (tabId) => {
-      if (tabId === activeTabId) {
-        const tabInfo = await window.electron!.browser.getTabInfo(tabId)
-        if (tabInfo) {
-          onTitleChange(tabInfo.title)
-          onLoadingChange(tabInfo.isLoading)
-          onCanGoBackChange(tabInfo.canGoBack)
-          onCanGoForwardChange(tabInfo.canGoForward)
-          if (tabInfo.url !== url) {
-            onNavigate(tabInfo.url)
-          }
-        }
-      }
-    })
+    // Always wait for dom-ready event to ensure webview is fully loaded
+    webview.addEventListener('dom-ready', setupListener, { once: true })
 
-    return unsubscribe
-  }, [isElectron, activeTabId])
+    return () => {
+      webview.removeEventListener?.('ipc-message', handleIpcMessage)
+      webview.removeEventListener?.('console-message', handleConsoleMessage)
+    }
+  }, [isElectron, isInternal, iframeUrl])
 
   // Handle URL changes
   useEffect(() => {
@@ -198,10 +232,8 @@ export function BrowserView({
 
   // Handle browser navigation events
   useEffect(() => {
-    const handleBack = async () => {
-      if (isElectron && activeTabId) {
-        await window.electron!.browser.goBack(activeTabId)
-      } else if (currentIndex > 0) {
+    const handleBack = () => {
+      if (currentIndex > 0) {
         const newIndex = currentIndex - 1
         setCurrentIndex(newIndex)
         setIframeUrl(history[newIndex])
@@ -209,10 +241,8 @@ export function BrowserView({
       }
     }
 
-    const handleForward = async () => {
-      if (isElectron && activeTabId) {
-        await window.electron!.browser.goForward(activeTabId)
-      } else if (currentIndex < history.length - 1) {
+    const handleForward = () => {
+      if (currentIndex < history.length - 1) {
         const newIndex = currentIndex + 1
         setCurrentIndex(newIndex)
         setIframeUrl(history[newIndex])
@@ -220,10 +250,8 @@ export function BrowserView({
       }
     }
 
-    const handleRefresh = async () => {
-      if (isElectron && activeTabId) {
-        await window.electron!.browser.reload(activeTabId)
-      } else if (iframeRef.current) {
+    const handleRefresh = () => {
+      if (iframeRef.current) {
         setError(null)
         onLoadingChange(true)
         iframeRef.current.src = iframeUrl
@@ -264,6 +292,7 @@ export function BrowserView({
 
           // Extract text content for AI
           const bodyText = iframeDoc.body?.innerText || ''
+          setPageContent(bodyText.slice(0, 10000))
           onContentChange(bodyText.slice(0, 10000)) // Limit content size
 
           // Update URL if iframe navigated
@@ -298,7 +327,10 @@ export function BrowserView({
       if (response.ok) {
         const data = await response.json()
         if (data.title) onTitleChange(data.title)
-        if (data.content) onContentChange(data.content)
+        if (data.content) {
+          setPageContent(data.content)
+          onContentChange(data.content)
+        }
       }
     } catch (e) {
       console.error('Failed to fetch page content:', e)
@@ -376,27 +408,77 @@ export function BrowserView({
         </div>
       )}
 
-      {/* Render external pages in Electron (placeholder for BrowserView) */}
-      {isElectron && url && !isInternal && (
-        <div className="w-full h-full bg-background">
-          {/* Electron BrowserView will be rendered here by the main process */}
-        </div>
-      )}
+      {/* Render external pages in webview (Electron) or iframe (web) */}
+      {iframeUrl && !isInternal && (
+        <>
+          {isElectron ? (
+            webviewPreloadPath ? (
+              <webview
+                ref={(el) => {
+                  (iframeRef as any).current = el
+                  if (el && !isInternal) {
+                    console.log('[BrowserView] Webview element created for:', iframeUrl)
+                    const electronAPI = (window as any).electronAPI
+                    if (!electronAPI) {
+                      console.warn('[BrowserView] electronAPI not available')
+                      return
+                    }
 
-      {/* Render external pages in iframe (web version) */}
-      {!isElectron && iframeUrl && !isInternal && (
-        <iframe
-          ref={iframeRef}
-          src={iframeUrl}
-          className={cn(
-            "w-full h-full border-0",
-            error && "hidden"
+                    // Set up IPC listeners immediately
+                    const handleIpcMessage = (event: any) => {
+                      const { channel, args } = event
+                      console.log('[BrowserView] IPC from webview:', channel)
+                      if (channel === 'cursor-move') {
+                        electronAPI.sendCursorMove?.(args[0])
+                      } else if (channel === 'cursor-down' || channel === 'cursor-mousedown') {
+                        electronAPI.sendCursorMouseDown?.()
+                      } else if (channel === 'cursor-up' || channel === 'cursor-mouseup') {
+                        electronAPI.sendCursorMouseUp?.()
+                      }
+                    }
+
+                    const handleConsoleMessage = (event: any) => {
+                      console.log(`[Webview] ${event.message}`)
+                    }
+
+                    el.addEventListener('ipc-message', handleIpcMessage)
+                    el.addEventListener('console-message', handleConsoleMessage)
+                    el.addEventListener('dom-ready', () => {
+                      console.log('[BrowserView] Webview dom-ready for:', iframeUrl)
+                    })
+                  }
+                }}
+                src={iframeUrl}
+                className={cn(
+                  "w-full h-full border-0",
+                  error && "hidden"
+                )}
+                style={{ display: error ? 'none' : 'flex' }}
+                // @ts-ignore - Electron webview attributes
+                allowpopups="true"
+                webpreferences="nodeIntegration=yes,contextIsolation=no"
+                preload={webviewPreloadPath}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground">Loading...</p>
+              </div>
+            )
+          ) : (
+            <iframe
+              ref={iframeRef}
+              src={iframeUrl}
+              className={cn(
+                "w-full h-full border-0",
+                error && "hidden"
+              )}
+              onLoad={handleLoad}
+              onError={handleError}
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+              title="Browser View"
+            />
           )}
-          onLoad={handleLoad}
-          onError={handleError}
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-          title="Browser View"
-        />
+        </>
       )}
     </div>
   )

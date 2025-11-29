@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { HeaderNavbar } from '@/components/header-navbar'
+import { CustomDock } from '@/components/CustomDock'
 
 const defaultSpaces = [
   {
@@ -101,7 +101,7 @@ export default function SpacesPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <HeaderNavbar user={null} />
+      <CustomDock />
       {/* Hero Section */}
       <div className="border-b border-border bg-gradient-to-br from-background via-background to-primary/5">
         <div className="container max-w-7xl mx-auto px-6 py-12">

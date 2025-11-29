@@ -232,6 +232,7 @@ export function MorphingCanvas({
         className="absolute inset-0 pointer-events-none"
         style={{
           ...getEyeStyle(),
+          zIndex: 2,
           transition: 'all 2000ms cubic-bezier(0.25, 0.1, 0.25, 1)' // Smooth transition
         }}
       >
@@ -246,6 +247,7 @@ export function MorphingCanvas({
         `}
         style={{
           ...getSearchStyle(),
+          zIndex: 10,
           transition: 'all 3000ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 3 second growth/shrink transition
         }}
       >

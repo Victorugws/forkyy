@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { PromptSuggestionsTicker } from '@/components/PromptSuggestionsTicker'
 
 interface BookmarksBarProps {
   bookmarks: Bookmark[]
@@ -80,10 +81,14 @@ export function BookmarksBar({
         </Button>
       )}
 
+      <div className="flex-1 mx-2 min-w-0">
+        <PromptSuggestionsTicker />
+      </div>
+
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 px-2 ml-auto"
+        className="h-7 px-2"
         onClick={onManage}
       >
         <Folder className="w-3 h-3 mr-1" />

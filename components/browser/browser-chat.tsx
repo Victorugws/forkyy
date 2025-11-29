@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sparkles, FileText, List, X } from 'lucide-react'
 import Textarea from 'react-textarea-autosize'
+import { ThoughtProcess } from '@/components/ThoughtProcess'
 
 interface BrowserChatProps {
   id: string
@@ -120,8 +121,8 @@ export function BrowserChat({
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <p className="text-sm text-gray-600">Thinking...</p>
+                <div className="bg-gray-100 rounded-2xl px-6 py-4 w-full">
+                  <ThoughtProcess isSearching={false} />
                 </div>
               </div>
             )}

@@ -212,9 +212,9 @@ export function Chat({
   // Sample related questions (can be populated from API response)
   const relatedQuestions = messages.length > 0
     ? [
-        { question: 'What are the latest developments in this field?', href: '/search?q=latest+developments' },
-        { question: 'How does this compare to previous research?', href: '/search?q=compare+research' },
-        { question: 'What are the practical applications?', href: '/search?q=practical+applications' }
+        { question: 'What are the latest developments in this field?', href: `/search?q=latest+developments` },
+        { question: 'How does this compare to previous research?', href: `/search?q=compare+research` },
+        { question: 'What are the practical applications?', href: `/search?q=practical+applications` }
       ]
     : []
 

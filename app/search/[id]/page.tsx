@@ -4,7 +4,7 @@ import { getCurrentUserId } from '@/lib/auth/get-current-user'
 import { getModels } from '@/lib/config/models'
 import { convertToUIMessages } from '@/lib/utils'
 import { notFound, redirect } from 'next/navigation'
-import { ExtendedCoreMessage, SearchResults } from '@/lib/types'; // Added SearchResults
+import { ExtendedCoreMessage, SearchResults } from '@/lib/types'
 
 export const maxDuration = 60
 
@@ -20,7 +20,7 @@ export async function generateMetadata(props: {
 
   const { id } = await props.params;
   const userId = await getCurrentUserId();
-  const chat = await getChat(id, userId || 'anonymous'); // Ensure fallback for userId
+  const chat = await getChat(id, userId || 'anonymous');
 
   let metadata: { title: string; openGraph?: { images?: { url: string; width?: number; height?: number }[] } } = {
     title: chat?.title?.toString().slice(0, 50) || 'Search',
@@ -32,7 +32,6 @@ export async function generateMetadata(props: {
     );
 
     if (dataMessage && dataMessage.content) {
-      // Assuming dataMessage.content is of type SearchResults or a compatible structure
       const searchData = dataMessage.content as SearchResults;
       if (searchData.images && searchData.images.length > 0) {
         const firstImage = searchData.images[0];
@@ -46,43 +45,42 @@ export async function generateMetadata(props: {
 
         if (imageUrl) {
           metadata.openGraph = {
-            images: [{ url: imageUrl, width: 1200, height: 630 }], // Standard OG image dimensions
+            images: [{ url: imageUrl, width: 1200, height: 630 }],
           };
         }
       }
     }
   }
-  // If no image is found, metadata.openGraph.images will remain undefined,
-  // allowing fallback to parent or global OG image settings.
   return metadata;
 }
 
-// ... rest of the file (default export SearchPage) remains the same
 export default async function SearchPage(props: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ q?: string }>
 }) {
   const enableSaveChatHistory = process.env.ENABLE_SAVE_CHAT_HISTORY === 'true'
-
-  // If chat history is disabled, redirect to home
-  if (!enableSaveChatHistory) {
-    redirect('/')
-  }
-
   const userId = await getCurrentUserId()
   const { id } = await props.params
+  const { q } = await props.searchParams
 
-  const chat = await getChat(id, userId)
-  // convertToUIMessages for useChat hook
-  const messages = convertToUIMessages(chat?.messages || [])
-
-  if (!chat) {
+  // If chat history is disabled, still allow new chats with query parameter
+  if (!enableSaveChatHistory && !q) {
     redirect('/')
   }
 
-  if (chat?.userId !== userId && chat?.userId !== 'anonymous') {
+  const chat = await getChat(id, userId)
+  const messages = convertToUIMessages(chat?.messages || [])
+
+  // If no existing chat and no query, redirect to home
+  if (!chat && !q) {
+    redirect('/')
+  }
+
+  // If chat exists but user doesn't have permission, show not found
+  if (chat && chat?.userId !== userId && chat?.userId !== 'anonymous') {
     notFound()
   }
 
   const models = await getModels()
-  return <Chat id={id} savedMessages={messages} models={models} />
+  return <Chat id={id} savedMessages={messages} query={q} models={models} />
 }

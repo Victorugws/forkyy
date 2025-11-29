@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { ResultCard } from './TabbedResultsPanel'
-import { ExternalLink, Clock, TrendingUp, Image as ImageIcon, Video, DollarSign, ChevronDown, ChevronUp, Play, Search, Settings } from 'lucide-react'
+import { ExternalLink, Clock, TrendingUp, Image as ImageIcon, Video, DollarSign, ChevronDown, ChevronUp, Play, Search, Settings, MessageSquare, Globe, Newspaper, ShoppingCart, Map, TrendingUpIcon } from 'lucide-react'
 
 /**
  * GoogleStyleResults
@@ -37,6 +37,22 @@ export function GoogleStyleResults({
   className = ''
 }: GoogleStyleResultsProps) {
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null)
+  const [searchInput, setSearchInput] = useState(searchQuery)
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return
+
+    // Generate a new chat ID and navigate to morphic chat page
+    const newChatId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+    window.dispatchEvent(new CustomEvent('browser:navigate', {
+      detail: { url: `/search/${newChatId}?q=${encodeURIComponent(query)}` }
+    }))
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleSearch(searchInput)
+  }
 
   const defaultCommentary = `Based on current information about "${searchQuery}", here's what you need to know:`
 
@@ -95,7 +111,44 @@ export function GoogleStyleResults({
 
   const displayResults = results.length > 0 ? results : defaultResults
   const [activeTab, setActiveTab] = useState('All')
-  const tabs = ['Chat', 'All', 'Images', 'Videos', 'News', 'Shopping', 'Maps', 'Financials']
+
+  const tabs = [
+    { name: 'Chat', icon: MessageSquare },
+    { name: 'All', icon: Globe },
+    { name: 'Images', icon: ImageIcon },
+    { name: 'Videos', icon: Video },
+    { name: 'News', icon: Newspaper },
+    { name: 'Templates', icon: TrendingUpIcon },
+  ]
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab)
+
+    // Navigate to specific pages or trigger chat sessions based on tab
+    switch (tab) {
+      case 'Chat':
+        // Start a new chat session with the current search query
+        handleSearch(searchQuery)
+        break
+      case 'Images':
+        window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/images' } }))
+        break
+      case 'Videos':
+        window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/videos' } }))
+        break
+      case 'News':
+        // Trigger chat session with news query
+        handleSearch(`${searchQuery} news`)
+        break
+      case 'Templates':
+        // Navigate to templates or trigger search
+        handleSearch(`${searchQuery} templates`)
+        break
+      default:
+        // 'All' tab just stays on current page
+        break
+    }
+  }
 
   return (
     <div className={`${className}`}>
@@ -104,18 +157,25 @@ export function GoogleStyleResults({
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             {/* Search Input */}
-            <div className="flex-1 max-w-3xl">
+            <form onSubmit={handleSearchSubmit} className="flex-1 max-w-3xl">
               <div className="neu-input rounded-full px-6 py-3 flex items-center gap-3">
                 <Search className="size-5 text-muted-foreground" />
                 <input
                   type="text"
-                  defaultValue={searchQuery}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSearchSubmit(e as any)
+                    }
+                  }}
                   className="flex-1 bg-transparent outline-none text-foreground text-base"
                   placeholder="Search..."
                 />
                 <Settings className="size-5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -124,19 +184,23 @@ export function GoogleStyleResults({
       <div className="px-4 lg:px-8 border-b border-border/30">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                  activeTab === tab
-                    ? 'neu-raised text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.name}
+                  onClick={() => handleTabClick(tab.name)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+                    activeTab === tab.name
+                      ? 'neu-raised text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="size-4" />
+                  {tab.name}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -338,9 +402,12 @@ export function GoogleStyleResults({
                     ))
                   )}
                 </div>
-                <a href="#" className="text-xs text-primary hover:underline mt-3 inline-block font-medium">
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/images' } }))}
+                  className="text-xs text-primary hover:underline mt-3 inline-block font-medium"
+                >
                   View all images →
-                </a>
+                </button>
               </div>
 
               {/* Videos Section */}
@@ -393,9 +460,12 @@ export function GoogleStyleResults({
                     ))
                   )}
                 </div>
-                <a href="#" className="text-xs text-primary hover:underline mt-3 inline-block font-medium">
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/videos' } }))}
+                  className="text-xs text-primary hover:underline mt-3 inline-block font-medium"
+                >
                   View all videos →
-                </a>
+                </button>
               </div>
 
               {/* Financials Section */}
@@ -421,9 +491,12 @@ export function GoogleStyleResults({
                     </div>
                   ))}
                 </div>
-                <a href="#" className="text-xs text-primary hover:underline mt-3 inline-block font-medium">
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/finance' } }))}
+                  className="text-xs text-primary hover:underline mt-3 inline-block font-medium"
+                >
                   View all data →
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -435,6 +508,7 @@ export function GoogleStyleResults({
               {relatedSearches.map((search, index) => (
                 <button
                   key={index}
+                  onClick={() => handleSearch(search)}
                   className="neu-card px-4 py-2 rounded-full text-xs text-foreground font-medium hover:bg-primary/5 transition-colors"
                 >
                   {search}

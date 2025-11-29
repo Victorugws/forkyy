@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const type = searchParams.get('type') // 'featured', 'top', 'topic'
+  const type = searchParams.get('type') // 'featured', 'top', 'topic', 'trending', 'top-articles'
   const topic = searchParams.get('topic') || 'breaking news'
 
   try {
@@ -15,6 +15,18 @@ export async function GET(request: Request) {
         fallback: true,
         data: getFallbackNews(type)
       })
+    }
+
+    // Handle trending topics request
+    if (type === 'trending') {
+      const trending = await fetchTrendingTopics(tavilyKey)
+      return NextResponse.json({ success: true, data: trending })
+    }
+
+    // Handle top articles request
+    if (type === 'top-articles') {
+      const articles = await fetchTopArticles(tavilyKey)
+      return NextResponse.json({ success: true, data: articles })
     }
 
     const query = type === 'featured' ? 'breaking news today' : topic
@@ -72,6 +84,105 @@ export async function GET(request: Request) {
   }
 }
 
+async function fetchTrendingTopics(apiKey: string) {
+  const response = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      api_key: apiKey,
+      query: 'trending news topics today',
+      search_depth: 'basic',
+      include_images: false,
+      include_answer: false,
+      max_results: 10
+    })
+  })
+
+  const data = await response.json()
+
+  if (data.results && data.results.length > 0) {
+    return data.results.map((item: any, index: number) => {
+      const category = extractCategory(item.title, item.content)
+      return {
+        id: `${index + 1}`,
+        name: item.title.split(' ').slice(0, 6).join(' '),
+        count: `${Math.floor(Math.random() * 100 + 30)}K`,
+        trend: index < 3 ? 'hot' : index < 7 ? 'rising' : 'stable',
+        category: category,
+        url: item.url
+      }
+    })
+  }
+
+  return getFallbackNews('trending')
+}
+
+async function fetchTopArticles(apiKey: string) {
+  const response = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      api_key: apiKey,
+      query: 'breaking news today',
+      search_depth: 'basic',
+      include_images: false,
+      include_answer: false,
+      max_results: 5
+    })
+  })
+
+  const data = await response.json()
+
+  if (data.results && data.results.length > 0) {
+    return data.results.map((item: any, index: number) => ({
+      id: `${index + 1}`,
+      title: item.title,
+      source: new URL(item.url).hostname.replace('www.', '').split('.')[0].toUpperCase(),
+      views: `${(Math.random() * 2 + 0.5).toFixed(1)}M`,
+      timeAgo: getTimeAgo(item.published_date),
+      category: extractCategory(item.title, item.content),
+      url: item.url
+    }))
+  }
+
+  return getFallbackNews('top-articles')
+}
+
+function extractCategory(title: string, content?: string): string {
+  const text = `${title} ${content || ''}`.toLowerCase()
+
+  if (text.includes('politic') || text.includes('government') || text.includes('election')) return 'Politics'
+  if (text.includes('tech') || text.includes('ai') || text.includes('software')) return 'Technology'
+  if (text.includes('crypto') || text.includes('bitcoin') || text.includes('stock') || text.includes('market')) return 'Finance'
+  if (text.includes('space') || text.includes('nasa') || text.includes('rocket')) return 'Science'
+  if (text.includes('climate') || text.includes('environment')) return 'Environment'
+  if (text.includes('sport') || text.includes('game')) return 'Sports'
+  if (text.includes('health') || text.includes('medical')) return 'Health'
+
+  return 'General'
+}
+
+function getTimeAgo(dateString?: string): string {
+  if (!dateString) return '1h ago'
+
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+    if (diffHours < 1) return `${Math.floor(diffMs / (1000 * 60))}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${Math.floor(diffHours / 24)}d ago`
+  } catch {
+    return '1h ago'
+  }
+}
+
 function getFallbackNews(type: string | null) {
   const featured = {
     title: 'Trump says US close to trade deal with India',
@@ -89,7 +200,7 @@ function getFallbackNews(type: string | null) {
       title: 'Private credit market tops $3T as regulators warn of risks',
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
       source: 'reuters',
-      url: 'https://www.reuters.com/markets/',
+      url: 'https://www.reuters.com/world/us/',
       views: '75K',
       sources: 45,
       publishedHours: 12
@@ -114,8 +225,37 @@ function getFallbackNews(type: string | null) {
     }
   ]
 
+  const trendingTopics = [
+    { id: '1', name: 'G20 Summit 2025', count: '125K', trend: 'hot', category: 'Politics' },
+    { id: '2', name: 'Quantum Computing', count: '98K', trend: 'rising', category: 'Technology' },
+    { id: '3', name: 'Bitcoin Crash', count: '87K', trend: 'hot', category: 'Finance' },
+    { id: '4', name: 'Space Exploration', count: '76K', trend: 'rising', category: 'Science' },
+    { id: '5', name: 'AI Regulation', count: '65K', trend: 'stable', category: 'Tech Policy' },
+    { id: '6', name: 'Climate Action', count: '54K', trend: 'rising', category: 'Environment' },
+    { id: '7', name: 'Electric Vehicles', count: '48K', trend: 'stable', category: 'Automotive' },
+    { id: '8', name: 'Meta Privacy Case', count: '43K', trend: 'hot', category: 'Tech' },
+    { id: '9', name: 'Moon Base Plans', count: '38K', trend: 'rising', category: 'Space' },
+    { id: '10', name: 'Renewable Energy', count: '32K', trend: 'stable', category: 'Energy' }
+  ]
+
+  const topArticles = [
+    { id: '1', title: 'South Africa hosts first G20 summit on African soil', source: 'BBC News', views: '2.3M', timeAgo: '2h ago', category: 'Politics' },
+    { id: '2', title: 'NASA astronaut Williams to launch to space station', source: 'Space.com', views: '1.8M', timeAgo: '4h ago', category: 'Science' },
+    { id: '3', title: 'Bitcoin plunges to seven-month low amid selling wave', source: 'Reuters', views: '1.5M', timeAgo: '1h ago', category: 'Finance' },
+    { id: '4', title: 'AI boom drives smartphone and laptop prices up', source: 'TechCrunch', views: '1.2M', timeAgo: '3h ago', category: 'Technology' },
+    { id: '5', title: 'Spain court orders Meta to pay $352M for privacy violations', source: 'The Verge', views: '980K', timeAgo: '5h ago', category: 'Tech' }
+  ]
+
   if (type === 'featured') {
     return featured
+  }
+
+  if (type === 'trending') {
+    return trendingTopics
+  }
+
+  if (type === 'top-articles') {
+    return topArticles
   }
 
   return topNews

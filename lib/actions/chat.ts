@@ -119,6 +119,11 @@ export async function getChatsPage(
 }
 
 export async function getChat(id: string, userId: string = 'anonymous') {
+  // Return null early if chat history is disabled
+  if (process.env.NEXT_PUBLIC_ENABLE_SAVE_CHAT_HISTORY !== 'true') {
+    return null
+  }
+
   const redis = await getRedis()
   const chat = await redis.hgetall<Chat>(`chat:${id}`)
 

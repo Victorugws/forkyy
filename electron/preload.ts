@@ -148,6 +148,43 @@ contextBridge.exposeInMainWorld('electronAPI', {
   }
 })
 
+// Expose eye tracking API
+contextBridge.exposeInMainWorld('eyeTracking', {
+  setEnabled: (enabled: boolean): Promise<boolean> =>
+    ipcRenderer.invoke('eye-tracking:set-enabled', enabled),
+
+  isEnabled: (): Promise<boolean> =>
+    ipcRenderer.invoke('eye-tracking:is-enabled'),
+
+  updateConfig: (config: { smoothing?: number; sensitivity?: number }): Promise<any> =>
+    ipcRenderer.invoke('eye-tracking:update-config', config),
+
+  getConfig: (): Promise<any> =>
+    ipcRenderer.invoke('eye-tracking:get-config'),
+
+  moveCursor: (x: number, y: number) => {
+    ipcRenderer.send('eye-tracking:move-cursor', { x, y })
+  },
+
+  moveCursorTo: (x: number, y: number) => {
+    ipcRenderer.send('eye-tracking:move-cursor-to', { x, y })
+  },
+
+  getCursorPosition: (): Promise<{ x: number; y: number }> =>
+    ipcRenderer.invoke('eye-tracking:get-cursor-position'),
+
+  click: () => {
+    ipcRenderer.send('eye-tracking:click')
+  },
+
+  doubleClick: () => {
+    ipcRenderer.send('eye-tracking:double-click')
+  },
+
+  reset: (): Promise<void> =>
+    ipcRenderer.invoke('eye-tracking:reset')
+})
+
 // Track cursor movement and send to overlay
 // System cursor remains visible
 document.addEventListener('DOMContentLoaded', () => {

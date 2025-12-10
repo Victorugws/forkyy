@@ -1,14 +1,17 @@
 'use client'
 
-import { CHAT_ID } from '@/lib/constants'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+import { useChat } from '@ai-sdk/react'
+import { ChatRequestOptions } from 'ai'
+import { Message } from 'ai/react'
+import { toast } from 'sonner'
+
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
-import { ChatRequestOptions, Message, useChat } from 'ai/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
+
 import { ChatMessages } from './chat-messages'
 import { ChatPanel } from './chat-panel'
-import { AssistantSidebar } from './assistant-sidebar'
 
 // Define section structure
 interface ChatSection {
@@ -46,12 +49,16 @@ export function Chat({
     reload
   } = useChat({
     initialMessages: savedMessages,
-    id: CHAT_ID,
+    id: id, // Use unique chat ID for isolated streaming
     body: {
       id
     },
     onFinish: () => {
-      window.history.replaceState({}, '', `/search/${id}`)
+      // Only update URL if we're on the home page (new chat)
+      // Don't update if we're already on a search page to avoid hijacking navigation
+      if (window.location.pathname === '/') {
+        window.history.replaceState({}, '', `/search/${id}`)
+      }
       window.dispatchEvent(new CustomEvent('chat-history-updated'))
     },
     onError: error => {
@@ -117,7 +124,12 @@ export function Chat({
 
   // Scroll to the section when a new user message is sent
   useEffect(() => {
-    if (sections.length > 0) {
+    // Only scroll if this chat is currently visible in the URL
+    const isCurrentChat =
+      window.location.pathname === `/search/${id}` ||
+      (window.location.pathname === '/' && sections.length > 0)
+
+    if (isCurrentChat && sections.length > 0) {
       const lastMessage = messages[messages.length - 1]
       if (lastMessage && lastMessage.role === 'user') {
         // If the last message is from user, find the corresponding section
@@ -128,7 +140,7 @@ export function Chat({
         })
       }
     }
-  }, [sections, messages])
+  }, [sections, messages, id])
 
   useEffect(() => {
     setMessages(savedMessages)
@@ -198,86 +210,39 @@ export function Chat({
     handleSubmit(e)
   }
 
-  // Extract sources from data if available
-  const sources =
-    data?.length > 0 && data[0]?.results
-      ? data[0].results.slice(0, 8).map((result: any) => ({
-          title: result.title || '',
-          url: result.url || '',
-          snippet: result.content || result.description || '',
-          favicon: `https://www.google.com/s2/favicons?domain=${new URL(result.url).hostname}&sz=32`
-        }))
-      : []
-
-  // Sample related questions (can be populated from API response)
-  const relatedQuestions = messages.length > 0
-    ? [
-        { question: 'What are the latest developments in this field?', href: `/search?q=latest+developments` },
-        { question: 'How does this compare to previous research?', href: `/search?q=compare+research` },
-        { question: 'What are the practical applications?', href: `/search?q=practical+applications` }
-      ]
-    : []
-
   return (
-    <>
-      <div
-        className={cn(
-          'relative flex h-full min-w-0 flex-1 flex-col',
-          messages.length === 0 ? 'items-center justify-center' : ''
-        )}
-        data-testid="full-chat"
-      >
-        {/* Orbai-inspired background for empty state */}
-        {messages.length === 0 && (
-          <>
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-              <iframe
-                src="https://orbai-template.framer.website"
-                className="w-full h-full border-0 scale-110 blur-[2px]"
-                title="Background"
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-radial from-background/60 via-background/80 to-background pointer-events-none" />
-          </>
-        )}
-
-        <ChatMessages
-          sections={sections}
-          data={data}
-          onQuerySelect={onQuerySelect}
-          isLoading={isLoading}
-          chatId={id}
-          addToolResult={addToolResult}
-          scrollContainerRef={scrollContainerRef}
-          onUpdateMessage={handleUpdateAndReloadMessage}
-          reload={handleReloadFrom}
-        />
-        <ChatPanel
-          input={input}
-          handleInputChange={handleInputChange}
-          handleSubmit={onSubmit}
-          isLoading={isLoading}
-          messages={messages}
-          setMessages={setMessages}
-          stop={stop}
-          query={query}
-          append={append}
-          models={models}
-          showScrollToBottomButton={!isAtBottom}
-          scrollContainerRef={scrollContainerRef}
-        />
-      </div>
-      {messages.length > 0 && (
-        <AssistantSidebar
-          sources={sources}
-          relatedQuestions={relatedQuestions}
-          summary={
-            messages.length > 1
-              ? 'This conversation explores various topics with AI assistance. Use the sources and related questions to dive deeper.'
-              : undefined
-          }
-        />
+    <div
+      className={cn(
+        'relative flex h-full min-w-0 flex-1 flex-col',
+        messages.length === 0 ? 'items-center justify-center' : ''
       )}
-    </>
+      data-testid="full-chat"
+    >
+      <ChatMessages
+        sections={sections}
+        data={data}
+        onQuerySelect={onQuerySelect}
+        isLoading={isLoading}
+        chatId={id}
+        addToolResult={addToolResult}
+        scrollContainerRef={scrollContainerRef}
+        onUpdateMessage={handleUpdateAndReloadMessage}
+        reload={handleReloadFrom}
+      />
+      <ChatPanel
+        input={input}
+        handleInputChange={handleInputChange}
+        handleSubmit={onSubmit}
+        isLoading={isLoading}
+        messages={messages}
+        setMessages={setMessages}
+        stop={stop}
+        query={query}
+        append={append}
+        models={models}
+        showScrollToBottomButton={!isAtBottom}
+        scrollContainerRef={scrollContainerRef}
+      />
+    </div>
   )
 }

@@ -7,7 +7,6 @@ import { CustomDock } from '@/components/CustomDock'
 import { IconWrapper } from '@/components/ui/icons'
 import { MarketIndicesGrid } from '@/components/finance/MarketIndicesGrid'
 import { CryptoGrid } from '@/components/finance/CryptoGrid'
-import { MarketSummary } from '@/components/finance/MarketSummary'
 import { EarningsCalendar } from '@/components/finance/EarningsCalendar'
 import { StockScreener } from '@/components/finance/StockScreener'
 import { PoliticianTrades } from '@/components/finance/PoliticianTrades'
@@ -21,6 +20,12 @@ import { Standouts } from '@/components/finance/Standouts'
 import { CryptoLeaderboard } from '@/components/finance/CryptoLeaderboard'
 import { CoinbaseIndex } from '@/components/finance/CoinbaseIndex'
 import { useWatchlist } from '@/hooks/useWatchlist'
+import { MarketMovers } from '@/components/finance/MarketMovers'
+import { SectorPerformance } from '@/components/finance/SectorPerformance'
+import { EconomicCalendar } from '@/components/finance/EconomicCalendar'
+import { PriceAlerts } from '@/components/finance/PriceAlerts'
+import { PortfolioTracker } from '@/components/finance/PortfolioTracker'
+import { MarketOverview } from '@/components/finance/MarketOverview'
 
 export default function FinancePage() {
   const [selectedCountry, setSelectedCountry] = useState('United States')
@@ -190,7 +195,7 @@ export default function FinancePage() {
               onClick={() => setActiveTab(tab)}
               className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                 activeTab === tab
-                  ? 'neu-inset text-primary bg-primary/10'
+                  ? 'text-primary neu-card'
                   : 'neu-button hover:neu-inset text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -199,78 +204,182 @@ export default function FinancePage() {
           ))}
         </div>
 
+        {/* Market Overview - Always visible for context */}
+        <div className="mb-8">
+          <MarketOverview />
+        </div>
+
         {/* Tab Content */}
         {activeTab.includes('Markets') && (
           <>
-            <MarketInsights type="US Markets" data={marketIndices} timeframe={timeframe} />
-            <MarketIndicesGrid
-              indices={marketIndices}
-              loading={loading}
-              onAddToWatchlist={addToWatchlist}
-              watchlist={watchlist}
-            />
-            <MarketSummary topic={`${selectedCountry} Markets`} />
-            <RecentDevelopments topic={`${selectedCountry} Markets`} limit={3} />
-            <PopularSpaces type="markets" />
-            <Standouts type="stocks" />
+            {/* Market Summary & Insights */}
+            <div className="mb-8">
+              <MarketInsights type="US Markets" data={marketIndices} timeframe={timeframe} />
+            </div>
+            
+            {/* Primary Market Data */}
+            <div className="mb-8">
+              <MarketIndicesGrid
+                indices={marketIndices}
+                loading={loading}
+                onAddToWatchlist={addToWatchlist}
+                watchlist={watchlist}
+              />
+            </div>
+            
+            {/* Market Movers - Combined View */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <MarketMovers type="gainers" limit={5} />
+              <MarketMovers type="losers" limit={5} />
+            </div>
+            
+            {/* Sector Analysis */}
+            <div className="mb-8">
+              <SectorPerformance />
+            </div>
+            
+            {/* Recent Market Developments */}
+            <div className="mb-8">
+              <RecentDevelopments topic={`${selectedCountry} Markets`} limit={4} />
+            </div>
+            
+            {/* Standout Performers */}
+            <div className="mb-8">
+              <Standouts type="stocks" />
+            </div>
+            
+            {/* Popular Research Spaces */}
+            <div className="mb-8">
+              <PopularSpaces type="markets" />
+            </div>
           </>
         )}
 
         {activeTab === 'Crypto' && (
           <>
-            <MarketInsights type="Crypto" data={cryptoData} timeframe={timeframe} />
-            <CryptoGrid cryptos={cryptoData} loading={loading} />
-            <CryptoLeaderboard />
-            <MarketSummary topic="Crypto" />
-            <RecentDevelopments topic="Crypto" limit={3} />
-            <PopularSpaces type="crypto" />
-            <CoinbaseIndex />
-            <Standouts type="crypto" />
+            {/* Crypto Summary & Insights */}
+            <div className="mb-8">
+              <MarketInsights type="Crypto" data={cryptoData} timeframe={timeframe} />
+            </div>
+            
+            {/* Primary Crypto Data */}
+            <div className="mb-8">
+              <CryptoGrid cryptos={cryptoData} loading={loading} />
+            </div>
+            
+            {/* Crypto Market Movers */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <MarketMovers type="gainers" limit={5} />
+              <MarketMovers type="most-active" limit={5} />
+            </div>
+            
+            {/* Crypto Leaderboard */}
+            <div className="mb-8">
+              <CryptoLeaderboard />
+            </div>
+            
+            {/* Coinbase Index */}
+            <div className="mb-8">
+              <CoinbaseIndex />
+            </div>
+            
+            {/* Recent Crypto Developments */}
+            <div className="mb-8">
+              <RecentDevelopments topic="Crypto" limit={4} />
+            </div>
+            
+            {/* Standout Cryptocurrencies */}
+            <div className="mb-8">
+              <Standouts type="crypto" />
+            </div>
+            
+            {/* Popular Research Spaces */}
+            <div className="mb-8">
+              <PopularSpaces type="crypto" />
+            </div>
           </>
         )}
 
         {activeTab === 'Earnings' && (
           <>
-            <MarketInsights type="Earnings" timeframe={timeframe} />
-            <EarningsCalendar />
-            <MarketProgressionChart
-              title="Earnings Impact"
-              timeframe={timeframe}
-              onTimeframeChange={setTimeframe}
-            />
+            {/* Earnings Summary */}
+            <div className="mb-8">
+              <MarketInsights type="Earnings" timeframe={timeframe} />
+            </div>
+            
+            {/* Earnings Calendar */}
+            <div className="mb-8">
+              <EarningsCalendar />
+            </div>
+            
+            {/* Economic Calendar */}
+            <div className="mb-8">
+              <EconomicCalendar />
+            </div>
+            
+            {/* Earnings Impact Analysis */}
+            <div className="mb-8">
+              <MarketProgressionChart
+                title="Earnings Impact"
+                timeframe={timeframe}
+                onTimeframeChange={setTimeframe}
+              />
+            </div>
           </>
         )}
 
         {activeTab === 'Screener' && (
           <>
-            <MarketInsights type="Screener" data={screenerStocks} timeframe={timeframe} />
-            <StockScreener
-              stocks={screenerStocks}
-              loading={loading}
-              onAddToWatchlist={addToWatchlist}
-              watchlist={watchlist}
-            />
-            <MarketProgressionChart
-              title="Screener Performance"
-              timeframe={timeframe}
-              onTimeframeChange={setTimeframe}
-            />
+            {/* Screener Summary */}
+            <div className="mb-8">
+              <MarketInsights type="Screener" data={screenerStocks} timeframe={timeframe} />
+            </div>
+            
+            {/* Stock Screener Tool */}
+            <div className="mb-8">
+              <StockScreener
+                stocks={screenerStocks}
+                loading={loading}
+                onAddToWatchlist={addToWatchlist}
+                watchlist={watchlist}
+              />
+            </div>
+            
+            {/* Screener Performance Analysis */}
+            <div className="mb-8">
+              <MarketProgressionChart
+                title="Screener Performance"
+                timeframe={timeframe}
+                onTimeframeChange={setTimeframe}
+              />
+            </div>
           </>
         )}
 
         {activeTab === 'Politicians' && (
           <>
-            <MarketInsights type="Politicians" data={politicianTrades} timeframe={timeframe} />
-            <PoliticianTrades
-              trades={politicianTrades}
-              loading={loading}
-              selectedCountry={selectedCountry}
-            />
-            <MarketProgressionChart
-              title="Political Trading Impact"
-              timeframe={timeframe}
-              onTimeframeChange={setTimeframe}
-            />
+            {/* Political Trading Summary */}
+            <div className="mb-8">
+              <MarketInsights type="Politicians" data={politicianTrades} timeframe={timeframe} />
+            </div>
+            
+            {/* Politician Trades List */}
+            <div className="mb-8">
+              <PoliticianTrades
+                trades={politicianTrades}
+                loading={loading}
+                selectedCountry={selectedCountry}
+              />
+            </div>
+            
+            {/* Political Trading Impact Analysis */}
+            <div className="mb-8">
+              <MarketProgressionChart
+                title="Political Trading Impact"
+                timeframe={timeframe}
+                onTimeframeChange={setTimeframe}
+              />
+            </div>
           </>
         )}
       </div>

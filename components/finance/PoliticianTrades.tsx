@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Globe } from 'lucide-react'
 import { CompanyLogo } from './CompanyLogo'
+import { PoliticianAvatar } from './PoliticianAvatar'
 
 interface Trade {
   name: string
@@ -36,26 +37,23 @@ export function PoliticianTrades({ trades, loading, selectedCountry = 'United St
       </p>
 
       {/* Politicians Trades List */}
-      <div className="space-y-3">
+      <div className="neu-card rounded-xl overflow-hidden">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-xl neu-card h-24 animate-pulse">
+            <div key={i}>
+              <div className="p-4 h-24 animate-pulse">
               <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
               <div className="h-3 bg-muted rounded w-1/4"></div>
+              </div>
+              {i < 4 && <div className="border-t border-border/50 mx-4" />}
             </div>
           ))
         ) : (
           trades.map((trade, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-4 rounded-xl neu-card group"
-            >
+            <div key={index}>
+              <div className="flex items-center justify-between p-4 group hover:bg-background/30 transition-all">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                  <span className="text-sm font-bold text-primary">
-                    {trade.name.split(' ').map(n => n[0]).join('')}
-                  </span>
-                </div>
+                  <PoliticianAvatar name={trade.name} size={48} />
                 <div>
                   <div className="text-sm font-medium text-foreground">
                     {trade.name}
@@ -96,6 +94,10 @@ export function PoliticianTrades({ trades, loading, selectedCountry = 'United St
                   <div className="text-xs text-muted-foreground">{trade.date}</div>
                 </div>
               </div>
+              </div>
+              {index < trades.length - 1 && (
+                <div className="border-t border-border/50 mx-4" />
+              )}
             </div>
           ))
         )}

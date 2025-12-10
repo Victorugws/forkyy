@@ -1,7 +1,13 @@
 'use client'
 
-import { TrendingUp, TrendingDown } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi
+} from '@/components/ui/carousel'
 
 interface StandoutStock {
   id: string
@@ -26,6 +32,38 @@ interface StandoutsProps {
 
 export function Standouts({ type = 'stocks' }: StandoutsProps) {
   const [standouts, setStandouts] = useState<StandoutStock[]>([])
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCurrent(api.selectedScrollSnap() + 1)
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
+  // Auto-scroll functionality
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    if (!api || isPaused) return
+
+    const interval = setInterval(() => {
+      if (api.canScrollNext()) {
+        api.scrollNext()
+      } else {
+        // Loop back to the beginning
+        api.scrollTo(0)
+      }
+    }, 5000) // Auto-scroll every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [api, isPaused])
 
   useEffect(() => {
     // Mock data - in production, fetch from API
@@ -115,7 +153,14 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
         <h2 className="text-lg font-semibold">Standouts</h2>
+          {standouts.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {current} / {standouts.length}
+            </span>
+          )}
+        </div>
         {type === 'crypto' && (
           <p className="text-xs text-muted-foreground">
             Constituent coins from the Coinbase 50 Index
@@ -123,12 +168,23 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
         )}
       </div>
 
-      <div className="space-y-6">
+      <div
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        className="relative"
+      >
+        <Carousel
+          setApi={setApi}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
         {standouts.map((stock) => (
-          <div
-            key={stock.id}
-            className="neu-card p-6 rounded-xl hover:neu-raised transition-all"
-          >
+            <CarouselItem key={stock.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+              <div className="neu-card p-6 rounded-xl hover:neu-raised transition-all h-full">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -192,7 +248,10 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
               {stock.description}
             </p>
           </div>
+            </CarouselItem>
         ))}
+        </CarouselContent>
+      </Carousel>
       </div>
     </div>
   )

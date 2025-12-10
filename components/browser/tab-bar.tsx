@@ -108,12 +108,12 @@ export function TabBar({
   }
 
   return (
-    <div className="flex items-center border-b bg-muted/30 overflow-x-auto">
+    <div className="flex items-center border-b bg-muted/30 overflow-x-auto min-h-[40px] flex-shrink-0 relative z-10">
       {/* Pinned Tabs */}
       {pinnedTabs.map(renderTab)}
 
       {/* Normal Tabs */}
-      <div className="flex flex-1 overflow-x-auto">
+      <div className="flex flex-1 overflow-x-auto min-w-0">
         {normalTabs.map(renderTab)}
       </div>
 

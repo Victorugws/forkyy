@@ -1,9 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { AnimatedEyeBackground } from './AnimatedEyeBackground'
-import { SearchInterface } from './SearchInterface'
-import { BinaryLoadingPlaceholder } from './BinaryLoadingPlaceholder'
 
 /**
  * MorphingCanvas
@@ -31,54 +29,21 @@ interface MorphingCanvasProps {
   children?: React.ReactNode
   initialState?: MorphState
   autoProgress?: boolean
+  isListening?: boolean
 }
 
 export function MorphingCanvas({
   onSearchSubmit,
   children,
   initialState = 'eye-landing',
-  autoProgress = true
+  autoProgress = true,
+  isListening = false
 }: MorphingCanvasProps) {
   const [morphState, setMorphState] = useState<MorphState>(initialState)
   const [searchQuery, setSearchQuery] = useState('')
   const [showBinary, setShowBinary] = useState(false)
 
-  // Auto-progress through states
-  useEffect(() => {
-    if (!autoProgress) return
-
-    if (morphState === 'eye-landing') {
-      const timer = setTimeout(() => {
-        setMorphState('eye-to-search')
-      }, 6000) // Let eye animation breathe for 6 seconds
-
-      return () => clearTimeout(timer)
-    }
-
-    if (morphState === 'eye-to-search') {
-      const timer = setTimeout(() => {
-        setMorphState('blank-canvas')
-      }, 4500) // 4.5 seconds for eye to FULLY vanish into canvas (no skipped frames)
-
-      return () => clearTimeout(timer)
-    }
-
-    if (morphState === 'blank-canvas') {
-      const timer = setTimeout(() => {
-        setMorphState('search-growing')
-      }, 2000) // 2 seconds of blank canvas visibility
-
-      return () => clearTimeout(timer)
-    }
-
-    if (morphState === 'search-growing') {
-      const timer = setTimeout(() => {
-        setMorphState('search-active')
-      }, 3000) // 3 seconds for search to physically grow from canvas
-
-      return () => clearTimeout(timer)
-    }
-  }, [morphState, autoProgress])
+  // Auto-progress disabled - search tab removed
 
   // Handle search submission
   const handleSearch = useCallback(
@@ -102,92 +67,13 @@ export function MorphingCanvas({
     [onSearchSubmit]
   )
 
-  // Render eye with varying opacity and scale based on state
-  // Eye now continues animating behind search interface
+  // Render eye - always visible, no morphing
   const getEyeStyle = (): React.CSSProperties => {
-    switch (morphState) {
-      case 'eye-landing':
-        return {
-          opacity: 1,
-          transform: 'scale(1)',
-          filter: 'blur(0px)'
-        }
-      case 'eye-to-search':
-        // Eye fades slightly but stays visible
-        return {
-          opacity: 0.8,
-          transform: 'scale(1)',
-          filter: 'blur(0px)'
-        }
-      case 'blank-canvas':
-      case 'search-growing':
-      case 'search-active':
-        // Eye continues animating behind search tab
         return {
           opacity: 1,
           transform: 'scale(1)',
           filter: 'blur(0px)',
           pointerEvents: 'none'
-        }
-      case 'search-to-loading':
-        // Eye stays visible as search transitions
-        return {
-          opacity: 1,
-          transform: 'scale(1)',
-          filter: 'blur(0px)'
-        }
-      case 'loading-eye':
-        // Eye fully visible during loading
-        return {
-          opacity: 0.9,
-          transform: 'scale(0.9)',
-          filter: 'blur(2px)'
-        }
-      case 'eye-to-content':
-      case 'content-growing':
-      case 'content-visible':
-        // Eye stays absorbed as content grows
-        return {
-          opacity: 0,
-          transform: 'scale(0)',
-          filter: 'blur(20px)',
-          pointerEvents: 'none'
-        }
-      default:
-        return { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' }
-    }
-  }
-
-  const getSearchStyle = (): React.CSSProperties => {
-    switch (morphState) {
-      case 'search-growing':
-        // Search fades in from canvas surface (no scaling, follows mould narrative)
-        return {
-          opacity: 0.3,
-          transform: 'scale(1)',
-          filter: 'blur(4px)'
-        }
-      case 'search-active':
-        // Search fully visible and sharp
-        return {
-          opacity: 1,
-          transform: 'scale(1)',
-          filter: 'blur(0px)'
-        }
-      case 'search-to-loading':
-        // Search fades back into canvas (no shrinking)
-        return {
-          opacity: 0.2,
-          transform: 'scale(1)',
-          filter: 'blur(6px)'
-        }
-      default:
-        return {
-          opacity: 0,
-          transform: 'scale(1)',
-          filter: 'blur(10px)',
-          pointerEvents: 'none'
-        }
     }
   }
 
@@ -217,44 +103,21 @@ export function MorphingCanvas({
     }
   }
 
-  const getSearchVisibility = () => {
-    return morphState === 'search-growing' || morphState === 'search-active' || morphState === 'search-to-loading'
-  }
-
   const getContentVisibility = () => {
     return morphState === 'content-growing' || morphState === 'content-visible'
   }
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-background">
-      {/* Eye Background Layer - continues animating behind search tab */}
+    <div className="relative w-full h-screen overflow-hidden bg-background" style={{ overflow: 'hidden' }}>
+      {/* Eye Background Layer - always visible */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           ...getEyeStyle(),
           zIndex: 2,
-          transition: 'all 2000ms cubic-bezier(0.25, 0.1, 0.25, 1)' // Smooth transition
         }}
       >
-        <AnimatedEyeBackground />
-      </div>
-
-      {/* Search Interface Layer */}
-      <div
-        className={`
-          absolute inset-0 flex items-center justify-center p-8
-          ${getSearchVisibility() ? 'pointer-events-auto' : 'pointer-events-none'}
-        `}
-        style={{
-          ...getSearchStyle(),
-          zIndex: 10,
-          transition: 'all 3000ms cubic-bezier(0.25, 0.1, 0.25, 1)' // 3 second growth/shrink transition
-        }}
-      >
-        <SearchInterface
-          onSearch={handleSearch}
-          isVisible={getSearchVisibility()}
-        />
+        <AnimatedEyeBackground isListening={isListening} />
       </div>
 
       {/* Final Content Layer */}

@@ -38,7 +38,9 @@ const INTERNAL_ROUTES = [
   '/images',
   '/videos',
   '/academic',
-  '/writing'
+  '/writing',
+  '/ide',
+  '/builder'
 ]
 
 // Check if URL is an internal route
@@ -94,12 +96,13 @@ export function BrowserView({
   const [history, setHistory] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [error, setError] = useState<string | null>(null)
+  // Initialize state - will be updated in useEffect
   const [iframeUrl, setIframeUrl] = useState('')
   const [isInternal, setIsInternal] = useState(false)
   const [internalPath, setInternalPath] = useState('/')
   const [pageContent, setPageContent] = useState('')
   const [webviewPreloadPath, setWebviewPreloadPath] = useState<string>('')
-
+  
   // Load webview preload path for Electron
   useEffect(() => {
     if (isElectron && typeof window !== 'undefined' && (window as any).electron?.getWebviewPreloadPath) {
@@ -180,46 +183,51 @@ export function BrowserView({
     }
   }, [isElectron, isInternal, iframeUrl])
 
-  // Handle URL changes
+  // Handle URL changes (including initial load)
   useEffect(() => {
-    if (url && url !== iframeUrl) {
-      const internal = isInternalRoute(url)
-      setIsInternal(internal)
+    const targetUrl = url || '/'
+    
+    // Always process the URL to handle initial load
+    const internal = isInternalRoute(targetUrl)
+    setIsInternal(internal)
 
-      if (internal) {
-        const path = getInternalRoutePath(url)
-        setInternalPath(path)
-        setIframeUrl(url)
+    if (internal) {
+      const path = getInternalRoutePath(targetUrl)
+      setInternalPath(path)
+      setIframeUrl(targetUrl)
 
-        // Set page title based on route
-        const titles: Record<string, string> = {
-          '/': 'ORB AI - AI Solutions',
-          '/about': 'About Us - ORB AI',
-          '/services': 'Services - ORB AI',
-          '/discover': 'Discover - ORB AI',
-          '/spaces': 'Spaces - ORB AI',
-          '/finance': 'Finance - ORB AI',
-          '/images': 'Images - ORB AI',
-          '/videos': 'Videos - ORB AI',
-          '/academic': 'Academic - ORB AI',
-          '/writing': 'Writing - ORB AI'
-        }
-        onTitleChange(titles[path] || 'ORB AI')
-        onLoadingChange(false)
-      } else {
-        setIframeUrl(url)
-        setError(null)
-        onLoadingChange(true)
+      // Set page title based on route
+      const titles: Record<string, string> = {
+        '/': 'ORB AI - AI Solutions',
+        '/about': 'About Us - ORB AI',
+        '/services': 'Services - ORB AI',
+        '/discover': 'Discover - ORB AI',
+        '/spaces': 'Spaces - ORB AI',
+        '/finance': 'Finance - ORB AI',
+        '/images': 'Images - ORB AI',
+        '/videos': 'Videos - ORB AI',
+        '/academic': 'Academic - ORB AI',
+        '/writing': 'Writing - ORB AI'
       }
+      onTitleChange(titles[path] || 'ORB AI')
+      onLoadingChange(false)
+    } else {
+      setIframeUrl(targetUrl)
+      setError(null)
+      onLoadingChange(true)
+    }
 
-      // Add to history
-      const newHistory = history.slice(0, currentIndex + 1)
-      newHistory.push(url)
+    // Add to history only if it's a new URL or initial load
+    if (history.length === 0 || targetUrl !== history[currentIndex]) {
+      const newHistory = history.length === 0 
+        ? [targetUrl]
+        : history.slice(0, currentIndex + 1).concat(targetUrl)
       setHistory(newHistory)
-      setCurrentIndex(newHistory.length - 1)
+      const newIndex = newHistory.length - 1
+      setCurrentIndex(newIndex)
 
       // Update navigation state
-      onCanGoBackChange(newHistory.length > 1)
+      onCanGoBackChange(newIndex > 0)
       onCanGoForwardChange(false)
     }
   }, [url])
@@ -360,6 +368,24 @@ export function BrowserView({
         return <NeumorphicSpacesPage />
       case '/writing':
         return <NeumorphicWritingPage />
+      case '/ide':
+        // Render IDE page directly using iframe to load the Next.js route
+        return (
+          <iframe
+            src="/ide"
+            className="w-full h-full border-0"
+            title="IDE"
+          />
+        )
+      case '/builder':
+        // Render Builder page directly using iframe to load the Next.js route
+        return (
+          <iframe
+            src="/builder"
+            className="w-full h-full border-0"
+            title="Website Builder"
+          />
+        )
       default:
         return (
           <div className="flex items-center justify-center h-full bg-background">

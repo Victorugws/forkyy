@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path_1 = require("path");
+const eye_tracking_service_1 = require("./eye-tracking-service");
 let mainWindow = null;
 let cursorOverlay = null;
 const ENABLE_CURSOR_OVERLAY = true;
@@ -44,6 +45,8 @@ async function createWindow() {
         createCursorOverlay();
         setupCursorIPC();
     }
+    // Setup eye tracking IPC handlers
+    setupEyeTrackingIPC();
 }
 function createCursorOverlay() {
     if (!ENABLE_CURSOR_OVERLAY || !mainWindow)
@@ -196,8 +199,82 @@ function setupCursorIPC() {
         }
     });
 }
-// App lifecycle
-electron_1.app.whenReady().then(createWindow);
+function setupEyeTrackingIPC() {
+    const eyeTracking = (0, eye_tracking_service_1.getEyeTrackingService)();
+    // Enable/disable eye tracking
+    electron_1.ipcMain.handle('eye-tracking:set-enabled', async (_event, enabled) => {
+        await eyeTracking.setEnabled(enabled);
+        return eyeTracking.isEnabled();
+    });
+    // Get eye tracking status
+    electron_1.ipcMain.handle('eye-tracking:is-enabled', () => {
+        return eyeTracking.isEnabled();
+    });
+    // Update configuration
+    electron_1.ipcMain.handle('eye-tracking:update-config', (_event, config) => {
+        eyeTracking.updateConfig(config);
+        return eyeTracking.getConfig();
+    });
+    // Get configuration
+    electron_1.ipcMain.handle('eye-tracking:get-config', () => {
+        return eyeTracking.getConfig();
+    });
+    // Move cursor from gaze data (normalized 0-1 coordinates)
+    electron_1.ipcMain.on('eye-tracking:move-cursor', async (_event, { x, y }) => {
+        await eyeTracking.moveCursorFromGaze(x, y);
+        // Also update the cursor overlay if it exists
+        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+            const display = electron_1.screen.getPrimaryDisplay();
+            const { width, height } = display.workAreaSize;
+            const { x: offsetX, y: offsetY } = display.workArea;
+            const screenX = offsetX + x * width;
+            const screenY = offsetY + y * height;
+            cursorOverlay.webContents.send('cursor-update', { x: screenX, y: screenY });
+        }
+    });
+    // Move cursor to absolute position
+    electron_1.ipcMain.on('eye-tracking:move-cursor-to', async (_event, { x, y }) => {
+        await eyeTracking.moveCursorTo(x, y);
+        // Update cursor overlay
+        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
+            cursorOverlay.webContents.send('cursor-update', { x, y });
+        }
+    });
+    // Get current cursor position
+    electron_1.ipcMain.handle('eye-tracking:get-cursor-position', async () => {
+        return await eyeTracking.getCursorPosition();
+    });
+    // Perform click
+    electron_1.ipcMain.on('eye-tracking:click', async () => {
+        await eyeTracking.click();
+    });
+    // Perform double click
+    electron_1.ipcMain.on('eye-tracking:double-click', async () => {
+        await eyeTracking.doubleClick();
+    });
+    // Reset eye tracking
+    electron_1.ipcMain.handle('eye-tracking:reset', () => {
+        eyeTracking.reset();
+    });
+}
+// Handle permission requests (microphone, camera, etc.)
+electron_1.app.whenReady().then(() => {
+    // Don't set up permission handlers for media - let macOS handle it natively
+    // This will allow the system permission dialog to appear
+    // Only handle non-media permissions if needed
+    electron_1.session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        // Let media permissions be handled by the system (don't intercept)
+        // "media" covers both microphone and camera
+        if (permission === 'media') {
+            // Return without calling callback - Electron will handle it natively
+            // This triggers the macOS permission dialog
+            return;
+        }
+        // Handle other permissions
+        callback(false);
+    });
+    createWindow();
+});
 electron_1.app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         electron_1.app.quit();

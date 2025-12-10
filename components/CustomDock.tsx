@@ -14,7 +14,9 @@ import {
   VscBriefcase,
   VscBeaker,
   VscBook,
-  VscGlobe
+  VscGlobe,
+  VscCode,
+  VscBrowser
 } from 'react-icons/vsc'
 import {
   RiDiscordFill,
@@ -189,7 +191,7 @@ export function CustomDock() {
   }
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none flex items-end h-[256px]">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none flex items-end h-[256px] visible">
       <motion.div
         onMouseMove={({ pageX }) => {
           mouseX.set(pageX)
@@ -240,6 +242,20 @@ export function CustomDock() {
           icon={<VscGraph size={20} />}
           label="Finance"
           onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/finance' } }))}
+        />
+
+        {/* IDE */}
+        <DockItem
+          icon={<VscCode size={20} />}
+          label="IDE"
+          onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/ide' } }))}
+        />
+
+        {/* Website Builder */}
+        <DockItem
+          icon={<VscBrowser size={20} />}
+          label="Builder"
+          onClick={() => window.dispatchEvent(new CustomEvent('browser:navigate', { detail: { url: '/builder' } }))}
         />
       </motion.div>
     </div>

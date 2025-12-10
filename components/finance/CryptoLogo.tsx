@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { IconWrapper } from '@/components/ui/icons'
 
 interface CryptoLogoProps {
   symbol: string
@@ -76,43 +75,39 @@ export function CryptoLogo({ symbol, name, size = 40, className = '' }: CryptoLo
     const initials = cleanSymbol.slice(0, 2).toUpperCase()
 
     return (
-      <IconWrapper isLogo={true} className={className}>
-        <div
-          className="rounded-full flex items-center justify-center text-white font-bold"
-          style={{
-            width: size,
-            height: size,
-            minWidth: size,
-            minHeight: size,
-            backgroundColor: bgColor,
-            fontSize: `${size * 0.4}px`
-          }}
-        >
-          {initials}
-        </div>
-      </IconWrapper>
+      <div
+        className={`rounded-full flex items-center justify-center text-white font-bold ${className}`}
+        style={{
+          width: size,
+          height: size,
+          minWidth: size,
+          minHeight: size,
+          backgroundColor: bgColor,
+          fontSize: `${size * 0.4}px`
+        }}
+      >
+        {initials}
+      </div>
     )
   }
 
   return (
-    <IconWrapper isLogo={true} className={className}>
-      <div
-        className="rounded-full overflow-hidden bg-muted flex items-center justify-center"
-        style={{ width: size, height: size, minWidth: size, minHeight: size }}
-      >
-        <Image
-          src={logoUrl}
-          alt={`${name} logo`}
-          width={size}
-          height={size}
-          className="object-contain p-1"
-          onError={() => {
-            console.log(`Failed to load crypto logo for ${cleanSymbol} from:`, logoUrl)
-            setImageError(true)
-          }}
-          unoptimized
-        />
-      </div>
-    </IconWrapper>
+    <div
+      className={`rounded-full overflow-hidden ${className}`}
+      style={{ width: size, height: size, minWidth: size, minHeight: size }}
+    >
+      <Image
+        src={logoUrl}
+        alt={`${name} logo`}
+        width={size}
+        height={size}
+        className="object-cover w-full h-full"
+        onError={() => {
+          console.log(`Failed to load crypto logo for ${cleanSymbol} from:`, logoUrl)
+          setImageError(true)
+        }}
+        unoptimized
+      />
+    </div>
   )
 }

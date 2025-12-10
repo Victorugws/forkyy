@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { EyeTrackingControl } from '@/components/EyeTrackingControl'
 
 interface BrowserToolbarProps {
   isBookmarked: boolean
@@ -107,6 +108,11 @@ export function BrowserToolbar({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Eye Tracking Control */}
+      {typeof window !== 'undefined' && (window as any).eyeTracking && (
+        <EyeTrackingControl />
+      )}
 
       {/* More Menu */}
       <DropdownMenu>

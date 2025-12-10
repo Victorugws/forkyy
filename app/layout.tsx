@@ -9,6 +9,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 import { Providers } from './providers'
+import { GlobalTextDecrypt } from '@/components/GlobalTextDecrypt'
 import './globals.css'
 
 const fontSans = FontSans({
@@ -74,6 +75,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <GlobalTextDecrypt />
             <div className="h-screen w-screen overflow-hidden">
               <ArtifactRoot>{children}</ArtifactRoot>
             </div>

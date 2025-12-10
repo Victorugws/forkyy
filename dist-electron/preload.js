@@ -111,6 +111,27 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
         electron_1.ipcRenderer.send('cursor-mouseup');
     }
 });
+// Expose eye tracking API
+electron_1.contextBridge.exposeInMainWorld('eyeTracking', {
+    setEnabled: (enabled) => electron_1.ipcRenderer.invoke('eye-tracking:set-enabled', enabled),
+    isEnabled: () => electron_1.ipcRenderer.invoke('eye-tracking:is-enabled'),
+    updateConfig: (config) => electron_1.ipcRenderer.invoke('eye-tracking:update-config', config),
+    getConfig: () => electron_1.ipcRenderer.invoke('eye-tracking:get-config'),
+    moveCursor: (x, y) => {
+        electron_1.ipcRenderer.send('eye-tracking:move-cursor', { x, y });
+    },
+    moveCursorTo: (x, y) => {
+        electron_1.ipcRenderer.send('eye-tracking:move-cursor-to', { x, y });
+    },
+    getCursorPosition: () => electron_1.ipcRenderer.invoke('eye-tracking:get-cursor-position'),
+    click: () => {
+        electron_1.ipcRenderer.send('eye-tracking:click');
+    },
+    doubleClick: () => {
+        electron_1.ipcRenderer.send('eye-tracking:double-click');
+    },
+    reset: () => electron_1.ipcRenderer.invoke('eye-tracking:reset')
+});
 // Track cursor movement and send to overlay
 // System cursor remains visible
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack: (config, { isServer }) => {
+    // Monaco Editor works only on client-side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      }
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {
@@ -31,6 +41,18 @@ const nextConfig = {
         hostname: 'api.dicebear.com',
         port: '',
         pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+        port: '',
+        pathname: '/unitedstates/images/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.congress.gov',
+        port: '',
+        pathname: '/img/**'
       }
     ],
     dangerouslyAllowSVG: true,

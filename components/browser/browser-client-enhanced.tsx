@@ -13,6 +13,7 @@ import { HistoryPanel } from './history-panel'
 import { DownloadsPanel } from './downloads-panel'
 import { DevToolsPanel } from './dev-tools-panel'
 import { FindInPage } from './find-in-page'
+import { CustomDock } from '@/components/CustomDock'
 // TargetCursor is now handled by Electron overlay window
 import {
   saveTabs,
@@ -207,7 +208,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
       {/* Header */}
-      <div>
+      <div className="flex-shrink-0">
         {/* Tab Bar */}
         <TabBar
         tabs={tabs}
@@ -226,7 +227,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
       />
 
       {/* Browser Bar + Toolbar */}
-      <div className="flex items-center border-b">
+      <div className="flex items-center border-b flex-shrink-0">
         <div className="flex-1">
           <BrowserBar
             currentUrl={
@@ -368,6 +369,8 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
           )}
         </div>
       </div>
+      {/* Custom Dock - Always visible at bottom */}
+      {/* <CustomDock /> */}
       {/* TargetCursor is now rendered in Electron overlay window */}
     </div>
   )

@@ -2,7 +2,6 @@
 
 import { Globe, ChevronDown, Check } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
-import { IconWrapper } from '@/components/ui/icons'
 
 export interface Country {
   name: string
@@ -144,17 +143,13 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
         className="flex items-center gap-2 px-4 py-2 rounded-lg neu-button cursor-pointer"
         style={{ pointerEvents: 'auto' }}
       >
-        <IconWrapper>
-          <Globe className="size-4" />
-        </IconWrapper>
+        <Globe className="size-4 text-foreground" />
         <span className="text-sm font-medium flex items-center gap-2">
           <span className="hidden sm:inline">{selectedCountry.flag}</span>
           <span className="hidden sm:inline">{selectedCountry.name}</span>
           <span className="sm:hidden">{selectedCountry.flag} {selectedCountry.abbreviation}</span>
         </span>
-        <IconWrapper>
-          <ChevronDown className={`size-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </IconWrapper>
+        <ChevronDown className={`size-4 text-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown */}
@@ -194,9 +189,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
                     <span className="text-xs text-muted-foreground">({country.code})</span>
                   </span>
                   {selectedCountry.code === country.code && (
-                    <IconWrapper>
                       <Check className="size-4 text-primary" />
-                    </IconWrapper>
                   )}
                 </button>
               ))

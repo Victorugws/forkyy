@@ -67,12 +67,10 @@ export function PopularSpaces({ type = 'all' }: PopularSpacesProps) {
     <div className="mb-8">
       <h2 className="text-lg font-semibold mb-4">Popular Spaces for Finance Research</h2>
 
-      <div className="space-y-4">
-        {filteredSpaces.map((space) => (
-          <div
-            key={space.id}
-            className="neu-card p-5 rounded-xl hover:neu-raised transition-all group cursor-pointer"
-          >
+      <div className="neu-card rounded-xl overflow-hidden">
+        {filteredSpaces.map((space, index) => (
+          <div key={space.id}>
+            <div className="p-5 hover:bg-background/30 transition-all group cursor-pointer">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4 flex-1 min-w-0">
                 <div className="p-3 rounded-lg neu-inset bg-background/50 flex-shrink-0">
@@ -95,6 +93,10 @@ export function PopularSpaces({ type = 'all' }: PopularSpacesProps) {
                 {space.actionText}
               </button>
             </div>
+            </div>
+            {index < filteredSpaces.length - 1 && (
+              <div className="border-t border-border/50 mx-5" />
+            )}
           </div>
         ))}
       </div>

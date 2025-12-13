@@ -6,6 +6,7 @@ import { HomeSearchTab } from '@/components/HomeSearchTab'
 import { ModeSelectionButtons } from '@/components/ModeSelectionButtons'
 import { TypewriterAcknowledgement } from '@/components/TypewriterAcknowledgement'
 import { ModeSuggestions } from '@/components/ModeSuggestions'
+import { MorphedSearchTab } from '@/components/MorphedSearchTab'
 import { generateId } from 'ai'
 
 /**
@@ -13,6 +14,11 @@ import { generateId } from 'ai'
  * Displays the main homepage with animated eye morphing canvas and all content sections
  * Now using EXACT reactbits.dev components
  */
+
+interface Suggestion {
+  title: string
+  description: string
+}
 
 export function NeumorphicHomePage() {
   const [hasSearched, setHasSearched] = useState(false)
@@ -22,6 +28,14 @@ export function NeumorphicHomePage() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [showFinanceOverlay, setShowFinanceOverlay] = useState(false)
+  
+  // New flow state
+  const [selectedOption, setSelectedOption] = useState<Suggestion | null>(null)
+  const [isMorphed, setIsMorphed] = useState(false)
+  const [morphPosition, setMorphPosition] = useState<'left' | 'right'>('right')
+  const [templatePrompt, setTemplatePrompt] = useState('')
+  const [variations, setVariations] = useState<Suggestion[]>([])
+  const [showLegalityButton, setShowLegalityButton] = useState(false)
 
   // Prevent all scrolling on homepage
   useEffect(() => {
@@ -92,10 +106,88 @@ export function NeumorphicHomePage() {
   const handleModeSelect = (mode: string) => {
     // Handle mode selection from share buttons
     setSelectedMode(mode)
+    // Reset flow state
+    setSelectedOption(null)
+    setIsMorphed(false)
+    setVariations([])
+    setShowLegalityButton(false)
     // Show suggestions after a short delay (when acknowledgement appears)
     setTimeout(() => {
       setShowSuggestions(true)
     }, 500)
+  }
+
+  const handleOptionClick = (option: Suggestion, position: { top: string; left?: string; right?: string }) => {
+    // Hide original suggestions
+    setSelectedOption(option)
+    
+    // Determine morph position (opposite side of clicked option)
+    const isLeft = position.left !== undefined
+    setMorphPosition(isLeft ? 'right' : 'left')
+    
+    // Create template prompt
+    const prompt = `Create ${option.title.replace('...', '').toLowerCase()}`
+    setTemplatePrompt(prompt)
+    
+    // Generate variations
+    const optionVariations = generateVariations(option, selectedMode || '')
+    setVariations(optionVariations)
+    
+    // Trigger morph animation
+    setTimeout(() => {
+      setIsMorphed(true)
+      setShowSuggestions(false) // Hide original suggestions
+      // Show variations after a short delay on the OPPOSITE side
+      setTimeout(() => {
+        setShowSuggestions(true)
+      }, 300)
+    }, 100)
+    
+    // Show legality button after morph completes
+    setTimeout(() => {
+      setShowLegalityButton(true)
+    }, 800)
+  }
+
+  const generateVariations = (option: Suggestion, mode: string): Suggestion[] => {
+    const baseTitle = option.title.replace('...', '')
+    const variations: Suggestion[] = []
+    
+    // Generate 3-4 variations based on mode and option
+    if (mode === 'webapp') {
+      variations.push(
+        { title: `${baseTitle} with user authentication...`, description: 'Add login and user management features' },
+        { title: `${baseTitle} with real-time updates...`, description: 'Include live data synchronization' },
+        { title: `${baseTitle} with mobile responsive design...`, description: 'Optimized for all devices' },
+        { title: `${baseTitle} with analytics dashboard...`, description: 'Include usage tracking and insights' },
+      )
+    } else if (mode === 'finance') {
+      variations.push(
+        { title: `${baseTitle} with portfolio tracking...`, description: 'Track investments and performance' },
+        { title: `${baseTitle} with risk analysis...`, description: 'Include risk assessment tools' },
+        { title: `${baseTitle} with tax optimization...`, description: 'Help with tax planning' },
+      )
+    } else {
+      // Generic variations
+      variations.push(
+        { title: `${baseTitle} with advanced features...`, description: 'Enhanced functionality' },
+        { title: `${baseTitle} with custom branding...`, description: 'Personalized design' },
+        { title: `${baseTitle} with integration support...`, description: 'Connect with other tools' },
+      )
+    }
+    
+    return variations
+  }
+
+  const handleSpecificitySelect = (value: string) => {
+    // Add specificity to template prompt
+    setTemplatePrompt(prev => `${prev} with ${value}`)
+  }
+
+  const handleVariationClick = (variation: Suggestion) => {
+    // Update template prompt with variation
+    const newPrompt = `Create ${variation.title.replace('...', '').toLowerCase()}`
+    setTemplatePrompt(newPrompt)
   }
 
   // Hide suggestions when acknowledgement disappears
@@ -146,22 +238,29 @@ export function NeumorphicHomePage() {
         }
       `}</style>
       <div className="w-full bg-background relative" style={{ height: '100vh', overflow: 'hidden' }}>
-        {/* Target Cursor is rendered at browser-client-enhanced level */}
+      {/* Target Cursor is rendered at browser-client-enhanced level */}
 
         {/* Typewriter Acknowledgement Message Above Eye */}
         <TypewriterAcknowledgement message={acknowledgement} />
 
         {/* Mode Suggestions - Appear after mode selection */}
-        <ModeSuggestions mode={selectedMode} visible={showSuggestions} />
+        <ModeSuggestions 
+          mode={selectedMode} 
+          visible={showSuggestions}
+          onOptionClick={isMorphed ? handleVariationClick : handleOptionClick}
+          selectedOption={selectedOption?.title || null}
+          variations={isMorphed ? variations : []}
+          morphPosition={isMorphed ? morphPosition : undefined}
+        />
 
         {/* Morphing Canvas with Eye Animation */}
         <div className="relative h-screen" style={{ overflow: 'hidden' }}>
-          <MorphingCanvas
+        <MorphingCanvas
             onSearchSubmit={(query) => handleSearch(query, 'ai')}
             autoProgress={false}
             isListening={isListening}
           />
-        </div>
+      </div>
 
         {/* Finance Overlay */}
         {showFinanceOverlay && (
@@ -187,27 +286,61 @@ export function NeumorphicHomePage() {
         )}
 
         {/* Search Tab and Mode Selection - Positioned below eye */}
-        <div className="absolute bottom-48 left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-6">
-          {/* Search Tab - Below Eye */}
-          <HomeSearchTab
-            onSearch={handleSearch}
-            onModeSelect={(mode) => {
-              handleModeSelect(mode)
-              // Set acknowledgement based on mode
-              const modeMessages: Record<string, string> = {
-                legality: 'Ready to legalize...',
-                business: 'Ready to businessize...',
-                finance: 'Ready to financialize...',
-                taskability: 'Ready to taskify...',
-                socials: 'Ready to socialize...',
-              }
-              setAcknowledgement(modeMessages[mode] || 'Ready...')
+        {!isMorphed ? (
+          <div 
+            className="absolute bottom-48 left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-6"
+            style={{
+              transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
-            onAcknowledgement={setAcknowledgement}
+          >
+            {/* Search Tab - Below Eye */}
+            <HomeSearchTab
+              onSearch={handleSearch}
+              onModeSelect={(mode) => {
+                handleModeSelect(mode)
+                // Set acknowledgement based on mode
+                const modeMessages: Record<string, string> = {
+                  webapp: 'Ready to webify...',
+                  finance: 'Ready to financialize...',
+                  slides: 'Ready to slideify...',
+                  service: 'Ready to servicize...',
+                  news: 'Ready to newsify...',
+                  research: 'Ready to researchify...',
+                  strategy: 'Ready to strategize...',
+                }
+                setAcknowledgement(modeMessages[mode] || 'Ready...')
+              }}
+              onAcknowledgement={setAcknowledgement}
+              onVoiceStateChange={setIsListening}
+              onFinanceOverlay={() => setShowFinanceOverlay(true)}
+              onAutopilotDoubleClick={() => {
+                window.dispatchEvent(new CustomEvent('browser:navigate', {
+                  detail: { url: '/autopilot' }
+                }))
+              }}
+      />
+    </div>
+        ) : (
+          <MorphedSearchTab
+            templatePrompt={templatePrompt}
+            onPromptChange={setTemplatePrompt}
+            onSearch={(query) => handleSearch(query, 'ai')}
             onVoiceStateChange={setIsListening}
-            onFinanceOverlay={() => setShowFinanceOverlay(true)}
+            position={morphPosition}
+            specificityOptions={[
+              { label: 'User Auth', value: 'user authentication' },
+              { label: 'Real-time', value: 'real-time updates' },
+              { label: 'Mobile', value: 'mobile responsive' },
+              { label: 'Analytics', value: 'analytics dashboard' },
+              { label: 'API Integration', value: 'API integration' },
+            ]}
+            onSpecificitySelect={handleSpecificitySelect}
+            onLegalityClick={() => {
+              console.log('Legality button clicked')
+            }}
+            showLegalityButton={showLegalityButton}
           />
-        </div>
+        )}
       </div>
 
       <style jsx>{`

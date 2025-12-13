@@ -11,9 +11,10 @@ interface HomeSearchTabProps {
   onAcknowledgement?: (message: string) => void
   onVoiceStateChange?: (isListening: boolean) => void
   onFinanceOverlay?: () => void
+  onAutopilotDoubleClick?: () => void
 }
 
-export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoiceStateChange, onFinanceOverlay }: HomeSearchTabProps) {
+export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoiceStateChange, onFinanceOverlay, onAutopilotDoubleClick }: HomeSearchTabProps) {
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [selectedMode, setSelectedMode] = useState<'search' | 'ai'>('ai')
@@ -274,6 +275,7 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
                 onModeSelect={onModeSelect || (() => {})}
                 onAcknowledgement={onAcknowledgement}
                 onFinanceOverlay={onFinanceOverlay}
+                onAutopilotDoubleClick={onAutopilotDoubleClick}
               />
             </div>
 

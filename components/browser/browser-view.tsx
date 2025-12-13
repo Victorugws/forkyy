@@ -25,6 +25,7 @@ interface BrowserViewProps {
   onContentChange: (content: string) => void
   onCanGoBackChange: (canGoBack: boolean) => void
   onCanGoForwardChange: (canGoForward: boolean) => void
+  onFaviconChange?: (favicon: string) => void
 }
 
 // Define internal routes
@@ -89,7 +90,8 @@ export function BrowserView({
   onTitleChange,
   onContentChange,
   onCanGoBackChange,
-  onCanGoForwardChange
+  onCanGoForwardChange,
+  onFaviconChange
 }: BrowserViewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -197,6 +199,7 @@ export function BrowserView({
       setIframeUrl(targetUrl)
 
       // Set page title based on route
+      // Don't update title for home page if it's "New Tab" - let it stay until user navigates
       const titles: Record<string, string> = {
         '/': 'ORB AI - AI Solutions',
         '/about': 'About Us - ORB AI',
@@ -209,12 +212,32 @@ export function BrowserView({
         '/academic': 'Academic - ORB AI',
         '/writing': 'Writing - ORB AI'
       }
-      onTitleChange(titles[path] || 'ORB AI')
+      // For home page, don't update title - let it stay as "New Tab" until user navigates
+      // For other routes, update the title
+      if (path !== '/') {
+        onTitleChange(titles[path] || 'ORB AI')
+      }
       onLoadingChange(false)
     } else {
       setIframeUrl(targetUrl)
       setError(null)
       onLoadingChange(true)
+      
+      // For external URLs, immediately fetch title and favicon via API
+      // This ensures we get the correct title/favicon even before the iframe loads
+      if (targetUrl && !targetUrl.startsWith('/')) {
+        // Set a temporary title based on domain while we fetch the real title
+        try {
+          const urlObj = new URL(targetUrl)
+          const domainTitle = urlObj.hostname.replace('www.', '').split('.')[0]
+          const tempTitle = domainTitle.charAt(0).toUpperCase() + domainTitle.slice(1)
+          onTitleChange(tempTitle)
+        } catch {
+          // Ignore URL parsing errors
+        }
+        // Fetch the actual title and favicon immediately
+        fetchPageContent(targetUrl)
+      }
     }
 
     // Add to history only if it's a new URL or initial load
@@ -286,6 +309,43 @@ export function BrowserView({
     }
   }, [currentIndex, history, iframeUrl])
 
+  // Extract favicon from URL or document
+  const extractFavicon = (doc: Document | null, pageUrl: string): string | null => {
+    if (!doc && !pageUrl) return null
+
+    // Try to get favicon from document
+    if (doc) {
+      // Look for favicon link tags
+      const faviconLink = doc.querySelector('link[rel*="icon"]') as HTMLLinkElement
+      if (faviconLink?.href) {
+        // Resolve relative URLs
+        try {
+          const url = new URL(faviconLink.href, pageUrl)
+          return url.href
+        } catch {
+          return faviconLink.href
+        }
+      }
+    }
+
+    // Fallback: try /favicon.ico
+    if (pageUrl) {
+      try {
+        const url = new URL(pageUrl)
+        const faviconUrl = `${url.origin}/favicon.ico`
+        return faviconUrl
+      } catch {
+        // If URL parsing fails, try simple concatenation
+        if (pageUrl.startsWith('http')) {
+          const baseUrl = pageUrl.split('/').slice(0, 3).join('/')
+          return `${baseUrl}/favicon.ico`
+        }
+      }
+    }
+
+    return null
+  }
+
   // Handle iframe load events
   const handleLoad = async () => {
     onLoadingChange(false)
@@ -298,6 +358,12 @@ export function BrowserView({
           const title = iframeDoc.title || 'Untitled'
           onTitleChange(title)
 
+          // Extract favicon
+          const favicon = extractFavicon(iframeDoc, iframeUrl)
+          if (favicon && onFaviconChange) {
+            onFaviconChange(favicon)
+          }
+
           // Extract text content for AI
           const bodyText = iframeDoc.body?.innerText || ''
           setPageContent(bodyText.slice(0, 10000))
@@ -307,6 +373,20 @@ export function BrowserView({
           const iframeLocation = iframeRef.current.contentWindow?.location.href
           if (iframeLocation && iframeLocation !== 'about:blank' && iframeLocation !== iframeUrl) {
             onNavigate(iframeLocation)
+          }
+        } else {
+          // For cross-origin sites, use Google's favicon service
+          if (iframeUrl && onFaviconChange) {
+            const favicon = getFaviconFromService(iframeUrl)
+            if (favicon) {
+              onFaviconChange(favicon)
+            } else {
+              // Fallback to extracting from URL
+              const extracted = extractFavicon(null, iframeUrl)
+              if (extracted) {
+                onFaviconChange(extracted)
+              }
+            }
           }
         }
       } catch (e) {
@@ -318,9 +398,53 @@ export function BrowserView({
     }
   }
 
+  // Use Google's favicon service as a reliable fallback for cross-origin sites
+  const getFaviconFromService = (url: string): string | null => {
+    try {
+      const urlObj = new URL(url)
+      // Use Google's favicon service for reliable favicon fetching
+      return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`
+    } catch {
+      return null
+    }
+  }
+
+  // Set up favicon for external URLs
+  const lastFaviconUrlRef = useRef<string>('')
+  const lastFaviconRef = useRef<string | null>(null)
+  
+  useEffect(() => {
+    if (!iframeUrl || isInternal || !onFaviconChange) return
+
+    // Prevent duplicate calls for the same URL
+    if (lastFaviconUrlRef.current === iframeUrl) return
+    lastFaviconUrlRef.current = iframeUrl
+
+    // For external URLs, use Google's favicon service as primary method
+    const favicon = getFaviconFromService(iframeUrl)
+    if (favicon && favicon !== lastFaviconRef.current) {
+      lastFaviconRef.current = favicon
+      onFaviconChange(favicon)
+    } else if (!favicon) {
+      // Fallback to extracting from URL
+      const extracted = extractFavicon(null, iframeUrl)
+      if (extracted && extracted !== lastFaviconRef.current) {
+        lastFaviconRef.current = extracted
+        onFaviconChange(extracted)
+      }
+    }
+    // Note: onFaviconChange is intentionally excluded from deps to prevent loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [iframeUrl, isInternal])
+
   const handleError = () => {
     onLoadingChange(false)
     setError('Failed to load page. The site may not allow embedding.')
+    
+    // For cross-origin issues, try to fetch via API proxy
+    if (iframeUrl && !iframeUrl.startsWith('/')) {
+      fetchPageContent(iframeUrl)
+    }
   }
 
   // Fetch page content via API for cross-origin pages
@@ -334,14 +458,47 @@ export function BrowserView({
 
       if (response.ok) {
         const data = await response.json()
-        if (data.title) onTitleChange(data.title)
+        // Always update title if available - this should override any default
+        if (data.title && data.title.trim()) {
+          console.log('[BrowserView] Updating title to:', data.title.trim())
+          onTitleChange(data.title.trim())
+        } else {
+          console.warn('[BrowserView] No title found in API response for:', pageUrl)
+        }
+        // Update favicon - prefer API result, fallback to Google service
+        if (onFaviconChange) {
+          if (data.favicon) {
+            onFaviconChange(data.favicon)
+          } else {
+            // Fallback to Google's favicon service if API didn't return one
+            const fallbackFavicon = getFaviconFromService(pageUrl)
+            if (fallbackFavicon) {
+              onFaviconChange(fallbackFavicon)
+            }
+          }
+        }
         if (data.content) {
           setPageContent(data.content)
           onContentChange(data.content)
         }
+      } else {
+        // If API fails, still try to get favicon from service
+        if (onFaviconChange) {
+          const fallbackFavicon = getFaviconFromService(pageUrl)
+          if (fallbackFavicon) {
+            onFaviconChange(fallbackFavicon)
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to fetch page content:', e)
+      // Even if API fails, try to get favicon from service
+      if (onFaviconChange) {
+        const fallbackFavicon = getFaviconFromService(pageUrl)
+        if (fallbackFavicon) {
+          onFaviconChange(fallbackFavicon)
+        }
+      }
     }
   }
 

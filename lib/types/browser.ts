@@ -1,3 +1,11 @@
+export interface TabGroup {
+  id: string
+  name: string
+  color?: string
+  collapsed: boolean
+  createdAt: number
+}
+
 export interface BrowserTab {
   id: string
   url: string
@@ -12,6 +20,7 @@ export interface BrowserTab {
   zoomLevel: number
   isPinned: boolean
   isMuted: boolean
+  groupId?: string // ID of the tab group this tab belongs to
 }
 
 export interface Bookmark {

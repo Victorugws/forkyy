@@ -16,7 +16,8 @@ import {
   Search,
   Code,
   Clock,
-  BookMarked
+  BookMarked,
+  Cookie
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ interface BrowserToolbarProps {
   onZoomOut: () => void
   onZoomReset: () => void
   onPrint: () => void
+  onSaveAsPDF?: () => void
   onFind: () => void
   onOpenDownloads: () => void
   onOpenHistory: () => void
@@ -52,9 +54,11 @@ export function BrowserToolbar({
   onZoomOut,
   onZoomReset,
   onPrint,
+  onSaveAsPDF,
   onFind,
   onOpenDownloads,
   onOpenHistory,
+  onOpenCookies,
   onOpenBookmarks,
   onOpenDevTools,
   onOpenSettings,
@@ -132,6 +136,12 @@ export function BrowserToolbar({
             Print
             <span className="ml-auto text-xs text-muted-foreground">Ctrl+P</span>
           </DropdownMenuItem>
+          {onSaveAsPDF && (
+            <DropdownMenuItem onClick={onSaveAsPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              Save as PDF
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onOpenBookmarks}>
             <BookMarked className="w-4 h-4 mr-2" />
@@ -145,6 +155,12 @@ export function BrowserToolbar({
             <Download className="w-4 h-4 mr-2" />
             Downloads
           </DropdownMenuItem>
+          {onOpenCookies && (
+            <DropdownMenuItem onClick={onOpenCookies}>
+              <Cookie className="w-4 h-4 mr-2" />
+              Cookies & Site Data
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onOpenDevTools}>
             <Code className="w-4 h-4 mr-2" />

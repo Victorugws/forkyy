@@ -24,9 +24,68 @@ export async function POST(req: NextRequest) {
 
     const html = await response.text()
 
-    // Extract title
+    // Extract title - try multiple methods
+    let title = ''
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-    const title = titleMatch ? titleMatch[1].trim() : ''
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1].trim()
+      // Decode HTML entities in title
+      title = title
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+    }
+    
+    // If no title found, try to extract from og:title or other meta tags
+    if (!title) {
+      const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+      if (ogTitleMatch && ogTitleMatch[1]) {
+        title = ogTitleMatch[1].trim()
+      }
+    }
+    
+    // Fallback to domain name if still no title
+    if (!title) {
+      try {
+        const urlObj = new URL(url)
+        title = urlObj.hostname.replace('www.', '')
+      } catch {
+        title = 'Untitled'
+      }
+    }
+
+    // Extract favicon
+    let favicon: string | null = null
+    const faviconMatch = html.match(/<link[^>]*rel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*href=["']([^"']+)["']/i)
+    if (faviconMatch && faviconMatch[1]) {
+      try {
+        const faviconUrl = new URL(faviconMatch[1], url)
+        favicon = faviconUrl.href
+      } catch {
+        // If URL parsing fails, try simple concatenation
+        if (faviconMatch[1].startsWith('http')) {
+          favicon = faviconMatch[1]
+        } else {
+          const baseUrl = url.split('/').slice(0, 3).join('/')
+          favicon = `${baseUrl}${faviconMatch[1].startsWith('/') ? '' : '/'}${faviconMatch[1]}`
+        }
+      }
+    } else {
+      // Fallback to /favicon.ico
+      try {
+        const urlObj = new URL(url)
+        favicon = `${urlObj.origin}/favicon.ico`
+      } catch {
+        // If URL parsing fails, try simple concatenation
+        if (url.startsWith('http')) {
+          const baseUrl = url.split('/').slice(0, 3).join('/')
+          favicon = `${baseUrl}/favicon.ico`
+        }
+      }
+    }
 
     // Extract text content (simple approach - remove scripts, styles, and tags)
     let content = html
@@ -57,6 +116,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       title,
       content,
+      favicon,
       url
     })
   } catch (error: any) {

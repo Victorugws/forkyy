@@ -140,7 +140,7 @@ export function BrowserBar({
           onKeyDown={handleKeyDown}
           placeholder="Enter URL or search..."
           className={cn(
-            "w-full",
+            "w-full border-[2.5px] border-gray-900",
             isLoading && "opacity-70"
           )}
         />

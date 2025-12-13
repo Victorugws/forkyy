@@ -28,14 +28,46 @@ async function createWindow() {
             contextIsolation: true,
             sandbox: true,
             webSecurity: true,
-            webviewTag: true // Enable webview tag for embedded browsing
+            webviewTag: true, // Enable webview tag for embedded browsing
+        }
+    });
+    // Handle webContents errors
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+        if (isDev && validatedURL.includes('localhost:3000')) {
+            console.error('Failed to load:', validatedURL, 'Error:', errorCode, errorDescription);
+            // Retry loading after a delay
+            setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.loadURL('http://localhost:3000').catch(err => {
+                        console.error('Retry failed:', err);
+                    });
+                }
+            }, 2000);
         }
     });
     // Webview tags are now managed in React, no need for BrowserManager
     // Load your Next.js app
     if (isDev) {
-        await mainWindow.loadURL('http://localhost:3000');
-        mainWindow.webContents.openDevTools();
+        // Wait for server to be ready with retries
+        const maxRetries = 10;
+        let retries = 0;
+        let loaded = false;
+        while (!loaded && retries < maxRetries) {
+            try {
+                await mainWindow.loadURL('http://localhost:3000');
+                loaded = true;
+                mainWindow.webContents.openDevTools();
+            }
+            catch (error) {
+                retries++;
+                if (retries >= maxRetries) {
+                    console.error('Failed to load http://localhost:3000 after', maxRetries, 'retries');
+                    throw error;
+                }
+                console.log(`Retrying to load http://localhost:3000 (attempt ${retries}/${maxRetries})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
     }
     else {
         await mainWindow.loadFile((0, path_1.join)(__dirname, '../.next/server/app/index.html'));

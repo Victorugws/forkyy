@@ -206,7 +206,7 @@ function generateComparisonMetric(category: string, rating: number): { label: st
     'User Satisfaction': { label: 'Industry Avg', value: 69 }
   }
 
-  const benchmark = benchmarks[category] || { label: 'Benchmark', value: 65 }
+  const benchmark = benchmarks[category as keyof typeof benchmarks] || { label: 'Benchmark', value: 65 }
 
   // Add some variance to make it more realistic
   const variance = Math.floor(Math.random() * 10) - 5

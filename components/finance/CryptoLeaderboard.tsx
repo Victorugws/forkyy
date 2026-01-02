@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import DecryptedText from '@/components/DecryptedText'
 
 interface CryptoItem {
   id: string
@@ -101,20 +102,22 @@ export function CryptoLeaderboard() {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold">Leaderboard</h2>
+          <h2 className="text-lg font-semibold">
+            <DecryptedText text="Leaderboard" animateOn="view" speed={30} />
+          </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Data from spot transactions on Coinbase
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg neu-inset text-xs">
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] text-xs">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
             <span className="text-muted-foreground">Coinbase</span>
           </div>
         </div>
       </div>
 
-      <div className="neu-card rounded-xl overflow-hidden">
+      <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -161,7 +164,7 @@ export function CryptoLeaderboard() {
                 >
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full neu-inset bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-[#e6ebf3] bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-primary">
                           {crypto.symbol.slice(0, 1)}
                         </span>

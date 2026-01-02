@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forkyy - Sidebar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body, #__next {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="__next"></div>
+  
+  <!-- Load your React app -->
+  <script type="module">
+    // Get extension base URL
+    const extensionBase = browser.runtime.getURL('sidebar/app/');
+    
+    // Load React app
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = extensionBase + '_next/static/chunks/main.js';
+    document.head.appendChild(script);
+    
+    // Load CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = extensionBase + '_next/static/css/main.css';
+    document.head.appendChild(link);
+  </script>
+</body>
+</html>
+

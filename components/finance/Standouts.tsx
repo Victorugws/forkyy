@@ -8,6 +8,7 @@ import {
   CarouselItem,
   type CarouselApi
 } from '@/components/ui/carousel'
+import DecryptedText from '@/components/DecryptedText'
 
 interface StandoutStock {
   id: string
@@ -154,7 +155,9 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-        <h2 className="text-lg font-semibold">Standouts</h2>
+        <h2 className="text-lg font-semibold">
+          <DecryptedText text="Standouts" animateOn="view" speed={30} />
+        </h2>
           {standouts.length > 0 && (
             <span className="text-xs text-muted-foreground">
               {current} / {standouts.length}
@@ -182,13 +185,17 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
           className="w-full"
         >
           <CarouselContent className="-ml-2 md:-ml-4">
-        {standouts.map((stock) => (
-            <CarouselItem key={stock.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-              <div className="neu-card p-6 rounded-xl hover:neu-raised transition-all h-full">
+        {standouts.map((stock, index) => (
+            <CarouselItem key={stock.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 relative">
+              <div className="p-6 h-full">
+                {/* Dotted vertical separator */}
+                {index > 0 && (
+                  <div className="absolute left-0 top-0 bottom-0 w-px border-l border-dotted border-border/50" />
+                )}
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg neu-inset bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-bold text-primary">
                     {stock.symbol.slice(0, 2)}
                   </span>
@@ -220,7 +227,7 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
             </div>
 
             {/* Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b border-border">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b border-dotted border-border/30">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Volume</p>
                 <p className="text-sm font-medium">{stock.volume}</p>
@@ -244,7 +251,7 @@ export function Standouts({ type = 'stocks' }: StandoutsProps) {
             </div>
 
             {/* Description */}
-            <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-5">
               {stock.description}
             </p>
           </div>

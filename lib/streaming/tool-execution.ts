@@ -21,11 +21,30 @@ export async function executeToolCall(
   coreMessages: CoreMessage[],
   dataStream: DataStreamWriter,
   model: string,
-  searchMode: boolean
+  searchMode: boolean,
+  taskId?: string
 ): Promise<ToolExecutionResult> {
   // If search mode is disabled, return empty tool call
   if (!searchMode) {
     return { toolCallDataAnnotation: null, toolCallMessages: [] }
+  }
+
+  // Track task step if taskId is provided
+  let taskStepId: string | undefined
+  if (taskId) {
+    try {
+      const { TaskExecutor } = await import('../agents/task-executor')
+      const executor = new TaskExecutor({ taskId, userId: '', searchMode })
+      const step = await executor.addStep(
+        'search',
+        'Executing search tool',
+        {},
+        'running'
+      )
+      taskStepId = step.id
+    } catch (error) {
+      console.error('Failed to track task step:', error)
+    }
   }
 
   // Convert Zod schema to string representation
@@ -86,6 +105,7 @@ export async function executeToolCall(
   dataStream.writeData(toolCallAnnotation)
 
   // Support for search tool only for now
+  const searchStartTime = Date.now()
   const searchResults = await search(
     toolCall.parameters?.query ?? '',
     toolCall.parameters?.max_results,
@@ -93,6 +113,22 @@ export async function executeToolCall(
     toolCall.parameters?.include_domains ?? [],
     toolCall.parameters?.exclude_domains ?? []
   )
+  const searchDuration = Date.now() - searchStartTime
+
+  // Update task step if tracking
+  if (taskId && taskStepId) {
+    try {
+      const { TaskExecutor } = await import('../agents/task-executor')
+      const executor = new TaskExecutor({ taskId, userId: '', searchMode })
+      await executor.updateStep(taskStepId, {
+        status: 'completed',
+        output: { results: searchResults },
+        duration: searchDuration
+      })
+    } catch (error) {
+      console.error('Failed to update task step:', error)
+    }
+  }
 
   const updatedToolCallAnnotation = {
     ...toolCallAnnotation,

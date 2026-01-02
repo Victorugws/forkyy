@@ -4,8 +4,6 @@ const electron_1 = require("electron");
 const path_1 = require("path");
 const eye_tracking_service_1 = require("./eye-tracking-service");
 let mainWindow = null;
-let cursorOverlay = null;
-const ENABLE_CURSOR_OVERLAY = true;
 function getWindowContentMetrics(window) {
     const windowBounds = window.getBounds();
     const contentBounds = window.getContentBounds();
@@ -28,140 +26,39 @@ async function createWindow() {
             contextIsolation: true,
             sandbox: true,
             webSecurity: true,
-            webviewTag: true, // Enable webview tag for embedded browsing
-        }
-    });
-    // Handle webContents errors
-    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-        if (isDev && validatedURL.includes('localhost:3000')) {
-            console.error('Failed to load:', validatedURL, 'Error:', errorCode, errorDescription);
-            // Retry loading after a delay
-            setTimeout(() => {
-                if (mainWindow && !mainWindow.isDestroyed()) {
-                    mainWindow.loadURL('http://localhost:3000').catch(err => {
-                        console.error('Retry failed:', err);
-                    });
-                }
-            }, 2000);
+            webviewTag: true // Enable webview tag for embedded browsing
         }
     });
     // Webview tags are now managed in React, no need for BrowserManager
     // Load your Next.js app
     if (isDev) {
-        // Wait for server to be ready with retries
-        const maxRetries = 10;
-        let retries = 0;
-        let loaded = false;
-        while (!loaded && retries < maxRetries) {
-            try {
-                await mainWindow.loadURL('http://localhost:3000');
-                loaded = true;
-                mainWindow.webContents.openDevTools();
+        await mainWindow.loadURL('http://localhost:3000');
+        // Suppress CSP warning in development (expected due to Next.js hot reloading)
+        // Inject script to filter console warnings after page loads
+        mainWindow.webContents.once('did-finish-load', () => {
+            mainWindow?.webContents.executeJavaScript(`
+        (function() {
+          const originalWarn = console.warn;
+          console.warn = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('Electron Security Warning') && message.includes('Content-Security-Policy')) {
+              // Suppress this specific warning in development
+              return;
             }
-            catch (error) {
-                retries++;
-                if (retries >= maxRetries) {
-                    console.error('Failed to load http://localhost:3000 after', maxRetries, 'retries');
-                    throw error;
-                }
-                console.log(`Retrying to load http://localhost:3000 (attempt ${retries}/${maxRetries})...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
+            originalWarn.apply(console, args);
+          };
+        })();
+      `).catch(() => {
+                // Ignore errors if script injection fails
+            });
+        });
+        mainWindow.webContents.openDevTools();
     }
     else {
         await mainWindow.loadFile((0, path_1.join)(__dirname, '../.next/server/app/index.html'));
     }
-    // Create cursor overlay window (full-screen, bulletproof)
-    if (ENABLE_CURSOR_OVERLAY) {
-        createCursorOverlay();
-        setupCursorIPC();
-    }
-    // Setup eye tracking IPC handlers
-    setupEyeTrackingIPC();
-}
-function createCursorOverlay() {
-    if (!ENABLE_CURSOR_OVERLAY || !mainWindow)
-        return;
-    // Get the main window's CONTENT bounds (excludes title bar and frame)
-    const contentBounds = mainWindow.getContentBounds();
-    // Add padding at the top to avoid covering window control buttons (traffic lights)
-    // macOS traffic lights are about 22px tall and positioned at the top left
-    const TOP_PADDING = 40; // Enough space for traffic lights
-    cursorOverlay = new electron_1.BrowserWindow({
-        width: contentBounds.width,
-        height: contentBounds.height - TOP_PADDING,
-        x: contentBounds.x,
-        y: contentBounds.y + TOP_PADDING,
-        transparent: true,
-        frame: false,
-        alwaysOnTop: true,
-        fullscreen: false,
-        resizable: false,
-        hasShadow: false,
-        focusable: false,
-        skipTaskbar: true,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        }
-    });
-    // CRITICAL: Set ignore mouse events with forward BEFORE loading content
-    cursorOverlay.setIgnoreMouseEvents(true, { forward: true });
-    // Use 'floating' instead of 'screen-saver' to avoid covering system UI like dock
-    cursorOverlay.setAlwaysOnTop(true, 'floating');
-    // Don't make it visible on all workspaces to avoid interfering with system UI
-    // cursorOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
-    // Load cursor overlay HTML - always from electron directory
-    const overlayPath = isDev
-        ? (0, path_1.join)(__dirname, '..', 'electron', 'cursorOverlay.html')
-        : (0, path_1.join)(__dirname, 'cursorOverlay.html');
-    cursorOverlay.loadFile(overlayPath);
-    // Re-apply ignore mouse events after page loads (important!)
-    cursorOverlay.webContents.on('did-finish-load', () => {
-        cursorOverlay?.setIgnoreMouseEvents(true, { forward: true });
-        console.log('[Main] Cursor overlay loaded and click-through enabled');
-    });
-    // Update overlay position/size to match main window's CONTENT area
-    const updateOverlayBounds = () => {
-        if (!cursorOverlay || cursorOverlay.isDestroyed() || !mainWindow || mainWindow.isDestroyed())
-            return;
-        const contentBounds = mainWindow.getContentBounds();
-        const TOP_PADDING = 40; // Match the padding used during creation
-        const newBounds = {
-            x: contentBounds.x,
-            y: contentBounds.y + TOP_PADDING,
-            width: contentBounds.width,
-            height: contentBounds.height - TOP_PADDING
-        };
-        console.log('[Main] Updating overlay bounds:', newBounds, 'isMaximized:', mainWindow.isMaximized());
-        cursorOverlay.setBounds(newBounds);
-        // Ensure overlay stays visible and on top
-        if (!cursorOverlay.isVisible()) {
-            cursorOverlay.showInactive();
-        }
-        cursorOverlay.setAlwaysOnTop(true, 'floating');
-    };
-    // Track main window movements and resizes
-    mainWindow.on('move', updateOverlayBounds);
-    mainWindow.on('resize', updateOverlayBounds);
-    mainWindow.on('maximize', updateOverlayBounds);
-    mainWindow.on('unmaximize', updateOverlayBounds);
-    mainWindow.on('enter-full-screen', updateOverlayBounds);
-    mainWindow.on('leave-full-screen', updateOverlayBounds);
-    // Ensure overlay stays on top and click-through
-    setInterval(() => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            if (!cursorOverlay.isAlwaysOnTop()) {
-                cursorOverlay.setAlwaysOnTop(true, 'screen-saver');
-            }
-            if (!cursorOverlay.isVisible()) {
-                cursorOverlay.showInactive();
-            }
-            // Re-enforce click-through every cycle
-            cursorOverlay.setIgnoreMouseEvents(true, { forward: true });
-        }
-    }, 100);
+    // Setup cursor position tracking for target cursor
+    setupCursorTrackingIPC();
 }
 // Handle getting webview preload path
 electron_1.ipcMain.handle('get-webview-preload-path', () => {
@@ -187,48 +84,20 @@ electron_1.ipcMain.handle('get-webview-preload-path', () => {
     console.log('[Main] Webview preload file URL:', fileUrl);
     return fileUrl;
 });
-function setupCursorIPC() {
-    if (!ENABLE_CURSOR_OVERLAY)
-        return;
-    // Receive cursor positions from renderer (screen coordinates)
-    electron_1.ipcMain.on('cursor-move', (_event, data) => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-update', data);
-        }
-    });
-    // Receive hover target updates from renderer
-    electron_1.ipcMain.on('hover-target', (_event, data) => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('hover-target-update', data);
-        }
-    });
-    // Receive mouse events from renderer
-    electron_1.ipcMain.on('cursor-mousedown', () => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-mousedown');
-        }
-    });
-    electron_1.ipcMain.on('cursor-mouseup', () => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-mouseup');
-        }
-    });
-    // Webview-specific events (from webview-preload-simple.js)
-    electron_1.ipcMain.on('cursor-down', () => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-mousedown');
-        }
-    });
-    electron_1.ipcMain.on('cursor-up', () => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-mouseup');
-        }
-    });
-    // Handle window close
-    mainWindow?.on('closed', () => {
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.close();
-        }
+// Setup cursor position tracking for target cursor
+function setupCursorTrackingIPC() {
+    // Listen for cursor position requests from webviews
+    // This allows webviews to get the actual cursor position without coordinate conversion issues
+    electron_1.ipcMain.on('webview-cursor-position', (event) => {
+        if (!mainWindow)
+            return;
+        const point = electron_1.screen.getCursorScreenPoint();
+        const contentBounds = mainWindow.getContentBounds();
+        // Convert screen coordinates to window content coordinates
+        const windowX = point.x - contentBounds.x;
+        const windowY = point.y - contentBounds.y;
+        // Send back to the webview that requested it
+        event.reply('cursor-position-reply', { x: windowX, y: windowY });
     });
 }
 function setupEyeTrackingIPC() {
@@ -254,23 +123,10 @@ function setupEyeTrackingIPC() {
     // Move cursor from gaze data (normalized 0-1 coordinates)
     electron_1.ipcMain.on('eye-tracking:move-cursor', async (_event, { x, y }) => {
         await eyeTracking.moveCursorFromGaze(x, y);
-        // Also update the cursor overlay if it exists
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            const display = electron_1.screen.getPrimaryDisplay();
-            const { width, height } = display.workAreaSize;
-            const { x: offsetX, y: offsetY } = display.workArea;
-            const screenX = offsetX + x * width;
-            const screenY = offsetY + y * height;
-            cursorOverlay.webContents.send('cursor-update', { x: screenX, y: screenY });
-        }
     });
     // Move cursor to absolute position
     electron_1.ipcMain.on('eye-tracking:move-cursor-to', async (_event, { x, y }) => {
         await eyeTracking.moveCursorTo(x, y);
-        // Update cursor overlay
-        if (cursorOverlay && !cursorOverlay.isDestroyed()) {
-            cursorOverlay.webContents.send('cursor-update', { x, y });
-        }
     });
     // Get current cursor position
     electron_1.ipcMain.handle('eye-tracking:get-cursor-position', async () => {
@@ -289,12 +145,52 @@ function setupEyeTrackingIPC() {
         eyeTracking.reset();
     });
 }
-// Handle permission requests (microphone, camera, etc.)
+// Set up Content Security Policy before app is ready
+// This must be done before creating windows
 electron_1.app.whenReady().then(() => {
+    // Set up eye tracking IPC handlers first, before creating window
+    // This ensures handlers are registered before any components try to use them
+    setupEyeTrackingIPC();
+    // Set Content Security Policy to fix security warnings
+    // Note: 'unsafe-eval' is required in development for Next.js hot reloading
+    // This warning will not appear in production builds
+    const defaultSession = electron_1.session.defaultSession;
+    defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        // Only set CSP for main document requests (not subresources)
+        if (details.resourceType === 'mainFrame' || details.resourceType === 'subFrame') {
+            const csp = isDev
+                ? // Development: Allow unsafe-eval for Next.js hot reloading
+                    "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: http://localhost:* https:; " +
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https:; " +
+                        "style-src 'self' 'unsafe-inline' http://localhost:* https:; " +
+                        "img-src 'self' data: blob: http://localhost:* https:; " +
+                        "font-src 'self' data: http://localhost:* https:; " +
+                        "connect-src 'self' http://localhost:* https: ws: wss:; " +
+                        "frame-src 'self' http://localhost:* https:; " +
+                        "media-src 'self' blob: http://localhost:* https:;"
+                : // Production: Stricter CSP without unsafe-eval
+                    "default-src 'self' 'unsafe-inline' data: blob: https:; " +
+                        "script-src 'self' 'unsafe-inline' https:; " +
+                        "style-src 'self' 'unsafe-inline' https:; " +
+                        "img-src 'self' data: blob: https:; " +
+                        "font-src 'self' data: https:; " +
+                        "connect-src 'self' https: wss:; " +
+                        "frame-src 'self' https:; " +
+                        "media-src 'self' blob: https:;";
+            const responseHeaders = {
+                ...details.responseHeaders,
+                'Content-Security-Policy': [csp]
+            };
+            callback({ responseHeaders });
+        }
+        else {
+            callback({});
+        }
+    });
     // Don't set up permission handlers for media - let macOS handle it natively
     // This will allow the system permission dialog to appear
     // Only handle non-media permissions if needed
-    electron_1.session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
         // Let media permissions be handled by the system (don't intercept)
         // "media" covers both microphone and camera
         if (permission === 'media') {

@@ -18,6 +18,7 @@ interface ModeSuggestionsProps {
   mode: string | null
   visible: boolean
   onOptionClick?: (option: Suggestion, position: { top: string; left?: string; right?: string }) => void
+  onTaskClick?: (prompt: string) => void
   selectedOption?: string | null
   variations?: Suggestion[]
   morphPosition?: 'left' | 'right' // To position variations on opposite side
@@ -31,20 +32,69 @@ const mockCryptos = [
 ]
 
 const mockTrades = [
-  { name: 'Nancy Pelosi', position: 'House Speaker', ticker: 'NVDA', action: 'Buy', shares: '50', value: '$24,260', date: '2024-11-15' },
-  { name: 'Kevin McCarthy', position: 'House Rep', ticker: 'AAPL', action: 'Sell', shares: '100', value: '$18,550', date: '2024-11-14' },
-  { name: 'Mitch McConnell', position: 'Senate Leader', ticker: 'MSFT', action: 'Buy', shares: '75', value: '$28,417', date: '2024-11-13' },
-  { name: 'Chuck Schumer', position: 'Senate Majority Leader', ticker: 'GOOGL', action: 'Buy', shares: '60', value: '$8,568', date: '2024-11-12' },
-  { name: 'John Boehner', position: 'Former House Speaker', ticker: 'TSLA', action: 'Sell', shares: '200', value: '$49,700', date: '2024-11-11' },
+  { name: 'Nancy Pelosi', position: 'House Speaker', ticker: 'NVDA', action: 'Buy' as const, shares: '50', value: '$24,260', date: '2024-11-15', source: 'House.gov', days: '45' },
+  { name: 'Kevin McCarthy', position: 'House Rep', ticker: 'AAPL', action: 'Sell' as const, shares: '100', value: '$18,550', date: '2024-11-14', source: 'House.gov', days: '30' },
+  { name: 'Mitch McConnell', position: 'Senate Leader', ticker: 'MSFT', action: 'Buy' as const, shares: '75', value: '$28,417', date: '2024-11-13', source: 'Senate.gov', days: '60' },
+  { name: 'Chuck Schumer', position: 'Senate Majority Leader', ticker: 'GOOGL', action: 'Buy' as const, shares: '60', value: '$8,568', date: '2024-11-12', source: 'Senate.gov', days: '90' },
+  { name: 'John Boehner', position: 'Former House Speaker', ticker: 'TSLA', action: 'Sell' as const, shares: '200', value: '$49,700', date: '2024-11-11', source: 'House.gov', days: '120' },
 ]
 
 const modeSuggestions: Record<string, Suggestion[]> = {
-  webapp: [
-    { title: 'make a weather app...', description: 'Build a weather application with real-time forecasts and location-based data' },
-    { title: 'make a calculator...', description: 'Create a functional calculator with basic and advanced mathematical operations' },
-    { title: 'build a geiger counter...', description: 'Develop a radiation detection app with sensor integration' },
-    { title: 'create a todo app...', description: 'Build a task management application with CRUD operations' },
-    { title: 'make a chat app...', description: 'Develop a real-time messaging application with user authentication' },
+  healthcare: [
+    { title: 'build a telemedicine platform...', description: 'Complete turnkey telemedicine solution with video consultations, patient records, and prescription management' },
+    { title: 'create a patient management system...', description: 'Full patient portal with appointment booking, medical history, and health records' },
+    { title: 'develop a health monitoring app...', description: 'IoT-integrated health tracking with wearable device sync and analytics' },
+    { title: 'build a pharmacy management system...', description: 'Complete pharmacy solution with inventory, prescriptions, and delivery tracking' },
+    { title: 'create a mental health platform...', description: 'Therapy booking, session management, and wellness tracking system' },
+    { title: 'develop a medical billing system...', description: 'HIPAA-compliant billing, insurance claims, and payment processing' },
+  ],
+  agriculture: [
+    { title: 'build a farm management platform...', description: 'Complete farm operations system with crop tracking, livestock management, and yield analytics' },
+    { title: 'create a crop monitoring system...', description: 'IoT sensors integration, weather data, and predictive analytics for crop health' },
+    { title: 'develop a supply chain tracker...', description: 'Farm-to-table tracking with logistics, quality control, and market pricing' },
+    { title: 'build an agricultural marketplace...', description: 'Connect farmers with buyers, pricing tools, and contract management' },
+    { title: 'create a precision agriculture tool...', description: 'Satellite imagery analysis, soil mapping, and irrigation optimization' },
+    { title: 'develop a livestock management system...', description: 'Animal health tracking, breeding records, and feed management' },
+  ],
+  education: [
+    { title: 'build a learning management system...', description: 'Complete LMS with course creation, student enrollment, and progress tracking' },
+    { title: 'create an online course platform...', description: 'Video hosting, quizzes, certificates, and student engagement tools' },
+    { title: 'develop a student information system...', description: 'Enrollment, grades, attendance, and parent portal integration' },
+    { title: 'build a tutoring marketplace...', description: 'Connect students with tutors, scheduling, payment processing, and reviews' },
+    { title: 'create an assessment platform...', description: 'Automated grading, plagiarism detection, and performance analytics' },
+    { title: 'develop a virtual classroom...', description: 'Live video sessions, whiteboard, breakout rooms, and collaboration tools' },
+  ],
+  realestate: [
+    { title: 'build a property listing platform...', description: 'Complete MLS system with search, filters, virtual tours, and lead management' },
+    { title: 'create a real estate CRM...', description: 'Client management, pipeline tracking, document management, and email automation' },
+    { title: 'develop a property management system...', description: 'Tenant portal, maintenance requests, rent collection, and lease management' },
+    { title: 'build a mortgage calculator tool...', description: 'Loan comparison, affordability analysis, and pre-approval workflow' },
+    { title: 'create a virtual tour platform...', description: '360° tours, floor plans, neighborhood insights, and scheduling' },
+    { title: 'develop a real estate analytics dashboard...', description: 'Market trends, property valuations, ROI calculator, and investment analysis' },
+  ],
+  ecommerce: [
+    { title: 'build an online store...', description: 'Complete e-commerce platform with product catalog, shopping cart, and checkout' },
+    { title: 'create a marketplace platform...', description: 'Multi-vendor marketplace with seller dashboard, commission management, and reviews' },
+    { title: 'develop an inventory management system...', description: 'Stock tracking, automated reordering, warehouse management, and analytics' },
+    { title: 'build a subscription service platform...', description: 'Recurring billing, subscription management, and customer lifecycle tools' },
+    { title: 'create a dropshipping automation tool...', description: 'Supplier integration, order routing, and fulfillment tracking' },
+    { title: 'develop a customer loyalty program...', description: 'Points system, rewards, referral program, and customer retention analytics' },
+  ],
+  energy: [
+    { title: 'build an energy monitoring platform...', description: 'Smart meter integration, real-time consumption tracking, and cost analysis' },
+    { title: 'create a carbon footprint tracker...', description: 'Emission calculations, offset recommendations, and sustainability reporting' },
+    { title: 'develop a renewable energy marketplace...', description: 'Solar/wind installation quotes, financing options, and ROI calculator' },
+    { title: 'build an energy trading platform...', description: 'Peer-to-peer energy trading, blockchain integration, and smart contracts' },
+    { title: 'create a grid management system...', description: 'Load balancing, demand forecasting, and grid optimization tools' },
+    { title: 'develop a sustainability dashboard...', description: 'ESG metrics, compliance tracking, and sustainability reporting' },
+  ],
+  foodbeverage: [
+    { title: 'build a restaurant management system...', description: 'POS integration, table management, kitchen display, and staff scheduling' },
+    { title: 'create an online ordering platform...', description: 'Menu builder, cart system, payment processing, and delivery integration' },
+    { title: 'develop a food delivery marketplace...', description: 'Multi-restaurant platform with driver tracking, ratings, and commission management' },
+    { title: 'build a recipe management app...', description: 'Recipe database, meal planning, grocery lists, and nutrition tracking' },
+    { title: 'create a food safety compliance system...', description: 'HACCP tracking, temperature monitoring, and inspection management' },
+    { title: 'develop a restaurant analytics dashboard...', description: 'Sales analytics, inventory optimization, and customer insights' },
   ],
   finance: [
     { 
@@ -73,34 +123,6 @@ const modeSuggestions: Record<string, Suggestion[]> = {
       component: <RecentDevelopments topic="US markets" limit={3} />
     },
   ],
-  slides: [
-    { title: 'create a pitch deck...', description: 'Design a compelling pitch presentation for investors' },
-    { title: 'make a product demo...', description: 'Build an interactive product demonstration slideshow' },
-    { title: 'create a training presentation...', description: 'Develop educational slides with interactive elements' },
-    { title: 'make a quarterly report...', description: 'Design a professional quarterly business report' },
-    { title: 'create a portfolio showcase...', description: 'Build a visual portfolio presentation' },
-  ],
-  service: [
-    { title: 'set up a landing page...', description: 'Create a professional landing page for your service' },
-    { title: 'build a booking system...', description: 'Develop an appointment scheduling system' },
-    { title: 'create a client portal...', description: 'Build a secure client management portal' },
-    { title: 'make an invoice generator...', description: 'Create an automated invoice generation system' },
-    { title: 'build a project tracker...', description: 'Develop a project management dashboard' },
-  ],
-  news: [
-    { title: 'create a news aggregator...', description: 'Build a personalized news feed from multiple sources' },
-    { title: 'make a newsletter template...', description: 'Design a professional email newsletter layout' },
-    { title: 'build a breaking news alert...', description: 'Create a real-time news notification system' },
-    { title: 'create a news analysis tool...', description: 'Develop a tool for analyzing news trends' },
-    { title: 'make a news dashboard...', description: 'Build a comprehensive news monitoring dashboard' },
-  ],
-  research: [
-    { title: 'create a research database...', description: 'Build a searchable database for research papers' },
-    { title: 'make a citation generator...', description: 'Create an automated citation formatting tool' },
-    { title: 'build a data visualization tool...', description: 'Develop interactive charts and graphs for research' },
-    { title: 'create a literature review template...', description: 'Design a structured literature review format' },
-    { title: 'make a research note organizer...', description: 'Build a system for organizing research notes' },
-  ],
   strategy: [
     { title: 'create a SWOT analysis...', description: 'Build a strategic SWOT analysis framework' },
     { title: 'make a business plan template...', description: 'Design a comprehensive business planning template' },
@@ -111,14 +133,16 @@ const modeSuggestions: Record<string, Suggestion[]> = {
 }
 
 const suggestionPositions = [
-  { top: '15%', left: '10%' },   // Top left
-  { top: '35%', left: '8%' },   // Mid left
-  { top: '55%', left: '10%' },  // Bottom left
-  { top: '15%', right: '10%' },  // Top right
-  { top: '35%', right: '8%' },  // Mid right
+  { top: '12%', left: '8%' },    // Top left - more spacing
+  { top: '28%', left: '6%' },    // Mid left - increased vertical gap
+  { top: '44%', left: '8%' },    // Bottom left - more spacing
+  { top: '60%', left: '10%' },   // Lower left - additional spacing
+  { top: '12%', right: '8%' },   // Top right
+  { top: '28%', right: '6%' },   // Mid right
+  { top: '44%', right: '8%' },   // Bottom right
 ]
 
-export function ModeSuggestions({ mode, visible, onOptionClick, selectedOption, variations, morphPosition }: ModeSuggestionsProps) {
+export function ModeSuggestions({ mode, visible, onOptionClick, onTaskClick, selectedOption, variations, morphPosition }: ModeSuggestionsProps) {
   if (!mode || !visible) return null
 
   const suggestions = modeSuggestions[mode] || []
@@ -138,8 +162,15 @@ export function ModeSuggestions({ mode, visible, onOptionClick, selectedOption, 
   }
 
   const handleOptionClick = (suggestion: Suggestion, index: number) => {
+    // Mode suggestions are typically task-like, so trigger task overlay
+    if (onTaskClick) {
+      const prompt = `Create ${suggestion.title.replace('...', '').toLowerCase()}`
+      onTaskClick(prompt)
+    } else {
+      // Fallback to original behavior
     const position = suggestionPositions[index] || suggestionPositions[0]
     onOptionClick?.(suggestion, position)
+    }
   }
 
   return (
@@ -151,18 +182,20 @@ export function ModeSuggestions({ mode, visible, onOptionClick, selectedOption, 
           // Variations appear on opposite side of morph position
           const variationPositions = morphPosition === 'left' 
             ? [
-                { top: '15%', right: '10%' },   // Top right
-                { top: '35%', right: '8%' },     // Mid right
-                { top: '55%', right: '10%' },   // Bottom right
-                { top: '20%', right: '12%' },   // Additional positions
-                { top: '50%', right: '10%' },
+                { top: '12%', right: '8%' },    // Top right - more spacing
+                { top: '28%', right: '6%' },    // Mid right - increased gap
+                { top: '44%', right: '8%' },    // Bottom right - more spacing
+                { top: '60%', right: '10%' },   // Lower right - additional spacing
+                { top: '18%', right: '10%' },   // Additional positions
+                { top: '36%', right: '8%' },
               ]
             : [
-                { top: '15%', left: '10%' },    // Top left
-                { top: '35%', left: '8%' },    // Mid left
-                { top: '55%', left: '10%' },   // Bottom left
-                { top: '20%', left: '12%' },   // Additional positions
-                { top: '50%', left: '10%' },
+                { top: '12%', left: '8%' },     // Top left - more spacing
+                { top: '28%', left: '6%' },     // Mid left - increased gap
+                { top: '44%', left: '8%' },     // Bottom left - more spacing
+                { top: '60%', left: '10%' },    // Lower left - additional spacing
+                { top: '18%', left: '10%' },    // Additional positions
+                { top: '36%', left: '8%' },
               ]
           basePosition = variationPositions[index] || variationPositions[0]
         } else {
@@ -242,6 +275,7 @@ export function ModeSuggestions({ mode, visible, onOptionClick, selectedOption, 
           overflow: visible; /* Allow content to determine size */
           max-height: 50px;
           max-width: 180px; /* Reduced container width */
+          margin-bottom: 24px; /* Add vertical spacing between cards */
         }
 
         .mode-suggestion-card:hover {

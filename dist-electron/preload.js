@@ -89,28 +89,6 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
     platform: process.platform,
     isElectron: true
 });
-// Expose cursor API for unified cursor system
-electron_1.contextBridge.exposeInMainWorld('electronAPI', {
-    onCursorMove: (callback) => {
-        electron_1.ipcRenderer.on('cursor:move', (_event, pos) => callback(pos));
-    },
-    syncCursorPosition: (pos) => {
-        electron_1.ipcRenderer.send('cursor:move', pos);
-    },
-    // Expose IPC send for webview cursor relay
-    sendCursorMove: (data) => {
-        electron_1.ipcRenderer.send('cursor-move', data);
-    },
-    sendHoverTarget: (data) => {
-        electron_1.ipcRenderer.send('hover-target', data);
-    },
-    sendCursorMouseDown: () => {
-        electron_1.ipcRenderer.send('cursor-mousedown');
-    },
-    sendCursorMouseUp: () => {
-        electron_1.ipcRenderer.send('cursor-mouseup');
-    }
-});
 // Expose eye tracking API
 electron_1.contextBridge.exposeInMainWorld('eyeTracking', {
     setEnabled: (enabled) => electron_1.ipcRenderer.invoke('eye-tracking:set-enabled', enabled),
@@ -131,87 +109,4 @@ electron_1.contextBridge.exposeInMainWorld('eyeTracking', {
         electron_1.ipcRenderer.send('eye-tracking:double-click');
     },
     reset: () => electron_1.ipcRenderer.invoke('eye-tracking:reset')
-});
-// Track cursor movement and send to overlay
-// System cursor remains visible
-document.addEventListener('DOMContentLoaded', () => {
-    // Configuration for hover detection
-    const TARGET_SELECTOR = '.cursor-target';
-    let activeTarget = null;
-    let currentLeaveHandler = null;
-    // Track mouse movement and send screen coordinates to overlay
-    window.addEventListener('mousemove', (e) => {
-        electron_1.ipcRenderer.send('cursor-move', { x: e.screenX, y: e.screenY });
-    });
-    // Track mouse down/up for click animations
-    window.addEventListener('mousedown', () => {
-        electron_1.ipcRenderer.send('cursor-mousedown');
-    });
-    window.addEventListener('mouseup', () => {
-        electron_1.ipcRenderer.send('cursor-mouseup');
-    });
-    // Track hover targets and send their bounds to overlay
-    const handleMouseOver = (e) => {
-        const directTarget = e.target;
-        const allTargets = [];
-        let current = directTarget;
-        // Find all matching targets in the hierarchy
-        while (current && current !== document.body) {
-            if (current.matches(TARGET_SELECTOR)) {
-                allTargets.push(current);
-            }
-            current = current.parentElement;
-        }
-        const target = allTargets[0] || null;
-        if (!target || activeTarget === target)
-            return;
-        // Clean up previous target
-        if (activeTarget && currentLeaveHandler) {
-            activeTarget.removeEventListener('mouseleave', currentLeaveHandler);
-        }
-        activeTarget = target;
-        const rect = target.getBoundingClientRect();
-        // Send hover enter event with target bounds
-        electron_1.ipcRenderer.send('hover-target', {
-            isHovering: true,
-            targetBounds: {
-                left: rect.left,
-                top: rect.top,
-                right: rect.right,
-                bottom: rect.bottom,
-                width: rect.width,
-                height: rect.height
-            }
-        });
-        // Set up leave handler
-        const leaveHandler = () => {
-            electron_1.ipcRenderer.send('hover-target', {
-                isHovering: false
-            });
-            activeTarget = null;
-            currentLeaveHandler = null;
-        };
-        currentLeaveHandler = leaveHandler;
-        target.addEventListener('mouseleave', leaveHandler);
-    };
-    // Handle scroll to check if still over target
-    const handleScroll = () => {
-        if (!activeTarget)
-            return;
-        const rect = activeTarget.getBoundingClientRect();
-        const mouseX = window.lastMouseX || 0;
-        const mouseY = window.lastMouseY || 0;
-        const isStillOver = mouseX >= rect.left && mouseX <= rect.right &&
-            mouseY >= rect.top && mouseY <= rect.bottom;
-        if (!isStillOver && currentLeaveHandler) {
-            currentLeaveHandler();
-        }
-    };
-    // Store last mouse position for scroll check
-    window.addEventListener('mousemove', (e) => {
-        window.lastMouseX = e.clientX;
-        window.lastMouseY = e.clientY;
-    });
-    window.addEventListener('mouseover', handleMouseOver, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
 });

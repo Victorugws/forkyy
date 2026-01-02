@@ -3,42 +3,167 @@
 
 console.log('[Webview Preload Simple] ✅ Script executing for:', window.location.href);
 
-// Preload scripts have direct access to require (not window.require)
+// Track cursor position and send to parent window via IPC
+// This allows the target cursor to track mouse position even inside webviews
 try {
+  // In Electron webview preload scripts, ipcRenderer is available via require
   const { ipcRenderer } = require('electron');
-  console.log('[Webview Preload Simple] ✅ ipcRenderer loaded!');
+  
+  if (ipcRenderer) {
+    console.log('[Webview Preload] ✅ IPC Renderer available, setting up cursor tracking');
+    let lastSentX = -1;
+    let lastSentY = -1;
+    const THRESHOLD = 2; // Only send if cursor moved more than 2px
 
-  // Track mouse movement and send to host
-  let lastSendTime = 0;
-  window.addEventListener('mousemove', (e) => {
-    const data = {
-      x: e.screenX,
-      y: e.screenY,
-      clientX: e.clientX,
-      clientY: e.clientY
+    // Helper function to check if an element is clickable (same logic as TargetCursor)
+    const isClickableElement = (element) => {
+      if (!element) return false;
+      
+      // Check for interactive elements
+      const tagName = element.tagName.toLowerCase();
+      const interactiveTags = ['a', 'button', 'input', 'select', 'textarea', 'label', 'summary', 'details'];
+      if (interactiveTags.includes(tagName)) {
+        if (tagName === 'input' || tagName === 'button') {
+          if (element.hasAttribute('disabled') || element.hasAttribute('readonly')) {
+            return false;
+          }
+        }
+        if (tagName === 'a') {
+          return element.href !== '' || element.hasAttribute('href');
+        }
+        return true;
+      }
+      
+      // Check for cursor pointer style
+      try {
+        const style = window.getComputedStyle(element);
+        if ((style.cursor === 'pointer' || style.cursor === 'grab' || style.cursor === 'grabbing') && 
+            style.pointerEvents !== 'none') {
+          return true;
+        }
+      } catch (e) {
+        // getComputedStyle might fail
+      }
+      
+      // Check for role attributes
+      const role = element.getAttribute('role');
+      if (role && ['button', 'link', 'menuitem', 'tab', 'option', 'checkbox', 'radio', 'switch'].includes(role)) {
+        return true;
+      }
+      
+      // Check for onclick handlers
+      if (element.onclick !== null) {
+        return true;
+      }
+      
+      // Check for tabindex
+      const tabIndex = element.getAttribute('tabindex');
+      if (tabIndex !== null && tabIndex !== '-1') {
+        return true;
+      }
+      
+      return false;
     };
 
-    ipcRenderer.sendToHost('cursor-move', data);
+    // Find clickable element at cursor position
+    const findClickableElement = (x, y) => {
+      try {
+        const element = document.elementFromPoint(x, y);
+        if (!element) return null;
+        
+        // Walk up the DOM tree to find clickable element
+        let current = element;
+        while (current && current !== document.body) {
+          if (isClickableElement(current)) {
+            const rect = current.getBoundingClientRect();
+            return {
+              x: rect.left,
+              y: rect.top,
+              width: rect.width,
+              height: rect.height,
+              right: rect.right,
+              bottom: rect.bottom
+            };
+          }
+          current = current.parentElement;
+        }
+      } catch (e) {
+        // elementFromPoint might fail in some cases
+      }
+      return null;
+    };
 
-    // Debug log (throttled)
-    const now = Date.now();
-    if (now - lastSendTime > 1000) {
-      console.log('[Webview Preload Simple] Sending cursor-move:', data);
-      lastSendTime = now;
-    }
-  }, { passive: true });
+    // Find image element at cursor position
+    const findImageElement = (x, y) => {
+      try {
+        const element = document.elementFromPoint(x, y);
+        if (!element) return null;
+        
+        // Walk up the DOM tree to find image element
+        let current = element;
+        while (current && current !== document.body) {
+          if (current.tagName && current.tagName.toLowerCase() === 'img' && 
+              current.src && !current.src.startsWith('data:')) {
+            return {
+              src: current.src,
+              width: current.width || current.naturalWidth,
+              height: current.height || current.naturalHeight,
+              naturalWidth: current.naturalWidth,
+              naturalHeight: current.naturalHeight,
+              complete: current.complete
+            };
+          }
+          current = current.parentElement;
+        }
+      } catch (e) {
+        // elementFromPoint might fail in some cases
+      }
+      return null;
+    };
 
-  // Track mousedown/mouseup
-  window.addEventListener('mousedown', () => {
-    ipcRenderer.sendToHost('cursor-down', {});
-  }, { passive: true });
+    let lastImageSrc = null;
+    
+    const sendCursorPosition = (x, y) => {
+      // Only send if position changed significantly to reduce IPC overhead
+      const positionChanged = Math.abs(x - lastSentX) > THRESHOLD || Math.abs(y - lastSentY) > THRESHOLD;
+      
+      if (positionChanged) {
+        // Find clickable element at cursor position
+        const clickableRect = findClickableElement(x, y);
+        
+        // Find image element at cursor position
+        const imageInfo = findImageElement(x, y);
+        const imageChanged = imageInfo ? (imageInfo.src !== lastImageSrc) : (lastImageSrc !== null);
+        
+        // Send webview-relative coordinates, clickable element info, and image info to renderer
+        ipcRenderer.sendToHost('cursor:move', { 
+          x, 
+          y,
+          clickable: clickableRect,
+          image: imageInfo
+        });
+        
+        lastSentX = x;
+        lastSentY = y;
+        lastImageSrc = imageInfo ? imageInfo.src : null;
+      }
+    };
 
-  window.addEventListener('mouseup', () => {
-    ipcRenderer.sendToHost('cursor-up', {});
-  }, { passive: true });
+    // Track mouse movement - send webview-relative coordinates
+    window.addEventListener('mousemove', (e) => {
+      sendCursorPosition(e.clientX, e.clientY);
+    });
 
-  console.log('[Webview Preload Simple] ✅ Event listeners attached!');
-} catch (err) {
-  console.error('[Webview Preload Simple] ❌ Failed to setup:', err);
-  console.error('[Webview Preload Simple] Error details:', err.message, err.stack);
+    // Also track pointer events for better compatibility
+    window.addEventListener('pointermove', (e) => {
+      sendCursorPosition(e.clientX, e.clientY);
+    });
+    
+    console.log('[Webview Preload] ✅ Cursor tracking listeners attached');
+  } else {
+    console.warn('[Webview Preload] ⚠️ IPC Renderer not available');
+  }
+} catch (error) {
+  // IPC not available (e.g., in regular browser iframe)
+  console.log('[Webview Preload] ❌ IPC not available, cursor tracking disabled:', error);
 }

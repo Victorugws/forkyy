@@ -3,7 +3,8 @@
 import { useArtifact } from '@/components/artifact/artifact-context'
 import { CHAT_ID } from '@/lib/constants'
 import type { SearchResults as TypeSearchResults } from '@/lib/types'
-import { useChat, ToolInvocation } from 'ai/react'
+import { useChat } from 'ai/react'
+import type { ToolInvocation } from 'ai'
 import { CollapsibleMessage } from './collapsible-message'
 import { SearchSkeleton } from './default-skeleton'
 import { SearchResults } from './search-results'
@@ -29,7 +30,27 @@ export function SearchSection({
   const isToolLoading = tool.state === 'call'
   const searchResults: TypeSearchResults =
     tool.state === 'result' ? tool.result : undefined
+  // Helper function to remove duplicated text patterns
+  const deduplicateText = (text: string | undefined): string => {
+    if (!text) return ''
+    // Remove patterns where text is repeated consecutively
+    // Handle both cases: "texttext" and "text text" (with spaces)
+    let deduplicated = text
+    
+    // First, try to match exact duplicates without spaces
+    deduplicated = deduplicated.replace(/(.{10,}?)\1+/g, '$1')
+    
+    // Then, try to match duplicates with whitespace between them
+    deduplicated = deduplicated.replace(/(.{10,}?)\s+\1+/g, '$1')
+    
+    // Also handle shorter patterns (for things like "SourcesSources")
+    deduplicated = deduplicated.replace(/(.{3,}?)\1+/g, '$1')
+    
+    return deduplicated.trim()
+  }
+
   const query = tool.args?.query as string | undefined
+  const deduplicatedQuery = deduplicateText(query)
   const includeDomains = tool.args?.includeDomains as string[] | undefined
   const includeDomainsString = includeDomains
     ? ` [${includeDomains.join(', ')}]`
@@ -46,7 +67,7 @@ export function SearchSection({
       <ToolArgsSection
         tool="search"
         number={searchResults?.results?.length}
-      >{`${query}${includeDomainsString}`}</ToolArgsSection>
+      >{`${deduplicatedQuery}${includeDomainsString}`}</ToolArgsSection>
     </button>
   )
 
@@ -58,6 +79,8 @@ export function SearchSection({
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       showIcon={false}
+      transparentBackground={true}
+      showBorder={false}
     >
       {searchResults &&
         searchResults.images &&
@@ -65,14 +88,14 @@ export function SearchSection({
           <Section>
             <SearchResultsImageSection
               images={searchResults.images}
-              query={query}
+              query={deduplicatedQuery}
             />
           </Section>
         )}
       {isLoading && isToolLoading ? (
         <SearchSkeleton />
       ) : searchResults?.results ? (
-        <Section title="Sources">
+        <Section title="Sources" transparentBackground={true}>
           <SearchResults results={searchResults.results} />
         </Section>
       ) : null}

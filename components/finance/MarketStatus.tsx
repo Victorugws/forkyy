@@ -101,7 +101,7 @@ export function MarketStatus({ compact = false }: MarketStatusProps) {
 
   if (compact) {
     return (
-      <div className="rounded-2xl neu-card p-4">
+      <div className="rounded-2xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-foreground" />
@@ -131,7 +131,7 @@ export function MarketStatus({ compact = false }: MarketStatusProps) {
   }
 
   return (
-    <div className="rounded-2xl neu-card p-6 mb-6">
+    <div className="rounded-2xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-foreground" />

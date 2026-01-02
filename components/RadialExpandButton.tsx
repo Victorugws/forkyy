@@ -61,11 +61,13 @@ export function RadialExpandButton({
         {/* Main button */}
         <button
           onClick={handleMainClick}
-          className="relative z-[100] grid place-items-center p-2.5 border-none bg-[#e8e8e8] shadow-[5px_5px_12px_#cacaca,-5px_-5px_12px_#ffffff] rounded-full transition-all duration-200 hover:scale-110"
+          className="relative z-[100] grid place-items-center p-2.5 border-none bg-black shadow-[5px_5px_12px_#cacaca,-5px_-5px_12px_#ffffff] rounded-full transition-all duration-200 hover:scale-110"
           style={{ width: size, height: size }}
           aria-label={mainLabel}
         >
-          {mainIcon}
+          <div className="text-white">
+            {mainIcon}
+          </div>
         </button>
 
         {/* Option buttons */}
@@ -82,7 +84,7 @@ export function RadialExpandButton({
               key={index}
               onClick={() => handleOptionClick(option.onClick)}
               className={cn(
-                "absolute grid place-items-center p-2.5 border-none bg-[#e8e8e8] rounded-full transition-all duration-300",
+                "absolute grid place-items-center p-2.5 border-none bg-black rounded-full transition-all duration-300",
                 isExpanded
                   ? "shadow-[5px_5px_12px_#cacaca,-5px_-5px_12px_#ffffff] opacity-100"
                   : "shadow-[5px_5px_12px_rgba(202,202,202,0),-5px_-5px_12px_rgba(255,255,255,0)] opacity-0"
@@ -98,11 +100,13 @@ export function RadialExpandButton({
                 left: '50%',
                 marginLeft: -size / 2,
                 marginTop: -size / 2,
-                backgroundColor: option.color || '#e8e8e8'
+                backgroundColor: option.color || '#000000'
               }}
               aria-label={option.label}
             >
-              {option.icon}
+              <div className="text-white">
+                {option.icon}
+              </div>
             </button>
           )
         })}

@@ -5,6 +5,12 @@ interface AnimatedEyeBackgroundProps {
 }
 
 export function AnimatedEyeBackground({ isListening = false }: AnimatedEyeBackgroundProps) {
+    // In extension context, use extension-relative path
+    const isExtension = typeof browser !== 'undefined' && browser.runtime?.id
+    const videoPath = isExtension 
+      ? browser.runtime.getURL('public/videos/fffffanimation.mov')
+      : '/videos/fffffanimation.mov'
+    
     return (
         <div
             className="container"
@@ -27,12 +33,12 @@ export function AnimatedEyeBackground({ isListening = false }: AnimatedEyeBackgr
                     height: "100%",
                     objectFit: "cover",
                     position: "absolute",
-                    top: "-14.29%",
+                    top: "calc(-14.29% + 30px)",
                     left: 0,
                 }}
             >
-                <source src="/videos/fffffanimation.mov" type="video/quicktime" />
-                <source src="/videos/fffffanimation.mov" type="video/mp4" />
+                <source src={videoPath} type="video/quicktime" />
+                <source src={videoPath} type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
             
@@ -43,7 +49,7 @@ export function AnimatedEyeBackground({ isListening = false }: AnimatedEyeBackgr
                     <div
                         style={{
                             position: "absolute",
-                            top: "calc(50% - 13.86%)",
+                            top: "calc(50% - 13.86% + 30px)",
                             left: "50%",
                             transform: "translate(-50%, -50%)",
                             width: "120px",
@@ -60,7 +66,7 @@ export function AnimatedEyeBackground({ isListening = false }: AnimatedEyeBackgr
                     <div
                         style={{
                             position: "absolute",
-                            top: "calc(50% - 13.86%)",
+                            top: "calc(50% - 13.86% + 30px)",
                             left: "50%",
                             transform: "translate(-50%, -50%)",
                             width: "60px",

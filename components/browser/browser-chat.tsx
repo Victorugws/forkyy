@@ -3,9 +3,10 @@
 import { Model } from '@/lib/types/models'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Sparkles, FileText, List, X } from 'lucide-react'
+import { Sparkles, FileText, List, X, Play, CheckCircle2 } from 'lucide-react'
 import Textarea from 'react-textarea-autosize'
 import { ThoughtProcess } from '@/components/ThoughtProcess'
+import { TaskList } from '@/components/tasks/task-list'
 
 interface BrowserChatProps {
   id: string
@@ -25,6 +26,8 @@ export function BrowserChat({
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showTasks, setShowTasks] = useState(false)
+  const [taskCreated, setTaskCreated] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,6 +42,18 @@ export function BrowserChat({
 
     try {
       // Call the chat API with browser context
+      // In extension, we can't use /api/chat - need to use browser.storage or external API
+      // For now, show a message that API is not available in extension
+      if (typeof browser !== 'undefined' && browser.runtime?.id) {
+        // Extension context - API routes don't work
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: 'Chat API is not available in extension context. This feature requires a server connection.'
+        }])
+        setIsLoading(false)
+        return
+      }
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,11 +94,83 @@ export function BrowserChat({
     setInput(prompt)
   }
 
+  const handleCreateTask = async () => {
+    if (!input.trim() || isLoading) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: input.trim(),
+          title: input.trim().slice(0, 100)
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setTaskCreated(true)
+        setInput('')
+        setTimeout(() => {
+          setTaskCreated(false)
+          setShowTasks(true) // Automatically switch to tasks view
+        }, 1500)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Failed to create task:', response.status, errorData)
+        const errorMessage = errorData.error || 
+          (response.status === 401 ? 'Please log in to create tasks' :
+           response.status === 404 ? 'API endpoint not found. Is the server running?' :
+           `Server error (${response.status})`)
+        alert(`Failed to create task: ${errorMessage}`)
+      }
+    } catch (error: any) {
+      console.error('Failed to create task:', error)
+      const errorMessage = error.message === 'fetch failed' || error.message?.includes('Failed to fetch')
+        ? 'Cannot connect to server. Please ensure the development server is running.'
+        : error.message || 'Unknown error occurred'
+      alert(`Failed to create task: ${errorMessage}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (showTasks) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="border-b p-4 flex items-center justify-between">
+          <h2 className="font-semibold text-base">Tasks</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowTasks(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <TaskList />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
       <div className="border-b p-6">
-        <h2 className="font-semibold text-base mb-1.5">AI Assistant</h2>
+        <div className="flex items-center justify-between mb-1.5">
+          <h2 className="font-semibold text-base">AI Assistant</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowTasks(true)}
+            title="View Tasks"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
         <p className="text-xs text-gray-600">
           {currentUrl ? `Analyzing: ${pageTitle || 'Current page'}` : 'Ready to help you browse'}
         </p>
@@ -132,11 +219,35 @@ export function BrowserChat({
 
       {/* Input */}
       <div className="border-t p-6">
+        <div className="flex flex-col gap-2 mb-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleCreateTask}
+            disabled={!input.trim() || isLoading}
+            className="flex items-center gap-2 w-full"
+          >
+            {taskCreated ? (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                Task Created!
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Create Autonomous Task
+              </>
+            )}
+          </Button>
+          <span className="text-xs text-gray-500 text-center">
+            Create a task to execute this request step-by-step with preview/replay
+          </span>
+        </div>
         <form onSubmit={handleSubmit} className="relative">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about this page..."
+            placeholder="Ask about this page or create a task..."
             className="w-full resize-none min-h-[48px] max-h-[200px] pr-12 py-3 px-4 rounded-xl border border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100 bg-gray-50"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {

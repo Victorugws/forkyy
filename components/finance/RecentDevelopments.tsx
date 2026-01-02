@@ -1,6 +1,7 @@
 'use client'
 
 import { Clock, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
+import DecryptedText from '@/components/DecryptedText'
 
 interface Development {
   id: string
@@ -56,7 +57,9 @@ export function RecentDevelopments({ topic = 'US markets', limit = 3 }: RecentDe
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Recent Developments</h2>
+        <h2 className="text-lg font-semibold">
+          <DecryptedText text="Recent Developments" animateOn="view" speed={30} />
+        </h2>
         <p className="text-xs text-muted-foreground">Updated 1 minute ago</p>
       </div>
 
@@ -64,10 +67,10 @@ export function RecentDevelopments({ topic = 'US markets', limit = 3 }: RecentDe
         {developments.slice(0, limit).map((dev) => (
           <div
             key={dev.id}
-            className="neu-card p-5 rounded-xl hover:neu-raised transition-all cursor-pointer group"
+            className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-5 rounded-xl transition-all cursor-pointer group"
           >
             <div className="flex items-start gap-3 mb-3">
-              <div className="p-2 rounded-lg neu-inset bg-background/50 flex-shrink-0">
+              <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] bg-background/50 flex-shrink-0">
                 {getSentimentIcon(dev.sentiment)}
               </div>
               <div className="flex-1 min-w-0">

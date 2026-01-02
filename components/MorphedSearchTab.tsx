@@ -1,6 +1,40 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+
+// SpeechRecognition type declaration
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: any) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionResult {
+  transcript: string
+  confidence: number
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResult[][]
+  resultIndex: number
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: SpeechRecognitionConstructor
+    webkitSpeechRecognition: SpeechRecognitionConstructor
+  }
+}
 import { Search, Mic, Scale, X } from 'lucide-react'
 
 interface MorphedSearchTabProps {
@@ -8,6 +42,7 @@ interface MorphedSearchTabProps {
   onPromptChange: (prompt: string) => void
   onSearch: (query: string) => void
   onVoiceStateChange?: (isListening: boolean) => void
+  onFinanceOverlay?: () => void
   position: 'left' | 'right'
   specificityOptions: Array<{ label: string; value: string }>
   onSpecificitySelect?: (value: string) => void

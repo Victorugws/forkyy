@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { useChat } from 'ai/react'
 import { Copy } from 'lucide-react'
 import { toast } from 'sonner'
-import { ChatShare } from './chat-share'
+// ChatShare removed - chat functionality disabled
 import { RetryButton } from './retry-button'
 import { Button } from './ui/button'
 
@@ -53,7 +53,7 @@ export function MessageActions({
       >
         <Copy size={14} />
       </Button>
-      {enableShare && chatId && <ChatShare chatId={chatId} />}
+      {/* ChatShare removed - chat functionality disabled */}
     </div>
   )
 }

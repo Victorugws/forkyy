@@ -130,7 +130,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
   )
 
   return (
-    <div ref={dropdownRef} className={`relative ${className}`}>
+    <div ref={dropdownRef} className={`relative ${className}`} style={{ zIndex: isOpen ? 9999 : 'auto' }}>
       {/* Trigger Button */}
       <button
         type="button"
@@ -140,7 +140,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
           console.log('Country selector clicked, current state:', isOpen)
           setIsOpen(!isOpen)
         }}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg neu-button cursor-pointer"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 cursor-pointer"
         style={{ pointerEvents: 'auto' }}
       >
         <Globe className="size-4 text-foreground" />
@@ -154,7 +154,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl neu-raised shadow-lg z-[100] overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 rounded-xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] shadow-lg z-[9999] overflow-hidden" style={{ position: 'absolute' }}>
           {/* Search Input */}
           <div className="p-3 border-b border-border">
             <input
@@ -162,7 +162,7 @@ export function CountrySelector({ value, onChange, className = '' }: CountrySele
               placeholder="Search countries..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg neu-input text-sm"
+              className="w-full px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] text-sm"
               autoFocus
             />
           </div>

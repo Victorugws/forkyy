@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { Sparkles, MousePointer2, Search, Zap, Target, Eye } from 'lucide-react'
+import { Sparkles, Search, Zap, Target, Eye } from 'lucide-react'
 
 export function HyperBrowserDemo() {
   return (
@@ -29,42 +29,11 @@ export function HyperBrowserDemo() {
 
       {/* Features Grid */}
       <div className="grid md:grid-cols-2 gap-6 mt-12">
-        {/* Feature 1: Adaptive Target Cursor */}
+        {/* Feature 1: Smart Element Detection */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="p-6 bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow"
-        >
-          <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl w-fit mb-4">
-            <MousePointer2 className="h-6 w-6 text-white" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Adaptive Target Cursor</h3>
-          <p className="text-gray-600 mb-4">
-            Your cursor intelligently morphs to match the boundaries of significant elements,
-            expanding to the corners of text, images, and interactive components.
-          </p>
-          <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-              <span>Expands to element corners</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-              <span>Highlights googleable content</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-              <span>Visual feedback on significance</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Feature 2: Smart Element Detection */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
           className="p-6 bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow"
         >
           <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl w-fit mb-4">
@@ -91,11 +60,11 @@ export function HyperBrowserDemo() {
           </div>
         </motion.div>
 
-        {/* Feature 3: Visual Search */}
+        {/* Feature 2: Visual Search */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
           className="p-6 bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow"
         >
           <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl w-fit mb-4">
@@ -122,11 +91,11 @@ export function HyperBrowserDemo() {
           </div>
         </motion.div>
 
-        {/* Feature 4: Hyper Analysis */}
+        {/* Feature 3: Hyper Analysis */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="p-6 bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow"
         >
           <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl w-fit mb-4">
@@ -173,8 +142,8 @@ export function HyperBrowserDemo() {
             </div>
             <h3 className="font-semibold text-gray-900">Hover Over Content</h3>
             <p className="text-sm text-gray-600">
-              Move your cursor over any text, image, or element. The cursor will
-              automatically expand to match significant elements.
+              Move your cursor over any text, image, or element to identify
+              significant content on the page.
             </p>
           </div>
 

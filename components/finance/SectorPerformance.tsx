@@ -1,6 +1,7 @@
 'use client'
 
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import DecryptedText from '@/components/DecryptedText'
 
 interface Sector {
   name: string
@@ -24,8 +25,10 @@ const mockSectors: Sector[] = [
 
 export function SectorPerformance() {
   return (
-    <div className="neu-card p-6 rounded-2xl mb-6">
-      <h3 className="text-xl font-bold text-foreground mb-4">Sector Performance</h3>
+    <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl mb-6">
+      <h3 className="text-xl font-bold text-foreground mb-4">
+        <DecryptedText text="Sector Performance" animateOn="view" speed={30} />
+      </h3>
       
       <div className="space-y-3">
         {mockSectors.map((sector) => (

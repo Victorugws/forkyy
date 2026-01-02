@@ -48,7 +48,7 @@ export function TabBar({
 }: TabBarProps) {
   const pinnedTabs = tabs.filter(t => t.isPinned)
   const normalTabs = tabs.filter(t => !t.isPinned)
-  
+
   // Organize tabs by groups
   const groupedTabs = groups.map(group => ({
     group,
@@ -309,7 +309,7 @@ export function TabBar({
   return (
     <>
       <div className="flex items-center border-b bg-muted/30 min-h-[40px] flex-shrink-0 relative z-10">
-        {/* Pinned Tabs */}
+      {/* Pinned Tabs */}
         <div className="flex items-center flex-shrink-0">
           {pinnedTabs.map((tab, index) => renderTab(tab, index, true))}
         </div>
@@ -414,8 +414,8 @@ export function TabBar({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-                
+      </div>
+
                 {/* Group Tabs */}
                 {!group.collapsed && (
                   <div className="flex items-center">
@@ -436,15 +436,15 @@ export function TabBar({
           })}
 
           {/* New Tab Button - positioned right after the last tab */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="flex-shrink-0 mx-1"
-            onClick={onNewTab}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="flex-shrink-0 mx-1"
+        onClick={onNewTab}
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    </div>
 
         {/* Scroll Buttons */}
         {canScrollRight && (

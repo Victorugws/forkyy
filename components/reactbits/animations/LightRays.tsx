@@ -123,10 +123,15 @@ const LightRays = ({
       gl.canvas.style.width = '100%';
       gl.canvas.style.height = '100%';
 
-      while (containerRef.current.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
+      // Clear container using replaceChildren (modern API) or innerHTML fallback
+      // This avoids conflicts with React's DOM management
+      if (containerRef.current.replaceChildren) {
+        containerRef.current.replaceChildren(gl.canvas);
+      } else {
+        // Fallback for older browsers
+        containerRef.current.innerHTML = '';
+        containerRef.current.appendChild(gl.canvas);
       }
-      containerRef.current.appendChild(gl.canvas);
 
       const vert = `
 attribute vec2 position;
@@ -324,9 +329,9 @@ void main() {
               loseContextExt.loseContext();
             }
 
-            if (canvas && canvas.parentNode) {
-              canvas.parentNode.removeChild(canvas);
-            }
+            // Don't manually remove canvas - let React handle it since it's a child of containerRef
+            // Manually removing it causes conflicts with React's DOM management
+            // The canvas will be automatically removed when React unmounts the container
           } catch (error) {
             console.warn('Error during WebGL cleanup:', error);
           }

@@ -31,6 +31,9 @@ export function UpdatePasswordForm({
     setError(null)
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
       const { error } = await supabase.auth.updateUser({ password })
       if (error) throw error
       // Redirect to root and refresh to ensure server components get updated session.

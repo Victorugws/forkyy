@@ -3,6 +3,7 @@
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { MiniChart } from './MiniChart'
 import { CompanyLogo } from './CompanyLogo'
+import DecryptedText from '@/components/DecryptedText'
 
 interface Mover {
   symbol: string
@@ -64,9 +65,11 @@ export function MarketMovers({ type = 'gainers', limit = 5 }: MarketMoversProps)
   const title = type === 'gainers' ? 'Top Gainers' : type === 'losers' ? 'Top Losers' : 'Most Active'
 
   return (
-    <div className="neu-card p-6 rounded-2xl mb-6">
+    <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-foreground">{title}</h3>
+        <h3 className="text-xl font-bold text-foreground">
+          <DecryptedText text={title} animateOn="view" speed={30} />
+        </h3>
         <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           View All
         </button>
@@ -89,7 +92,7 @@ export function MarketMovers({ type = 'gainers', limit = 5 }: MarketMoversProps)
               </div>
 
               <div className="hidden md:block flex-shrink-0 w-20">
-                <MiniChart data={generateChartData(mover.isGainer)} isPositive={mover.isGainer} />
+                <MiniChart data={generateChartData(mover.isGainer)} positive={mover.isGainer} />
               </div>
 
               <div className="flex-shrink-0 text-right">

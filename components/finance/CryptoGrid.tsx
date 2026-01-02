@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { MiniChart } from './MiniChart'
 import { CryptoLogo } from './CryptoLogo'
+import GlareHover from '@/components/GlareHover'
 
 interface CryptoData {
   name: string
@@ -38,7 +39,7 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-4 rounded-xl neu-card h-32 animate-pulse">
+          <div key={i} className="p-4 rounded-xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] h-32 animate-pulse">
             <div className="h-3 bg-muted rounded w-1/2 mb-2"></div>
             <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
             <div className="h-4 bg-muted rounded w-1/3"></div>
@@ -54,11 +55,24 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
         const chartData = generateChartData(crypto.negative)
 
         return (
-          <Link
+          <GlareHover
             key={crypto.name}
-            href={`/search?q=${encodeURIComponent(crypto.name)}+cryptocurrency`}
-            className="p-4 rounded-xl neu-card group"
+            width="100%"
+            height="100%"
+            background="transparent"
+            borderRadius="12px"
+            borderColor="transparent"
+            glareColor="#ffffff"
+            glareOpacity={0.2}
+            glareAngle={-30}
+            glareSize={300}
+            transitionDuration={800}
+            playOnce={false}
           >
+            <Link
+              href={`/search?q=${encodeURIComponent(crypto.name)}+cryptocurrency`}
+              className="p-4 rounded-xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] group block h-full"
+            >
             <div className="flex items-center gap-3 mb-3">
               <CryptoLogo symbol={crypto.symbol} name={crypto.name} size={48} />
               <div className="flex-1 min-w-0">
@@ -74,6 +88,7 @@ export function CryptoGrid({ cryptos, loading }: CryptoGridProps) {
               {crypto.change}
             </div>
           </Link>
+          </GlareHover>
         )
       })}
     </div>

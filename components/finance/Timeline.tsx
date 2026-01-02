@@ -77,7 +77,7 @@ export function Timeline({ events, className = '' }: TimelineProps) {
                   initial={{ opacity: 0, y: -10 }}
                   animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-sm font-semibold text-foreground mb-3 px-3 py-1.5 rounded-lg neu-inset"
+                  className="text-sm font-semibold text-foreground mb-3 px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3]"
                 >
                   {event.date}
                 </motion.div>
@@ -107,7 +107,7 @@ export function Timeline({ events, className = '' }: TimelineProps) {
                 </motion.div>
               </div>
               
-              {/* Event card with neumorphic styling */}
+              {/* Event card */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
@@ -120,7 +120,7 @@ export function Timeline({ events, className = '' }: TimelineProps) {
                   scale: 1.02,
                   transition: { duration: 0.2 }
                 }}
-                className="flex-1 neu-card p-6 rounded-2xl group cursor-pointer"
+                className="flex-1 bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl group cursor-pointer"
               >
                 {/* Gradient accent line */}
                 <motion.div

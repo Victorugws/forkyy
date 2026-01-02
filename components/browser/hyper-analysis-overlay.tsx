@@ -4,7 +4,14 @@ import { motion, AnimatePresence } from 'motion/react'
 import { X, Sparkles, Search, Image as ImageIcon, BookOpen, TrendingUp, ExternalLink, Lightbulb, Globe } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import type { SignificantElement } from './adaptive-target-cursor'
+
+interface SignificantElement {
+  element: HTMLElement
+  content: string
+  type: string
+  significance?: number
+  position: { x: number; y: number; width: number; height: number }
+}
 
 interface SearchResult {
   title: string
@@ -110,7 +117,7 @@ export function HyperAnalysisOverlay({ isOpen, onClose, element }: HyperAnalysis
       image: `https://picsum.photos/seed/${elem.content.slice(0, 10)}/300/200`,
       facts: [
         { label: 'Type', value: elem.type.charAt(0).toUpperCase() + elem.type.slice(1) },
-        { label: 'Relevance', value: `${elem.significance}%` },
+        { label: 'Relevance', value: `${elem.significance ?? 85}%` },
         { label: 'Content Length', value: `${elem.content.length} characters` },
         { label: 'Category', value: getCategoryFromType(elem.type) }
       ]

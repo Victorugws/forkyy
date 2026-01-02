@@ -9,6 +9,9 @@ import { PriceAlerts } from './PriceAlerts'
 import { MarketStatus } from './MarketStatus'
 import { QuickStats } from './QuickStats'
 import { TrendingTopics } from './TrendingTopics'
+import { EquitySectors } from './EquitySectors'
+import { PopularCryptocurrencies } from './PopularCryptocurrencies'
+import { FixedIncome } from './FixedIncome'
 
 interface Stock {
   name: string
@@ -23,9 +26,11 @@ interface WatchlistSidebarProps {
   onAddToWatchlist: (ticker: string) => void
   onRemoveFromWatchlist: (ticker: string) => void
   selectedCountry?: string
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist, selectedCountry = 'United States', isOpen, onClose }: WatchlistSidebarProps & { isOpen?: boolean; onClose?: () => void }) {
+export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWatchlist, selectedCountry = 'United States', isOpen = true, onClose }: WatchlistSidebarProps) {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers' | 'active'>('gainers')
   const [gainers, setGainers] = useState<Stock[]>([])
   const [losers, setLosers] = useState<Stock[]>([])
@@ -42,6 +47,36 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
         // For now, using screener data as a proxy
         console.log('Fetching market movers for country:', selectedCountry)
         const res = await fetch(`/api/finance?type=screener&country=${encodeURIComponent(selectedCountry)}`)
+        
+        if (!res.ok) {
+          // API endpoint doesn't exist, use mock data
+          const mockStocks: Stock[] = [
+            { name: 'NVIDIA Corp.', ticker: 'NVDA', price: '$183.38', change: '+2.11%', positive: true },
+            { name: 'Tesla Inc.', ticker: 'TSLA', price: '$454.53', change: '+1.74%', positive: true },
+            { name: 'Palantir Technologies', ticker: 'PLTR', price: '$177.75', change: '+0.95%', positive: true },
+            { name: 'Microsoft Corp.', ticker: 'MSFT', price: '$479.93', change: '+0.46%', positive: true },
+          ]
+          setGainers(mockStocks)
+          setLosers([])
+          setActiveStocks(mockStocks)
+          return
+        }
+        
+        const contentType = res.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          // Response is not JSON, use mock data
+          const mockStocks: Stock[] = [
+            { name: 'NVIDIA Corp.', ticker: 'NVDA', price: '$183.38', change: '+2.11%', positive: true },
+            { name: 'Tesla Inc.', ticker: 'TSLA', price: '$454.53', change: '+1.74%', positive: true },
+            { name: 'Palantir Technologies', ticker: 'PLTR', price: '$177.75', change: '+0.95%', positive: true },
+            { name: 'Microsoft Corp.', ticker: 'MSFT', price: '$479.93', change: '+0.46%', positive: true },
+          ]
+          setGainers(mockStocks)
+          setLosers([])
+          setActiveStocks(mockStocks)
+          return
+        }
+        
         const data = await res.json()
 
         if (data.success || data.fallback) {
@@ -112,6 +147,34 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
         // Fetch all watchlist stocks (simplified - would batch in real implementation)
         console.log('Fetching watchlist prices for country:', selectedCountry)
         const res = await fetch(`/api/finance?type=screener&country=${encodeURIComponent(selectedCountry)}`)
+        
+        if (!res.ok) {
+          // API endpoint doesn't exist, use mock data for watchlist
+          const watchlistData = myWatchlist.map((ticker: string) => ({
+            name: ticker,
+            ticker: ticker,
+            price: '$0.00',
+            change: '0.00%',
+            positive: true
+          }))
+          setWatchlistStocks(watchlistData)
+          return
+        }
+        
+        const contentType = res.headers.get('content-type')
+        if (!contentType || !contentType.includes('application/json')) {
+          // Response is not JSON, use mock data for watchlist
+          const watchlistData = myWatchlist.map((ticker: string) => ({
+            name: ticker,
+            ticker: ticker,
+            price: '$0.00',
+            change: '0.00%',
+            positive: true
+          }))
+          setWatchlistStocks(watchlistData)
+          return
+        }
+        
         const data = await res.json()
 
         if (data.success || data.fallback) {
@@ -124,7 +187,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
 
           // For each ticker in watchlist, either use fetched data or create placeholder
           const watchlistData = myWatchlist.map((ticker: string) => {
-            const stock = stockMap.get(ticker.toUpperCase())
+            const stock = stockMap.get(ticker.toUpperCase()) as any
             if (stock) {
               return {
                 name: stock.name || ticker,
@@ -211,7 +274,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
         )}
 
         {/* Watchlist Section */}
-        <div className="rounded-2xl neu-card p-4">
+        <div className="rounded-2xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
             <TrendingUp className="size-3.5" />
@@ -275,7 +338,7 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
       </div>
 
       {/* Market Movers Section */}
-      <div className="rounded-2xl neu-card p-4">
+      <div className="rounded-2xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-4">
         <h3 className="text-sm font-semibold text-foreground mb-3">Market Movers</h3>
 
         {/* Tabs */}
@@ -356,6 +419,15 @@ export function WatchlistSidebar({ myWatchlist, onAddToWatchlist, onRemoveFromWa
 
       {/* Trending Topics Section */}
       <TrendingTopics compact={true} />
+
+      {/* Equity Sectors Section */}
+      <EquitySectors />
+
+      {/* Popular Cryptocurrencies Section */}
+      <PopularCryptocurrencies />
+
+      {/* Fixed Income Section */}
+      <FixedIncome />
       </div>
     </>
   )

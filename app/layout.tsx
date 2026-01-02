@@ -10,11 +10,14 @@ import type { Metadata, Viewport } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 import { Providers } from './providers'
 import { GlobalTextDecrypt } from '@/components/GlobalTextDecrypt'
+import TargetCursor from '@/components/reactbits/animations/TargetCursor'
 import './globals.css'
 
 const fontSans = FontSans({
   subsets: ['latin'],
   variable: '--font-sans',
+  display: 'swap',
+  preload: true,
 })
 
 const title = 'Morphic'
@@ -76,6 +79,11 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <GlobalTextDecrypt />
+            <TargetCursor 
+              spinDuration={2}
+              hideDefaultCursor={true}
+              parallaxOn={true}
+            />
             <div className="h-screen w-screen overflow-hidden">
               <ArtifactRoot>{children}</ArtifactRoot>
             </div>

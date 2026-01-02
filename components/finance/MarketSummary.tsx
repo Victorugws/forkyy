@@ -62,6 +62,11 @@ export function MarketSummary({ topic }: MarketSummaryProps) {
             throw new Error(`API returned ${res.status}`)
           }
           
+          const contentType = res.headers.get('content-type')
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON')
+          }
+          
           data = await res.json()
         } catch (fetchError: any) {
           // Handle abort (timeout) or network errors gracefully

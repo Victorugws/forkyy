@@ -1,24 +1,49 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { CompanyLogo } from './CompanyLogo'
+import DecryptedText from '@/components/DecryptedText'
 
 interface EarningsCall {
   name: string
   ticker: string
   time: string
   quarter: string
-  date?: string
+  date: Date
 }
 
 interface WeekDay {
   day: string
   date: string
-  calls: string
+  calls: number
   fullDate: Date
   active: boolean
+}
+
+// Mock earnings data
+const generateMockEarnings = (date: Date): EarningsCall[] => {
+  const dayOfWeek = date.getDay()
+  if (dayOfWeek === 0 || dayOfWeek === 6) return [] // No earnings on weekends
+
+  const companies = [
+    { name: 'Apple Inc.', ticker: 'AAPL', quarter: 'Q4 2025' },
+    { name: 'Microsoft Corporation', ticker: 'MSFT', quarter: 'Q4 2025' },
+    { name: 'Amazon.com Inc.', ticker: 'AMZN', quarter: 'Q4 2025' },
+    { name: 'Alphabet Inc.', ticker: 'GOOGL', quarter: 'Q4 2025' },
+    { name: 'Meta Platforms', ticker: 'META', quarter: 'Q4 2025' },
+    { name: 'Tesla Inc.', ticker: 'TSLA', quarter: 'Q4 2025' },
+    { name: 'NVIDIA Corporation', ticker: 'NVDA', quarter: 'Q4 2025' },
+  ]
+
+  const times = ['8:00 AM', '9:00 AM', '10:00 AM', '4:00 PM', '5:00 PM']
+  
+  return companies.slice(0, Math.floor(Math.random() * 5) + 3).map((company, idx) => ({
+    ...company,
+    time: times[idx % times.length],
+    date: new Date(date)
+  }))
 }
 
 export function EarningsCalendar() {
@@ -26,7 +51,7 @@ export function EarningsCalendar() {
   const [weekDays, setWeekDays] = useState<WeekDay[]>([])
   const [earningsCalls, setEarningsCalls] = useState<EarningsCall[]>([])
   const [selectedDay, setSelectedDay] = useState<Date>(new Date())
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   // Generate week days dynamically
   useEffect(() => {
@@ -50,10 +75,14 @@ export function EarningsCalendar() {
         const isToday = currentDate.toDateString() === new Date().toDateString()
         const isSelected = currentDate.toDateString() === selectedDay.toDateString()
 
+        // Generate mock earnings count for weekdays
+        const dayOfWeek = currentDate.getDay()
+        const calls = (dayOfWeek === 0 || dayOfWeek === 6) ? 0 : Math.floor(Math.random() * 50) + 20
+
         days.push({
           day: dayNames[i],
           date: `${months[currentDate.getMonth()]} ${currentDate.getDate()}`,
-          calls: 'Loading...',
+          calls,
           fullDate: currentDate,
           active: isSelected
         })
@@ -65,35 +94,26 @@ export function EarningsCalendar() {
     generateWeekDays()
   }, [currentWeekOffset, selectedDay])
 
-  // Fetch earnings data
+  // Fetch earnings for selected day
   useEffect(() => {
     const fetchEarnings = async () => {
       setLoading(true)
       try {
-        const res = await fetch('/api/finance?type=earnings')
-        const data = await res.json()
-
-        if (data.success || data.fallback) {
-          setEarningsCalls(data.data || [])
-
-          // Count calls per day (simplified - in real implementation would parse dates)
-          const updatedDays = weekDays.map(day => ({
-            ...day,
-            calls: day.day === 'Sat' || day.day === 'Sun' ? 'No Calls' : `${Math.floor(Math.random() * 50 + 20)} Calls`
-          }))
-          setWeekDays(updatedDays)
-        }
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        const mockEarnings = generateMockEarnings(selectedDay)
+        setEarningsCalls(mockEarnings)
       } catch (error) {
         console.error('Error fetching earnings:', error)
+        setEarningsCalls([])
       } finally {
         setLoading(false)
       }
     }
 
-    if (weekDays.length > 0) {
       fetchEarnings()
-    }
-  }, [currentWeekOffset])
+  }, [selectedDay])
 
   const handlePreviousWeek = () => {
     setCurrentWeekOffset(prev => prev - 1)
@@ -112,30 +132,36 @@ export function EarningsCalendar() {
     setSelectedDay(day.fullDate)
   }
 
+  const selectedDayCalls = useMemo(() => {
+    return earningsCalls.filter(call => 
+      call.date.toDateString() === selectedDay.toDateString()
+    )
+  }, [earningsCalls, selectedDay])
+
   return (
     <div className="mb-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">
-          Earnings Calendar
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-foreground">
+          <DecryptedText text="Earnings Calendar" animateOn="view" speed={30} />
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={handlePreviousWeek}
-            className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+            className="bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 p-2 rounded-lg hover:bg-white/30 backdrop-blur-md border border-[#e6ebf3] transition-all"
             aria-label="Previous week"
           >
             <ChevronLeft className="size-4" />
           </button>
           <button
             onClick={handleToday}
-            className="px-4 py-1.5 rounded-lg bg-accent text-sm font-medium hover:bg-accent/80 transition-colors"
+            className="bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/30 backdrop-blur-md border border-[#e6ebf3] transition-all"
           >
             Today
           </button>
           <button
             onClick={handleNextWeek}
-            className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+            className="bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 p-2 rounded-lg hover:bg-white/30 backdrop-blur-md border border-[#e6ebf3] transition-all"
             aria-label="Next week"
           >
             <ChevronRight className="size-4" />
@@ -147,12 +173,12 @@ export function EarningsCalendar() {
       <div className="grid grid-cols-7 gap-3 mb-6">
         {weekDays.map((day) => (
           <button
-            key={day.date}
+            key={`${day.date}-${day.day}`}
             onClick={() => handleDayClick(day)}
-            className={`p-4 rounded-xl border text-center transition-all ${
+            className={`p-4 rounded-xl text-center transition-all ${
               day.active
-                ? 'border-primary bg-primary/5'
-                : 'border-border bg-card hover:border-primary/50'
+                ? 'bg-white/30 backdrop-blur-md border border-[#e6ebf3] border-2 border-primary'
+                : 'bg-white/30 backdrop-blur-md border border-[#e6ebf3] hover:bg-white/40'
             }`}
           >
             <div className="text-sm font-medium text-foreground mb-1">
@@ -163,30 +189,30 @@ export function EarningsCalendar() {
             </div>
             <div
               className={`text-xs font-medium ${
-                day.active ? 'text-primary' : 'text-muted-foreground'
+                day.active ? 'text-primary' : day.calls === 0 ? 'text-muted-foreground' : 'text-foreground'
               }`}
             >
-              {day.calls}
+              {day.calls === 0 ? 'No Calls' : `${day.calls} Calls`}
             </div>
           </button>
         ))}
       </div>
 
-      {/* Earnings Calls List */}
+      {/* Selected Day Earnings Calls */}
+      {selectedDayCalls.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="size-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">
+              Earnings Calls for {selectedDay.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </h3>
+          </div>
       <div className="space-y-2">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="p-4 rounded-xl neu-card h-16 animate-pulse">
-              <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
-              <div className="h-3 bg-muted rounded w-1/4"></div>
-            </div>
-          ))
-        ) : (
-          earningsCalls.slice(0, 7).map((call, index) => (
+            {selectedDayCalls.map((call, index) => (
             <Link
-              key={index}
+                key={`${call.ticker}-${index}`}
               href={`/search?q=${encodeURIComponent(call.ticker)}+earnings`}
-              className="flex items-center justify-between p-4 rounded-xl neu-card group"
+                className="flex items-center justify-between p-4 rounded-xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] hover:bg-white/40 transition-all group"
             >
               <div className="flex items-center gap-4">
                 <CompanyLogo ticker={call.ticker} companyName={call.name} size={48} />
@@ -201,12 +227,35 @@ export function EarningsCalendar() {
                 <div className="text-sm font-medium text-foreground">
                   {call.quarter}
                 </div>
-                <div className="text-sm text-muted-foreground">{call.time}</div>
+                  <div className="text-xs text-muted-foreground">{call.time}</div>
               </div>
             </Link>
-          ))
-        )}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && selectedDayCalls.length === 0 && (
+        <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] rounded-xl p-8 text-center">
+          <Calendar className="size-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <p className="text-muted-foreground">
+            No earnings calls scheduled for {selectedDay.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}.
+          </p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="p-4 rounded-xl bg-white/30 backdrop-blur-md border border-[#e6ebf3] h-16 animate-pulse">
+              <div className="h-4 bg-muted rounded w-1/3 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-1/4"></div>
+            </div>
+          ))}
       </div>
+      )}
     </div>
   )
 }

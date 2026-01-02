@@ -32,13 +32,14 @@ export function RenderMessage({
   onUpdateMessage,
   reload
 }: RenderMessageProps) {
-  const relatedQuestions = useMemo(
-    () =>
-      message.annotations?.filter(
-        annotation => (annotation as any)?.type === 'related-questions'
-      ),
-    [message.annotations]
-  )
+  // Only get the last related questions annotation to avoid duplication
+  const relatedQuestions = useMemo(() => {
+    const allRelated = message.annotations?.filter(
+      annotation => (annotation as any)?.type === 'related-questions'
+    ) || []
+    // Return only the last one to avoid duplication
+    return allRelated.length > 0 ? [allRelated[allRelated.length - 1]] : []
+  }, [message.annotations])
 
   // Render for manual tool call
   const toolData = useMemo(() => {
@@ -98,19 +99,36 @@ export function RenderMessage({
   }, [reasoningAnnotation])
 
   if (message.role === 'user') {
+    // Remove <has_function_call> tags from user messages (shouldn't happen, but just in case)
+    const cleanedUserContent = typeof message.content === 'string' 
+      ? message.content.replace(/<has_function_call>[\s\S]*?<\/has_function_call>/gi, '').trim()
+      : message.content
+    
     return (
       <UserMessage
-        message={message.content}
+        message={cleanedUserContent}
         messageId={messageId}
         onUpdateMessage={onUpdateMessage}
       />
     )
   }
 
+  // Track which tool call IDs we've already rendered to avoid duplication
+  const renderedToolCallIds = useMemo(() => {
+    const ids = new Set<string>()
+    message.parts?.forEach(part => {
+      if (part.type === 'tool-invocation') {
+        ids.add(part.toolInvocation.toolCallId)
+      }
+    })
+    return ids
+  }, [message.parts])
+
   // New way: Use parts instead of toolInvocations
   return (
     <>
-      {toolData.map(tool => (
+      {/* Only render toolData if it's not already in parts (for backward compatibility) */}
+      {toolData.length > 0 && renderedToolCallIds.size === 0 && toolData.map(tool => (
         <ToolSection
           key={tool.toolCallId}
           tool={tool}
@@ -137,11 +155,35 @@ export function RenderMessage({
               />
             )
           case 'text':
+            // Helper function to remove duplicated text patterns
+            const deduplicateText = (text: string): string => {
+              if (!text) return text
+              let deduplicated = text
+              
+              // First, try to match exact duplicates without spaces
+              deduplicated = deduplicated.replace(/(.{10,}?)\1+/g, '$1')
+              
+              // Then, try to match duplicates with whitespace between them
+              deduplicated = deduplicated.replace(/(.{10,}?)\s+\1+/g, '$1')
+              
+              // Also handle shorter patterns
+              deduplicated = deduplicated.replace(/(.{3,}?)\1+/g, '$1')
+              
+              return deduplicated.trim()
+            }
+            
+            // Remove <has_function_call> tags from text content and deduplicate
+            // Use a more robust regex that handles multiline content
+            const cleanedText = deduplicateText(
+              part.text?.replace(/<has_function_call>[\s\S]*?<\/has_function_call>/gi, '').trim() || ''
+            )
             // Only show actions if this is the last part and it's a text part
+            // Skip empty text parts after cleaning
+            if (!cleanedText) return null
             return (
               <AnswerSection
                 key={`${messageId}-text-${index}`}
-                content={part.text}
+                content={cleanedText}
                 isOpen={getIsOpen(messageId)}
                 onOpenChange={open => onOpenChange(messageId, open)}
                 chatId={chatId}
@@ -167,8 +209,10 @@ export function RenderMessage({
             return null
         }
       })}
+      {/* Only render related questions once, at the end, if they exist */}
       {relatedQuestions && relatedQuestions.length > 0 && (
         <RelatedQuestions
+          key={`${messageId}-related-questions`}
           annotations={relatedQuestions as JSONValue[]}
           onQuerySelect={onQuerySelect}
           isOpen={getIsOpen(`${messageId}-related`)}

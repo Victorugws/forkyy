@@ -33,7 +33,8 @@ export function createManualToolStreamResponse(config: BaseStreamConfig) {
             truncatedMessages,
             dataStream,
             toolCallModelId,
-            searchMode
+            searchMode,
+            config.taskId
           )
 
         const researcherConfig = manualResearcher({

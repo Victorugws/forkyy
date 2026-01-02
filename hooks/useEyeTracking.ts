@@ -385,6 +385,14 @@ export function useEyeTracking(): UseEyeTrackingReturn {
         sensitivity: cfg.sensitivity ?? 1.0
       })
       setIsEnabled(cfg.enabled ?? false)
+    }).catch((error) => {
+      // Handler might not be registered yet, use defaults
+      console.warn('Eye tracking config not available yet:', error)
+      setConfig({
+        smoothing: 0.7,
+        sensitivity: 1.0
+      })
+      setIsEnabled(false)
     })
   }, [isElectron])
 

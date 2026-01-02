@@ -1,9 +1,43 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Search, Mic } from 'lucide-react'
-import { generateId } from 'ai'
+import { Search, Mic, Building2 } from 'lucide-react'
 import { ModeSelectionButtons } from './ModeSelectionButtons'
+import { useTypewriterSuggestions } from '@/hooks/useTypewriterSuggestions'
+
+// SpeechRecognition type declaration
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: any) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionResult {
+  transcript: string
+  confidence: number
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResult[][]
+  resultIndex: number
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: SpeechRecognitionConstructor
+    webkitSpeechRecognition: SpeechRecognitionConstructor
+  }
+}
 
 interface HomeSearchTabProps {
   onSearch?: (query: string, mode: 'search' | 'ai') => void
@@ -22,6 +56,30 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
   const [isSpeechAvailable, setIsSpeechAvailable] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  
+  const typewriterTextRef = useRef<HTMLSpanElement>(null)
+  
+  const searchSuggestions = [
+    'Analyze Q4 revenue trends',
+    'Create financial forecast model',
+    'Review market competition analysis',
+    'Generate business plan template',
+    'Calculate ROI for expansion',
+    'Compare pricing strategies',
+    'Estimate customer acquisition cost',
+    'Build cash flow projection',
+    'Analyze profit margins',
+    'Evaluate investment opportunities'
+  ]
+  
+  useTypewriterSuggestions({
+    suggestions: searchSuggestions,
+    textRef: typewriterTextRef,
+    speed: 80,
+    deleteSpeed: 40,
+    pauseTime: 1500,
+    isPaused: isFocused || query.length > 0
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,19 +90,8 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
 
   const handleModeSelect = (mode: 'search' | 'ai') => {
     setSelectedMode(mode)
-    if (mode === 'search') {
-      // Navigate to choice search engine response page
-      const newChatId = generateId()
-      window.dispatchEvent(new CustomEvent('browser:navigate', {
-        detail: { url: `/search/${newChatId}?q=${encodeURIComponent(query || '')}&mode=search` }
-      }))
-    } else {
-      // Navigate to post prompt morphic page
-      const newChatId = generateId()
-      window.dispatchEvent(new CustomEvent('browser:navigate', {
-        detail: { url: `/search/${newChatId}?q=${encodeURIComponent(query || '')}&mode=ai` }
-      }))
-    }
+    // Placeholder - chat functionality removed
+    console.log('Search mode selected:', mode, 'Query:', query)
   }
 
   const handleAutopilotClick = () => {
@@ -165,7 +212,7 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
   }, [onSearch, selectedMode, onVoiceStateChange])
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto mt-8">
+    <div className="relative w-full max-w-4xl mx-auto mt-4">
       {/* Search Tab Container - transparent with dotted outline */}
       <div
         className="relative p-6"
@@ -195,18 +242,11 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
         <form onSubmit={handleSubmit} className="relative flex items-center gap-4">
           {/* Search Input */}
           <div
-            className={`
-              relative flex-1 flex items-center bg-white rounded-xl border transition-all duration-300
-              ${isFocused ? 'border-gray-400 shadow-md' : 'border-gray-200'}
-            `}
+            className="bottom-search-input-container relative flex-1 flex items-center"
           >
             {/* Search Icon */}
             <div className="absolute left-4 flex items-center pointer-events-none">
-              <Search
-                className={`size-5 transition-colors duration-300 ${
-                  isFocused ? 'text-gray-900' : 'text-gray-400'
-                }`}
-              />
+              <Search className="search-icon size-5 transition-colors duration-300 text-[#374151]/80" />
             </div>
 
             {/* Input Field */}
@@ -217,9 +257,16 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="Ask me anything"
-              className="w-full bg-transparent pl-12 pr-12 py-4 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none"
+              placeholder=""
+              className="bottom-search-input w-full pl-12 pr-12 text-base"
             />
+            {/* Typewriter Placeholder Overlay */}
+            <div 
+              className={`absolute left-12 right-12 pointer-events-none ${!isFocused && query.length === 0 ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <span className="typewriter-placeholder" ref={typewriterTextRef}></span>
+              <span className="typewriter-cursor">|</span>
+            </div>
 
             {/* Voice Sensor Glow Indicator */}
             <button
@@ -236,7 +283,7 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
               }
             >
               <div className="relative">
-                <Mic className={`size-5 transition-colors ${isListening ? 'text-orange-500' : isSpeechAvailable ? 'text-gray-400' : 'text-gray-300'}`} />
+                <Mic className={`mic-icon size-5 transition-colors ${isListening ? 'text-orange-500' : isSpeechAvailable ? 'text-[#374151]/80' : 'text-[#374151]/50'}`} />
                 {isListening && (
                   <div
                     className="absolute inset-0 rounded-full"
@@ -258,10 +305,10 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
               type="button"
               onClick={() => handleModeSelect('search')}
               className={`
-                w-12 h-12 rounded-full border-2 transition-all duration-200 flex items-center justify-center
+                w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center
                 ${selectedMode === 'search'
-                  ? 'border-gray-900 bg-gray-900 text-white'
-                  : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
+                  ? 'neu-inset text-[#374151]'
+                  : 'border-2 border-[#D1D5DB] bg-white text-[#6B7280] hover:border-[#9CA3AF]'
                 }
               `}
               title="Search Engine Mode"
@@ -274,7 +321,6 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
               <ModeSelectionButtons
                 onModeSelect={onModeSelect || (() => {})}
                 onAcknowledgement={onAcknowledgement}
-                onFinanceOverlay={onFinanceOverlay}
                 onAutopilotDoubleClick={onAutopilotDoubleClick}
               />
             </div>
@@ -283,19 +329,33 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
             <button
               type="button"
               onClick={handleAutopilotClick}
-              className="w-12 h-12 rounded-full border-2 border-gray-300 bg-white text-gray-600 hover:border-gray-400 transition-all duration-200 flex items-center justify-center"
+              className="w-12 h-12 rounded-full border-2 border-[#D1D5DB] bg-white text-[#6B7280] hover:border-[#9CA3AF] transition-all duration-200 flex items-center justify-center"
               title="Autopilot"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </button>
+
+            {/* Real Estate Button */}
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('browser:navigate', {
+                  detail: { url: '/real-estate' }
+                }))
+              }}
+              className="w-12 h-12 rounded-full border-2 border-[#D1D5DB] bg-white text-[#6B7280] hover:border-[#9CA3AF] transition-all duration-200 flex items-center justify-center"
+              title="Real Estate"
+            >
+              <Building2 className="size-5" />
+            </button>
           </div>
 
           {/* Submit Button (Curved Arrow) */}
           <button
             type="submit"
-            className="w-12 h-12 rounded-full border-2 border-gray-300 bg-white text-gray-600 hover:border-gray-400 transition-all duration-200 flex items-center justify-center"
+            className="w-12 h-12 rounded-full border-2 border-[#D1D5DB] bg-white text-[#6B7280] hover:border-[#9CA3AF] transition-all duration-200 flex items-center justify-center"
             title="Submit"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-5">
@@ -305,10 +365,146 @@ export function HomeSearchTab({ onSearch, onModeSelect, onAcknowledgement, onVoi
         </form>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
+        /* Bottom Search Input Styles - Neumorphic Darker White */
+        .bottom-search-input-container {
+          border: none !important;
+          outline: none !important;
+          border-radius: 15px !important;
+          padding: 1em !important;
+          background-color: #f5f5f5 !important;
+          box-shadow: inset 0.5px 1.25px 2.5px rgba(0,0,0,0.3) !important;
+          transition: 300ms ease-in-out !important;
+          position: relative;
+        }
+        
+        .bottom-search-input-container::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-color: #f5f5f5 !important;
+          border-radius: 15px;
+          z-index: -1;
+          box-shadow: inset 0.5px 1.25px 2.5px rgba(0,0,0,0.3) !important;
+        }
+        
+        .bottom-search-input-container:focus-within {
+          background-color: #f5f5f5 !important;
+          box-shadow: none !important;
+          transform: none !important;
+        }
+        
+        .bottom-search-input-container:focus-within .bottom-search-input {
+          color: #111827 !important;
+        }
+        
+        .bottom-search-input-container:not(:focus-within) .search-icon,
+        .bottom-search-input-container:not(:focus-within) .mic-icon:not(.text-orange-500) {
+          animation: shine-icon 3s linear infinite;
+        }
+        
+        .bottom-search-input-container:focus-within .search-icon {
+          color: #111827 !important;
+          animation: none !important;
+        }
+        
+        .bottom-search-input-container:focus-within .mic-icon:not(.text-orange-500) {
+          color: #111827 !important;
+          animation: none !important;
+        }
+        
+        .bottom-search-input {
+          background: transparent !important;
+          border: none !important;
+          outline: none !important;
+          color: #374151 !important;
+        }
+        
+        .bottom-search-input-container:not(:focus-within) .bottom-search-input {
+          background-image: linear-gradient(
+            120deg,
+            rgba(55, 65, 81, 0.8) 0%,
+            rgba(55, 65, 81, 0.8) 40%,
+            rgba(55, 65, 81, 1) 50%,
+            rgba(55, 65, 81, 0.8) 60%,
+            rgba(55, 65, 81, 0.8) 100%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shine-bottom-input 3s linear infinite;
+        }
+        
+        .bottom-search-input-container:not(:focus-within) .bottom-search-input::placeholder {
+          color: rgba(55, 65, 81, 0.7) !important;
+          -webkit-text-fill-color: rgba(55, 65, 81, 0.7) !important;
+        }
+        
+        .bottom-search-input-container:focus-within .bottom-search-input {
+          background-image: none !important;
+          color: #111827 !important;
+          -webkit-text-fill-color: #111827 !important;
+          animation: none !important;
+        }
+        
+        .bottom-search-input-container:focus-within .bottom-search-input::placeholder {
+          color: rgba(17, 24, 39, 0.5) !important;
+          -webkit-text-fill-color: rgba(17, 24, 39, 0.5) !important;
+        }
+        
+        
+        @keyframes shine-bottom-input {
+          0% {
+            background-position: 100%;
+          }
+          100% {
+            background-position: -100%;
+          }
+        }
+        
+        @keyframes shine-icon {
+          0%, 100% {
+            filter: brightness(1);
+          }
+          50% {
+            filter: brightness(1.5);
+          }
+        }
+        
         @keyframes pulse-glow {
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 0.6; transform: scale(1.2); }
+        }
+        
+        .typewriter-placeholder {
+          color: rgba(55, 65, 81, 0.7);
+          background-image: linear-gradient(
+            120deg,
+            rgba(55, 65, 81, 0.8) 0%,
+            rgba(55, 65, 81, 0.8) 40%,
+            rgba(55, 65, 81, 1) 50%,
+            rgba(55, 65, 81, 0.8) 60%,
+            rgba(55, 65, 81, 0.8) 100%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: shine-bottom-input 3s linear infinite;
+        }
+        
+        .typewriter-cursor {
+          display: inline-block;
+          margin-left: 2px;
+          color: rgba(55, 65, 81, 0.7);
+          -webkit-text-fill-color: rgba(55, 65, 81, 0.7);
+          animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
         }
       `}</style>
     </div>

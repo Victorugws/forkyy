@@ -1,40 +1,88 @@
-import { deleteChat } from '@/lib/actions/chat'
-import { getCurrentUserId } from '@/lib/auth/get-current-user'
 import { NextRequest, NextResponse } from 'next/server'
+import { getChat, deleteChat } from '@/lib/actions/chat'
+import { getCurrentUserId } from '@/lib/auth/get-current-user'
+import { convertToUIMessages } from '@/lib/utils'
 
-export async function DELETE(
-  request: NextRequest,
+export const dynamic = 'force-static'
+export const revalidate = false
+
+// Required for static export with dynamic routes
+export function generateStaticParams() {
+  return []
+}
+
+
+export async function GET(
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const enableSaveChatHistory = process.env.ENABLE_SAVE_CHAT_HISTORY === 'true'
-  if (!enableSaveChatHistory) {
-    return NextResponse.json(
-      { error: 'Chat history saving is disabled.' },
-      { status: 403 }
-    )
-  }
-
-  const chatId = (await params).id
-  if (!chatId) {
-    return NextResponse.json({ error: 'Chat ID is required' }, { status: 400 })
-  }
-
-  const userId = await getCurrentUserId()
-
   try {
-    const result = await deleteChat(chatId, userId)
+    const userId = await getCurrentUserId()
+    const { id: chatId } = await params
 
-    if (result.error) {
-      const statusCode = result.error === 'Chat not found' ? 404 : 500
-      return NextResponse.json({ error: result.error }, { status: statusCode })
+    if (!chatId) {
+      return NextResponse.json(
+        { error: 'Chat ID is required' },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({ ok: true })
-  } catch (error) {
-    console.error(`API route error deleting chat ${chatId}:`, error)
+    const chat = await getChat(chatId, userId || 'anonymous')
+
+    if (!chat) {
+      return NextResponse.json(
+        { error: 'Chat not found' },
+        { status: 404 }
+      )
+    }
+
+    // Convert ExtendedCoreMessage[] to UI Message format
+    const uiMessages = convertToUIMessages(chat.messages || [])
+
+    return NextResponse.json({
+      ...chat,
+      messages: uiMessages
+    })
+  } catch (error: any) {
+    console.error('Error fetching chat:', error)
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: error.message || 'Failed to fetch chat' },
       { status: 500 }
     )
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const userId = await getCurrentUserId()
+    const { id: chatId } = await params
+
+    if (!chatId) {
+      return NextResponse.json(
+        { error: 'Chat ID is required' },
+        { status: 400 }
+      )
+    }
+
+    const result = await deleteChat(chatId, userId || 'anonymous')
+
+    if (result.error) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error('Error deleting chat:', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete chat' },
+      { status: 500 }
+    )
+  }
+}
+

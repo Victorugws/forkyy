@@ -9,11 +9,32 @@ import { cn } from '@/lib/utils'
 
 import { Button } from './ui/button'
 import { CollapsibleMessage } from './collapsible-message'
+import { DottedBorderCard } from './ui/dotted-border-card'
 
 type UserMessageProps = {
   message: string
   messageId?: string
   onUpdateMessage?: (messageId: string, newContent: string) => Promise<void>
+}
+
+// Helper function to remove duplicated text patterns
+const deduplicateText = (text: string): string => {
+  if (!text) return text
+  // Remove patterns where text is repeated consecutively
+  // Handle both cases: "texttext" and "text text" (with spaces)
+  // Use a more aggressive pattern that matches longer sequences
+  let deduplicated = text
+  
+  // First, try to match exact duplicates without spaces
+  deduplicated = deduplicated.replace(/(.{10,}?)\1+/g, '$1')
+  
+  // Then, try to match duplicates with whitespace between them
+  deduplicated = deduplicated.replace(/(.{10,}?)\s+\1+/g, '$1')
+  
+  // Also handle shorter patterns (for things like "SourcesSources")
+  deduplicated = deduplicated.replace(/(.{3,}?)\1+/g, '$1')
+  
+  return deduplicated.trim()
 }
 
 export const UserMessage: React.FC<UserMessageProps> = ({
@@ -22,11 +43,12 @@ export const UserMessage: React.FC<UserMessageProps> = ({
   onUpdateMessage
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedContent, setEditedContent] = useState(message)
+  const deduplicatedMessage = deduplicateText(message)
+  const [editedContent, setEditedContent] = useState(deduplicatedMessage)
 
   const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
-    setEditedContent(message)
+    setEditedContent(deduplicatedMessage)
     setIsEditing(true)
   }
 
@@ -47,10 +69,12 @@ export const UserMessage: React.FC<UserMessageProps> = ({
   }
 
   return (
-    <CollapsibleMessage role="user">
-      <div
+    <CollapsibleMessage role="user" showBorder={false}>
+      <DottedBorderCard
+        borderRadius="1.5rem"
+        padding="p-5"
+        background="bg-white/95 backdrop-blur-md"
         className="flex-1 break-words w-full group outline-none relative"
-        tabIndex={0}
       >
         {isEditing ? (
           <div className="flex flex-col gap-2">
@@ -73,7 +97,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({
           </div>
         ) : (
           <div className="flex justify-between items-start">
-            <div className="flex-1">{message}</div>
+            <div className="flex-1">{deduplicatedMessage}</div>
             <div
               className={cn(
                 'absolute top-1 right-1 transition-opacity ml-2',
@@ -94,7 +118,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({
             </div>
           </div>
         )}
-      </div>
+      </DottedBorderCard>
     </CollapsibleMessage>
   )
 }

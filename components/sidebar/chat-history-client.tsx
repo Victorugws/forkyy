@@ -125,7 +125,7 @@ export function ChatHistoryClient() {
             No search history
           </div>
         ) : (
-          <SidebarMenu>
+          <SidebarMenu className="space-y-1">
             {chats.map(
               (chat: Chat) => chat && <ChatMenuItem key={chat.id} chat={chat} />
             )}

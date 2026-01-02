@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { TrendingUp } from 'lucide-react'
+import DecryptedText from '@/components/DecryptedText'
 
 type Timeframe = '$' | '%' | '1D' | '5D' | '1M' | '6M' | 'YTD' | '1Y' | '5Y' | 'MAX'
 
@@ -37,7 +38,9 @@ export function CoinbaseIndex() {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold">Coinbase 50 Index</h2>
+          <h2 className="text-lg font-semibold">
+            <DecryptedText text="Coinbase 50 Index" animateOn="view" speed={30} />
+          </h2>
           <a
             href="#"
             className="text-xs text-primary hover:underline"
@@ -62,7 +65,7 @@ export function CoinbaseIndex() {
         </div>
       </div>
 
-      <div className="neu-card p-6 rounded-xl">
+      <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-xl">
         {/* Timeframe buttons */}
         <div className="flex items-center gap-1 mb-6 flex-wrap">
           {timeframes.map((tf) => (
@@ -72,8 +75,8 @@ export function CoinbaseIndex() {
               onClick={() => setSelectedTimeframe(tf)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 selectedTimeframe === tf
-                  ? 'neu-inset text-primary'
-                  : 'neu-button hover:neu-inset'
+                  ? 'bg-white/20 backdrop-blur-sm border border-[#e6ebf3] text-primary'
+                  : 'bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 hover:bg-white/20 backdrop-blur-sm border border-[#e6ebf3]'
               }`}
             >
               {tf}

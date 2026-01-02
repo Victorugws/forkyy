@@ -24,6 +24,26 @@ type SectionProps = {
   size?: 'sm' | 'md' | 'lg'
   title?: string
   separator?: boolean
+  transparentBackground?: boolean
+}
+
+// Helper function to remove duplicated text patterns
+const deduplicateText = (text: string | undefined): string => {
+  if (!text) return ''
+  // Remove patterns where text is repeated consecutively
+  // Handle both cases: "texttext" and "text text" (with spaces)
+  let deduplicated = text
+  
+  // First, try to match exact duplicates without spaces
+  deduplicated = deduplicated.replace(/(.{10,}?)\1+/g, '$1')
+  
+  // Then, try to match duplicates with whitespace between them
+  deduplicated = deduplicated.replace(/(.{10,}?)\s+\1+/g, '$1')
+  
+  // Also handle shorter patterns (for things like "SourcesSources")
+  deduplicated = deduplicated.replace(/(.{3,}?)\1+/g, '$1')
+  
+  return deduplicated.trim()
 }
 
 export const Section: React.FC<SectionProps> = ({
@@ -31,8 +51,10 @@ export const Section: React.FC<SectionProps> = ({
   className,
   size = 'md',
   title,
-  separator = false
+  separator = false,
+  transparentBackground = false
 }) => {
+  const deduplicatedTitle = title ? deduplicateText(title) : undefined
   const iconSize = 16
   const iconClassName = 'mr-1.5 text-muted-foreground'
   let icon: React.ReactNode
@@ -73,19 +95,21 @@ export const Section: React.FC<SectionProps> = ({
       <section
         className={cn(
           ` ${size === 'sm' ? 'py-1' : size === 'lg' ? 'py-4' : 'py-2'}`,
+          transparentBackground && 'bg-transparent',
           className
         )}
+        style={transparentBackground ? { backgroundColor: 'transparent', background: 'none' } : undefined}
       >
-        {title && type === 'text' && (
+        {deduplicatedTitle && type === 'text' && (
           <h2 className="flex items-center leading-none py-2">
             {icon}
-            {title}
+            {deduplicatedTitle}
           </h2>
         )}
-        {title && type === 'badge' && (
+        {deduplicatedTitle && type === 'badge' && (
           <Badge variant="secondary" className="mb-2">
             {icon}
-            {title}
+            {deduplicatedTitle}
           </Badge>
         )}
         {children}

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { CompanyLogo } from './CompanyLogo'
+import DecryptedText from '@/components/DecryptedText'
 
 interface Stock {
   name: string
@@ -24,7 +25,9 @@ export function StockScreener({ stocks, loading, onAddToWatchlist, watchlist = [
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-foreground">Stock Screener</h2>
+        <h2 className="text-xl font-bold text-foreground">
+          <DecryptedText text="Stock Screener" animateOn="view" speed={30} />
+        </h2>
         <span className="text-sm text-muted-foreground">
           {stocks.length} stocks found
         </span>

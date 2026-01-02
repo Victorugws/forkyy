@@ -13,8 +13,9 @@ import { HistoryPanel } from './history-panel'
 import { DownloadsPanel } from './downloads-panel'
 import { DevToolsPanel } from './dev-tools-panel'
 import { FindInPage } from './find-in-page'
+import { CookiesPanel } from './cookies-panel'
 import { CustomDock } from '@/components/CustomDock'
-// TargetCursor is now handled by Electron overlay window
+import TargetCursor from '@/components/reactbits/animations/TargetCursor'
 import {
   saveTabs,
   loadTabs,
@@ -425,93 +426,101 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0">
-        {/* Tab Bar */}
-        <TabBar
-        tabs={tabs}
-        activeTabId={activeTabId}
-        groups={tabGroups}
-        onTabSelect={setActiveTabId}
-        onTabClose={closeTab}
-        onNewTab={() => createNewTab()}
-        onTabPin={(tabId) => {
-          const tab = tabs.find(t => t.id === tabId)
-          if (tab) updateTab(tabId, { isPinned: !tab.isPinned })
-        }}
-        onTabMute={(tabId) => {
-          const tab = tabs.find(t => t.id === tabId)
-          if (tab) updateTab(tabId, { isMuted: !tab.isMuted })
-        }}
-        onTabReorder={(fromIndex, toIndex) => {
-          const pinnedTabs = tabs.filter(t => t.isPinned)
-          const normalTabs = tabs.filter(t => !t.isPinned && !t.groupId)
-          const reorderedTabs = [...normalTabs]
-          const [movedTab] = reorderedTabs.splice(fromIndex, 1)
-          reorderedTabs.splice(toIndex, 0, movedTab)
-          setTabs([...pinnedTabs, ...tabs.filter(t => t.groupId), ...reorderedTabs])
-        }}
-        onTabGroup={(tabId, groupId) => {
-          updateTab(tabId, { groupId: groupId || undefined })
-        }}
-        onGroupToggle={(groupId) => {
-          setTabGroups(prev =>
-            prev.map(g =>
-              g.id === groupId ? { ...g, collapsed: !g.collapsed } : g
-            )
-          )
-        }}
-        onGroupDelete={(groupId) => {
-          // Ungroup all tabs in this group
-          tabs.forEach(tab => {
-            if (tab.groupId === groupId) {
-              updateTab(tab.id, { groupId: undefined })
-            }
-          })
-          setTabGroups(prev => prev.filter(g => g.id !== groupId))
-        }}
-        onGroupRename={(groupId, newName) => {
-          setTabGroups(prev =>
-            prev.map(g => (g.id === groupId ? { ...g, name: newName } : g))
-          )
-        }}
-        onCreateGroup={(tabIds) => {
-          const groupName = prompt('Group name:', 'New Group') || 'New Group'
-          const groupColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
-          const randomColor = groupColors[Math.floor(Math.random() * groupColors.length)]
-          
-          const newGroup: TabGroup = {
-            id: generateId(),
-            name: groupName,
-            color: randomColor,
-            collapsed: false,
-            createdAt: Date.now(),
-          }
-          
-          setTabGroups(prev => [...prev, newGroup])
-          
-          // Add tabs to the new group
-          tabIds.forEach(tabId => {
-            updateTab(tabId, { groupId: newGroup.id })
-          })
-        }}
-      />
+      {/* TabBar - Hide in extension (Firefox has its own tabs) */}
+      {mounted && typeof window !== 'undefined' && window.electron?.isElectron && (
+        <div className="flex-shrink-0">
+          {/* Tab Bar */}
+          <TabBar
+            tabs={tabs}
+            activeTabId={activeTabId}
+            groups={tabGroups}
+            onTabSelect={setActiveTabId}
+            onTabClose={closeTab}
+            onNewTab={() => createNewTab()}
+            onTabPin={(tabId) => {
+              const tab = tabs.find(t => t.id === tabId)
+              if (tab) updateTab(tabId, { isPinned: !tab.isPinned })
+            }}
+            onTabMute={(tabId) => {
+              const tab = tabs.find(t => t.id === tabId)
+              if (tab) updateTab(tabId, { isMuted: !tab.isMuted })
+            }}
+            onTabReorder={(fromIndex, toIndex) => {
+              const pinnedTabs = tabs.filter(t => t.isPinned)
+              const normalTabs = tabs.filter(t => !t.isPinned && !t.groupId)
+              const reorderedTabs = [...normalTabs]
+              const [movedTab] = reorderedTabs.splice(fromIndex, 1)
+              reorderedTabs.splice(toIndex, 0, movedTab)
+              setTabs([...pinnedTabs, ...tabs.filter(t => t.groupId), ...reorderedTabs])
+            }}
+            onTabGroup={(tabId, groupId) => {
+              updateTab(tabId, { groupId: groupId || undefined })
+            }}
+            onGroupToggle={(groupId) => {
+              setTabGroups(prev =>
+                prev.map(g =>
+                  g.id === groupId ? { ...g, collapsed: !g.collapsed } : g
+                )
+              )
+            }}
+            onGroupDelete={(groupId) => {
+              // Ungroup all tabs in this group
+              tabs.forEach(tab => {
+                if (tab.groupId === groupId) {
+                  updateTab(tab.id, { groupId: undefined })
+                }
+              })
+              setTabGroups(prev => prev.filter(g => g.id !== groupId))
+            }}
+            onGroupRename={(groupId, newName) => {
+              setTabGroups(prev =>
+                prev.map(g => (g.id === groupId ? { ...g, name: newName } : g))
+              )
+            }}
+            onCreateGroup={(tabIds) => {
+              const groupName = prompt('Group name:', 'New Group') || 'New Group'
+              const groupColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+              const randomColor = groupColors[Math.floor(Math.random() * groupColors.length)]
+              
+              const newGroup: TabGroup = {
+                id: generateId(),
+                name: groupName,
+                color: randomColor,
+                collapsed: false,
+                createdAt: Date.now(),
+              }
+              
+              setTabGroups(prev => [...prev, newGroup])
+              
+              // Add tabs to the new group
+              tabIds.forEach(tabId => {
+                updateTab(tabId, { groupId: newGroup.id })
+              })
+            }}
+          />
+        </div>
+      )}
 
       {/* Browser Bar + Toolbar */}
       <div className="flex items-center border-b flex-shrink-0">
-        <div className="flex-1">
-          <BrowserBar
-            currentUrl={
-              // Only show external URLs in address bar, hide internal routes
-              activeTab?.url?.startsWith('/') ? '' : activeTab?.url || ''
-            }
-            onUrlChange={(url) => handleNavigate(url)}
-            canGoBack={activeTab?.canGoBack || false}
-            canGoForward={activeTab?.canGoForward || false}
-            isLoading={activeTab?.isLoading || false}
-            pageTitle={activeTab?.title || ''}
-          />
-        </div>
-        {mounted && (
+        {/* BrowserBar - Hide in extension (Firefox has its own navigation) */}
+        {mounted && typeof window !== 'undefined' && window.electron?.isElectron && (
+          <div className="flex-1">
+            <BrowserBar
+              currentUrl={
+                // Only show external URLs in address bar, hide internal routes
+                activeTab?.url?.startsWith('/') ? '' : activeTab?.url || ''
+              }
+              onUrlChange={(url) => handleNavigate(url)}
+              canGoBack={activeTab?.canGoBack || false}
+              canGoForward={activeTab?.canGoForward || false}
+              isLoading={activeTab?.isLoading || false}
+              pageTitle={activeTab?.title || ''}
+            />
+          </div>
+        )}
+        {/* BrowserToolbar - Hide in extension (Firefox has its own controls) */}
+        {mounted && typeof window !== 'undefined' && window.electron?.isElectron && (
           <BrowserToolbar
             isBookmarked={isBookmarked}
             onToggleBookmark={toggleBookmark}
@@ -548,14 +557,13 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
         />
       )}
 
-        {/* Find in Page */}
-        {showFindInPage && (
-          <FindInPage
-            onClose={() => setShowFindInPage(false)}
-            onFind={handleFind}
-          />
-        )}
-      </div>
+      {/* Find in Page */}
+      {showFindInPage && (
+        <FindInPage
+          onClose={() => setShowFindInPage(false)}
+          onFind={handleFind}
+        />
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 flex">
@@ -610,6 +618,7 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
                 <BrowserView
                   key={activeTab.id}
                   url={activeTab.url}
+                  models={models}
                   onNavigate={(url) => updateTab(activeTab.id, { url })}
                   onLoadingChange={(isLoading) =>
                     updateTab(activeTab.id, { isLoading })
@@ -654,8 +663,8 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
             )}
           </div>
 
-          {/* AI Assistant Sidebar */}
-          {showAIAssistant && activeTab && (
+          {/* AI Assistant Sidebar - Only show on external URLs */}
+          {showAIAssistant && activeTab && !activeTab.url?.startsWith('/') && (
             <div className="w-[380px] border-l bg-background">
               <BrowserChat
                 id={id}
@@ -670,7 +679,14 @@ export function BrowserClientEnhanced({ id, models, initialUrl = '/' }: BrowserC
       </div>
       {/* Custom Dock - Always visible at bottom */}
       {/* <CustomDock /> */}
-      {/* TargetCursor is now rendered in Electron overlay window */}
+      {/* TargetCursor - Render in extension (Electron uses overlay window) */}
+      {mounted && typeof window !== 'undefined' && !window.electron?.isElectron && (
+        <TargetCursor 
+          spinDuration={2}
+          hideDefaultCursor={true}
+          parallaxOn={true}
+        />
+      )}
     </div>
   )
 }

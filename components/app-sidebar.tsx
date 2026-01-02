@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Sidebar,
   SidebarContent,
@@ -14,37 +16,37 @@ import {
 import { cn } from '@/lib/utils'
 import {
   Plus,
-  Home,
-  Compass,
-  Folder,
+  Heart,
   TrendingUp,
-  Image as ImageIcon,
-  Video,
+  Sprout,
   GraduationCap,
-  Pen,
-  Sparkles
+  Building2,
+  ShoppingBag,
+  Zap,
+  UtensilsCrossed,
+  Briefcase
 } from 'lucide-react'
 import Link from 'next/link'
-import { Suspense } from 'react'
-import { ChatHistorySection } from './sidebar/chat-history-section'
-import { ChatHistorySkeleton } from './sidebar/chat-history-skeleton'
+import { ChatHistoryClient } from './sidebar/chat-history-client'
+import { ModeTasksDropdown } from './sidebar/mode-tasks-dropdown'
 import { IconLogo } from './ui/icons'
 
-const navigationItems = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/discover', icon: Compass, label: 'Discover' },
-  { href: '/templates', icon: Sparkles, label: 'Templates' },
-  { href: '/spaces', icon: Folder, label: 'Spaces' },
-  { href: '/finance', icon: TrendingUp, label: 'Finance' },
-  { href: '/images', icon: ImageIcon, label: 'Images' },
-  { href: '/videos', icon: Video, label: 'Videos' },
-  { href: '/academic', icon: GraduationCap, label: 'Academic' },
-  { href: '/writing', icon: Pen, label: 'Writing' }
+const organisationModes = [
+  { mode: 'healthcare', icon: Heart, label: 'Health' },
+  { mode: 'business', icon: Briefcase, label: 'Business' },
+  { mode: 'agriculture', icon: Sprout, label: 'Agriculture' },
+  { mode: 'education', icon: GraduationCap, label: 'Education' },
+  { mode: 'realestate', icon: Building2, label: 'Real Estate' },
+  { mode: 'ecommerce', icon: ShoppingBag, label: 'E-commerce' },
+  { mode: 'energy', icon: Zap, label: 'Energy' },
+  { mode: 'foodbeverage', icon: UtensilsCrossed, label: 'Food & Beverage' },
+  { mode: 'finance', icon: TrendingUp, label: 'Finance' },
+  { mode: 'strategy', icon: Briefcase, label: 'Strategy' }
 ]
 
 export default function AppSidebar() {
   return (
-    <Sidebar side="left" variant="sidebar" collapsible="offcanvas">
+    <Sidebar side="left" collapsible="offcanvas">
       <SidebarHeader className="flex flex-row justify-between items-center">
         <Link href="/" className="flex items-center gap-2 px-2 py-3">
           <IconLogo className={cn('size-5')} />
@@ -66,33 +68,32 @@ export default function AppSidebar() {
 
         <SidebarGroup className="mt-4">
           <SidebarGroupLabel className="text-xs text-muted-foreground px-2 mb-2">
-            Navigation
+            Organisations
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.href} className="flex items-center gap-3 px-2 py-2">
-                      <item.icon className="size-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              {organisationModes.map((item) => (
+                <ModeTasksDropdown
+                  key={item.mode}
+                  mode={item.mode}
+                  icon={item.icon}
+                  label={item.label}
+                  href={`/?mode=${item.mode}`}
+                />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup className="flex-1 overflow-y-auto mt-4">
+          <div className="bg-gray-500/20 backdrop-blur-xl rounded-lg border border-gray-300/30 p-3 shadow-lg">
           <SidebarGroupLabel className="text-xs text-muted-foreground px-2 mb-2">
-            Recent Threads
+              Recent conversations
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <Suspense fallback={<ChatHistorySkeleton />}>
-              <ChatHistorySection />
-            </Suspense>
+            <ChatHistoryClient />
           </SidebarGroupContent>
+          </div>
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />

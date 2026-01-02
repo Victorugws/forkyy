@@ -1,6 +1,7 @@
 'use client'
 
 import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3 } from 'lucide-react'
+import { ExpandableComponent } from './ExpandableComponent'
 
 interface MarketStat {
   label: string
@@ -41,13 +42,30 @@ const mockStats: MarketStat[] = [
   },
 ]
 
-export function MarketOverview() {
+interface MarketOverviewProps {
+  onExpand?: (query: string) => void
+}
+
+export function MarketOverview({ onExpand }: MarketOverviewProps) {
+  const componentData = {
+    stats: mockStats,
+    timestamp: new Date().toISOString()
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <ExpandableComponent
+      id="market-overview"
+      title="Market Overview"
+      type="market-overview"
+      data={componentData}
+      className="mb-6"
+      onExpand={onExpand}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {mockStats.map((stat) => (
         <div
           key={stat.label}
-          className="neu-card p-6 rounded-2xl hover:scale-[1.02] transition-transform cursor-pointer"
+          className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl hover:scale-[1.02] transition-transform cursor-pointer"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 rounded-lg bg-background/50 text-foreground">
@@ -69,6 +87,7 @@ export function MarketOverview() {
         </div>
       ))}
     </div>
+    </ExpandableComponent>
   )
 }
 

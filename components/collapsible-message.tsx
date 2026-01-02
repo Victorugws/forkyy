@@ -8,6 +8,7 @@ import {
 } from './ui/collapsible'
 import { IconLogo } from './ui/icons'
 import { Separator } from './ui/separator'
+import { DottedBorderCard } from './ui/dotted-border-card'
 
 interface CollapsibleMessageProps {
   children: React.ReactNode
@@ -18,6 +19,7 @@ interface CollapsibleMessageProps {
   onOpenChange?: (open: boolean) => void
   showBorder?: boolean
   showIcon?: boolean
+  transparentBackground?: boolean
 }
 
 export function CollapsibleMessage({
@@ -28,7 +30,8 @@ export function CollapsibleMessage({
   header,
   onOpenChange,
   showBorder = true,
-  showIcon = true
+  showIcon = true,
+  transparentBackground = false
 }: CollapsibleMessageProps) {
   const content = <div className="flex-1">{children}</div>
 
@@ -47,35 +50,66 @@ export function CollapsibleMessage({
       )}
 
       {isCollapsible ? (
-        <div
-          className={cn(
-            'flex-1 rounded-2xl p-4',
-            showBorder && 'border border-border/50'
-          )}
-        >
-          <Collapsible
-            open={isOpen}
-            onOpenChange={onOpenChange}
-            className="w-full"
+        showBorder ? (
+          <DottedBorderCard
+            borderRadius="1rem"
+            padding="p-4"
+            className="flex-1"
+            background={transparentBackground ? "bg-transparent" : undefined}
           >
-            <div className="flex items-center justify-between w-full gap-2">
-              {header && <div className="text-sm w-full">{header}</div>}
-              <CollapsibleTrigger asChild>
-                <button
-                  type="button"
-                  className="rounded-md p-1 hover:bg-accent group"
-                  aria-label={isOpen ? 'Collapse' : 'Expand'}
-                >
-                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                </button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent className="data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
-              <Separator className="my-4 border-border/50" />
-              {content}
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+            <Collapsible
+              open={isOpen}
+              onOpenChange={onOpenChange}
+              className="w-full"
+            >
+              <div className="flex items-center justify-between w-full gap-2">
+                {header && <div className="text-sm w-full">{header}</div>}
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="rounded-md p-1 hover:bg-accent group"
+                    aria-label={isOpen ? 'Collapse' : 'Expand'}
+                  >
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </button>
+                </CollapsibleTrigger>
+              </div>
+              <CollapsibleContent className="data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+                <Separator className="my-4 border-border/50" />
+                {content}
+              </CollapsibleContent>
+            </Collapsible>
+          </DottedBorderCard>
+        ) : (
+          <div
+            className={cn(
+              'flex-1 rounded-2xl p-4'
+            )}
+          >
+            <Collapsible
+              open={isOpen}
+              onOpenChange={onOpenChange}
+              className="w-full"
+            >
+              <div className="flex items-center justify-between w-full gap-2">
+                {header && <div className="text-sm w-full">{header}</div>}
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="rounded-md p-1 hover:bg-accent group"
+                    aria-label={isOpen ? 'Collapse' : 'Expand'}
+                  >
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </button>
+                </CollapsibleTrigger>
+              </div>
+              <CollapsibleContent className="data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
+                <Separator className="my-4 border-border/50" />
+                {content}
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+        )
       ) : (
         <div
           className={cn(

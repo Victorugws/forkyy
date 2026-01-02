@@ -4,15 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { AlertCircle } from 'lucide-react'
 import { NeumorphicHomePage } from '@/components/neumorphic-pages/home-page'
-import { NeumorphicAboutPage } from '@/components/neumorphic-pages/about-page'
-import { NeumorphicServicesPage } from '@/components/neumorphic-pages/services-page'
-import { NeumorphicDiscoverPage } from '@/components/neumorphic-pages/discover-page'
-import { NeumorphicFinancePage } from '@/components/neumorphic-pages/finance-page'
-import { NeumorphicImagesPage } from '@/components/neumorphic-pages/images-page'
-import { NeumorphicVideosPage } from '@/components/neumorphic-pages/videos-page'
-import { NeumorphicAcademicPage } from '@/components/neumorphic-pages/academic-page'
-import { NeumorphicSpacesPage } from '@/components/neumorphic-pages/spaces-page'
-import { NeumorphicWritingPage } from '@/components/neumorphic-pages/writing-page'
+import { ChatOverlay } from '@/components/chat/ChatOverlay'
+import { generateId } from 'ai'
 
 // Check if running in Electron
 const isElectron = typeof window !== 'undefined' && window.electron?.isElectron
@@ -26,22 +19,13 @@ interface BrowserViewProps {
   onCanGoBackChange: (canGoBack: boolean) => void
   onCanGoForwardChange: (canGoForward: boolean) => void
   onFaviconChange?: (favicon: string) => void
+  models?: any[]
 }
 
 // Define internal routes
 const INTERNAL_ROUTES = [
   '/',
-  '/about',
-  '/services',
-  '/discover',
-  '/spaces',
-  '/finance',
-  '/images',
-  '/videos',
-  '/academic',
-  '/writing',
-  '/ide',
-  '/builder'
+  '/search'
 ]
 
 // Check if URL is an internal route
@@ -51,7 +35,9 @@ function isInternalRoute(url: string): boolean {
   try {
     // Check if it's just a path (no protocol)
     if (url.startsWith('/')) {
-      return INTERNAL_ROUTES.includes(url.split('?')[0])
+      const path = url.split('?')[0]
+      // Check exact match or if it starts with /search/
+      return INTERNAL_ROUTES.includes(path) || path.startsWith('/search/')
     }
 
     // Check if it's a full URL pointing to our domain
@@ -59,7 +45,9 @@ function isInternalRoute(url: string): boolean {
     const currentDomain = typeof window !== 'undefined' ? window.location.hostname : ''
 
     if (urlObj.hostname === currentDomain || urlObj.hostname === 'localhost') {
-      return INTERNAL_ROUTES.includes(urlObj.pathname.split('?')[0])
+      const path = urlObj.pathname.split('?')[0]
+      // Check exact match or if it starts with /search/
+      return INTERNAL_ROUTES.includes(path) || path.startsWith('/search/')
     }
   } catch {
     // Invalid URL, treat as external
@@ -91,10 +79,12 @@ export function BrowserView({
   onContentChange,
   onCanGoBackChange,
   onCanGoForwardChange,
-  onFaviconChange
+  onFaviconChange,
+  models
 }: BrowserViewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const ipcHandlerRef = useRef<((e: any) => void) | null>(null)
   const [history, setHistory] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const [error, setError] = useState<string | null>(null)
@@ -129,61 +119,6 @@ export function BrowserView({
     }
   }, [])
 
-  // Set up webview IPC message handlers to relay cursor events
-  useEffect(() => {
-    if (!isElectron || !iframeRef.current || isInternal) return
-
-    const webview = iframeRef.current as any
-    const electronAPI = (window as any).electronAPI
-
-    console.log('[BrowserView] Setting up webview for:', iframeUrl, 'Element tag:', webview?.tagName)
-
-    if (!electronAPI) {
-      console.warn('[BrowserView] electronAPI not available for webview cursor relay')
-      return
-    }
-
-    const handleIpcMessage = (event: any) => {
-      const { channel, args } = event
-      console.log('[BrowserView] IPC message received:', channel, args)
-
-      // Relay cursor messages from webview to main process
-      if (channel === 'cursor-move') {
-        const [data] = args
-        console.log('[BrowserView] Relaying cursor-move:', data)
-        electronAPI.sendCursorMove?.(data)
-      } else if (channel === 'hover-target') {
-        const [data] = args
-        electronAPI.sendHoverTarget?.(data)
-      } else if (channel === 'cursor-mousedown' || channel === 'cursor-down') {
-        console.log('[BrowserView] Relaying cursor-down')
-        electronAPI.sendCursorMouseDown?.()
-      } else if (channel === 'cursor-mouseup' || channel === 'cursor-up') {
-        console.log('[BrowserView] Relaying cursor-up')
-        electronAPI.sendCursorMouseUp?.()
-      }
-    }
-
-    // Forward console messages from webview to main console for debugging
-    const handleConsoleMessage = (event: any) => {
-      console.log(`[Webview Console] ${event.message}`)
-    }
-
-    // Wait for webview to be ready before adding listener
-    const setupListener = () => {
-      console.log('[BrowserView] ✅ Webview ready! Setting up IPC listener for:', iframeUrl)
-      webview.addEventListener('ipc-message', handleIpcMessage)
-      webview.addEventListener('console-message', handleConsoleMessage)
-    }
-
-    // Always wait for dom-ready event to ensure webview is fully loaded
-    webview.addEventListener('dom-ready', setupListener, { once: true })
-
-    return () => {
-      webview.removeEventListener?.('ipc-message', handleIpcMessage)
-      webview.removeEventListener?.('console-message', handleConsoleMessage)
-    }
-  }, [isElectron, isInternal, iframeUrl])
 
   // Handle URL changes (including initial load)
   useEffect(() => {
@@ -201,22 +136,9 @@ export function BrowserView({
       // Set page title based on route
       // Don't update title for home page if it's "New Tab" - let it stay until user navigates
       const titles: Record<string, string> = {
-        '/': 'ORB AI - AI Solutions',
-        '/about': 'About Us - ORB AI',
-        '/services': 'Services - ORB AI',
-        '/discover': 'Discover - ORB AI',
-        '/spaces': 'Spaces - ORB AI',
-        '/finance': 'Finance - ORB AI',
-        '/images': 'Images - ORB AI',
-        '/videos': 'Videos - ORB AI',
-        '/academic': 'Academic - ORB AI',
-        '/writing': 'Writing - ORB AI'
+        '/': 'ORB AI - AI Solutions'
       }
       // For home page, don't update title - let it stay as "New Tab" until user navigates
-      // For other routes, update the title
-      if (path !== '/') {
-        onTitleChange(titles[path] || 'ORB AI')
-      }
       onLoadingChange(false)
     } else {
       setIframeUrl(targetUrl)
@@ -504,27 +426,38 @@ export function BrowserView({
 
   // Render internal neumorphic page
   const renderInternalPage = () => {
+    // Handle /search/ routes - show ChatOverlay
+    if (internalPath.startsWith('/search/')) {
+      // Extract chatId and query from URL
+      const urlParts = iframeUrl?.split('?') || []
+      const pathParts = urlParts[0]?.split('/') || []
+      const chatId = pathParts[2] || generateId()
+      
+      // Extract query parameter
+      let initialQuery = ''
+      if (urlParts[1]) {
+        const params = new URLSearchParams(urlParts[1])
+        initialQuery = params.get('q') || ''
+      }
+      
+      return (
+        <div className="w-full h-full bg-background">
+          <ChatOverlay
+            initialQuery={initialQuery}
+            chatId={chatId}
+            models={models}
+            onClose={() => {
+              // Navigate back to home when chat is closed
+              onNavigate('/')
+            }}
+          />
+        </div>
+      )
+    }
+    
     switch (internalPath) {
       case '/':
         return <NeumorphicHomePage />
-      case '/about':
-        return <NeumorphicAboutPage />
-      case '/services':
-        return <NeumorphicServicesPage />
-      case '/discover':
-        return <NeumorphicDiscoverPage />
-      case '/finance':
-        return <NeumorphicFinancePage />
-      case '/images':
-        return <NeumorphicImagesPage />
-      case '/videos':
-        return <NeumorphicVideosPage />
-      case '/academic':
-        return <NeumorphicAcademicPage />
-      case '/spaces':
-        return <NeumorphicSpacesPage />
-      case '/writing':
-        return <NeumorphicWritingPage />
       case '/ide':
         // Render IDE page directly using iframe to load the Next.js route
         return (
@@ -599,36 +532,72 @@ export function BrowserView({
               <webview
                 ref={(el) => {
                   (iframeRef as any).current = el
+                  
+                  // Clean up previous listener if it exists
+                  if (ipcHandlerRef.current && (iframeRef as any).current) {
+                    (iframeRef as any).current.removeEventListener('ipc-message', ipcHandlerRef.current);
+                  }
+                  
                   if (el && !isInternal) {
                     console.log('[BrowserView] Webview element created for:', iframeUrl)
-                    const electronAPI = (window as any).electronAPI
-                    if (!electronAPI) {
-                      console.warn('[BrowserView] electronAPI not available')
-                      return
-                    }
+                    
+                    // Setup IPC listener immediately when webview is created
+                          const handleIPCMessage = (e: any) => {
+                            if (e.channel === 'cursor:move' && typeof window !== 'undefined') {
+                              const { x, y, clickable, image } = e.args[0] || {};
+                              if (typeof x === 'number' && typeof y === 'number') {
+                                // Get webview position to convert coordinates
+                                // e.clientX/e.clientY from webview are relative to webview's viewport
+                                const rect = el.getBoundingClientRect();
 
-                    // Set up IPC listeners immediately
-                    const handleIpcMessage = (event: any) => {
-                      const { channel, args } = event
-                      console.log('[BrowserView] IPC from webview:', channel)
-                      if (channel === 'cursor-move') {
-                        electronAPI.sendCursorMove?.(args[0])
-                      } else if (channel === 'cursor-down' || channel === 'cursor-mousedown') {
-                        electronAPI.sendCursorMouseDown?.()
-                      } else if (channel === 'cursor-up' || channel === 'cursor-mouseup') {
-                        electronAPI.sendCursorMouseUp?.()
-                      }
-                    }
-
-                    const handleConsoleMessage = (event: any) => {
-                      console.log(`[Webview] ${event.message}`)
-                    }
-
-                    el.addEventListener('ipc-message', handleIpcMessage)
-                    el.addEventListener('console-message', handleConsoleMessage)
-                    el.addEventListener('dom-ready', () => {
-                      console.log('[BrowserView] Webview dom-ready for:', iframeUrl)
-                    })
+                                // Try to get webview zoom level if available
+                                let zoomLevel = 1.0;
+                                try {
+                                  // @ts-ignore - Electron webview API
+                                  const zoom = el.getZoomFactor?.();
+                                  if (typeof zoom === 'number') {
+                                    zoomLevel = zoom;
+                                  }
+                                } catch (e) {
+                                  // Zoom not available, use 1.0
+                                }
+                                
+                                // Convert webview-relative coordinates to window coordinates
+                                // Account for zoom level if present
+                                const windowX = rect.left + (x * zoomLevel);
+                                const windowY = rect.top + (y * zoomLevel);
+                                
+                                // Convert clickable element rect if present
+                                let clickableRect = null;
+                                if (clickable && typeof clickable === 'object') {
+                                  clickableRect = {
+                                    left: rect.left + (clickable.x * zoomLevel),
+                                    top: rect.top + (clickable.y * zoomLevel),
+                                    right: rect.left + (clickable.right * zoomLevel),
+                                    bottom: rect.top + (clickable.bottom * zoomLevel),
+                                    width: clickable.width * zoomLevel,
+                                    height: clickable.height * zoomLevel
+                                  };
+                                }
+                                
+                                // Dispatch custom event that TargetCursor can listen to
+                                const event = new CustomEvent('cursor:move', {
+                                  detail: { 
+                                    x: windowX, 
+                                    y: windowY,
+                                    clickable: clickableRect,
+                                    image: image // Pass image info from webview
+                                  }
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          };
+                    
+                    ipcHandlerRef.current = handleIPCMessage;
+                    el.addEventListener('ipc-message', handleIPCMessage);
+                  } else {
+                    ipcHandlerRef.current = null;
                   }
                 }}
                 src={iframeUrl}

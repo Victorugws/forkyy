@@ -64,13 +64,13 @@ export function PriceAlerts({ compact = false }: PriceAlertsProps) {
   if (compact) {
     // Compact version for sidebar
     return (
-      <div className="neu-card p-4 rounded-2xl">
+      <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-4 rounded-2xl">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-foreground" />
             <h3 className="text-base font-semibold text-foreground">Price Alerts</h3>
           </div>
-          <button className="p-1.5 rounded-lg neu-button hover:neu-inset transition-all">
+          <button className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 hover:bg-white/20 backdrop-blur-sm border border-[#e6ebf3] transition-all">
             <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -135,7 +135,7 @@ export function PriceAlerts({ compact = false }: PriceAlertsProps) {
 
   // Full version for main content
   return (
-    <div className="neu-card p-6 rounded-2xl mb-6">
+    <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-foreground" />

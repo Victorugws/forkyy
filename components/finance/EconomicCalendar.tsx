@@ -71,7 +71,7 @@ function getImpactColor(impact: string) {
 
 export function EconomicCalendar() {
   return (
-    <div className="neu-card p-6 rounded-2xl mb-6">
+    <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] p-6 rounded-2xl mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-foreground" />

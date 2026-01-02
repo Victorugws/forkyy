@@ -161,12 +161,17 @@ export function convertToUIMessages(
 
     if (message.content) {
       if (typeof message.content === 'string') {
-        textContent = message.content
+        // Remove <has_function_call> tags at the source
+        textContent = message.content.replace(/<has_function_call>[\s\S]*?<\/has_function_call>/gi, '').trim()
       } else if (Array.isArray(message.content)) {
         for (const content of message.content) {
           if (content && typeof content === 'object' && 'type' in content) {
             if (content.type === 'text' && 'text' in content) {
-              textContent += content.text
+              // Remove <has_function_call> tags from text content
+              const cleanedText = (content.text as string).replace(/<has_function_call>[\s\S]*?<\/has_function_call>/gi, '').trim()
+              if (cleanedText) {
+                textContent += cleanedText
+              }
             } else if (
               content.type === 'tool-call' &&
               'toolCallId' in content &&

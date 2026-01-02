@@ -16,12 +16,12 @@ export function GradualBlur({ className = '', intensity = 'medium' }: GradualBlu
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 pointer-events-none z-50 ${className}`}>
-      <div className="relative h-32 sm:h-40 md:h-48">
+      <div className="relative h-[5.6rem] sm:h-[7rem] md:h-[8.4rem]">
         {/* Multiple blur layers for gradual effect */}
         <div
           className="absolute bottom-0 left-0 right-0 h-full"
           style={{
-            background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 25%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 75%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.28) 25%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.08) 75%, transparent 100%)',
             backdropFilter: 'blur(0px)',
           }}
         />
@@ -30,7 +30,7 @@ export function GradualBlur({ className = '', intensity = 'medium' }: GradualBlu
           style={{
             backdropFilter: 'blur(2px)',
             WebkitBackdropFilter: 'blur(2px)',
-            background: 'linear-gradient(to top, rgba(255,255,255,0.3) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(255,255,255,0.12) 0%, transparent 100%)',
           }}
         />
         <div
@@ -38,7 +38,7 @@ export function GradualBlur({ className = '', intensity = 'medium' }: GradualBlu
           style={{
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
-            background: 'linear-gradient(to top, rgba(255,255,255,0.2) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(255,255,255,0.08) 0%, transparent 100%)',
           }}
         />
         <div
@@ -46,7 +46,7 @@ export function GradualBlur({ className = '', intensity = 'medium' }: GradualBlu
           style={{
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
-            background: 'linear-gradient(to top, rgba(255,255,255,0.1) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(255,255,255,0.04) 0%, transparent 100%)',
           }}
         />
       </div>

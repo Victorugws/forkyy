@@ -434,7 +434,6 @@ export function ImpactAnalysisDisplay({
                   />
                 ) : (
                   <div style={{
-                    display: 'block',
                     width: '100%',
                     height: '450px',
                     borderRadius: 'inherit',
@@ -514,11 +513,14 @@ export function ImpactAnalysisDisplay({
               margin: 0,
               color: 'rgb(0, 0, 0)'
             }}>
-              {currentRating.description.split(' ').map((word, i) => (
-                <span key={i} style={{ display: 'inline-block', opacity: 1, transform: 'none', willChange: 'transform' }}>
-                  {word}
-                </span>
-              )).reduce((prev, curr, i) => [prev, ' ', curr])}
+              {currentRating.description.split(' ').map((word, i, array) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ' '}
+                  <span style={{ display: 'inline-block', opacity: 1, transform: 'none', willChange: 'transform' }}>
+                    {word}
+                  </span>
+                </React.Fragment>
+              ))}
             </p>
           </div>
 

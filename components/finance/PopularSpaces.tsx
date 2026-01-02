@@ -1,6 +1,7 @@
 'use client'
 
 import { FileText, User, Database, Coins, HelpCircle, Search } from 'lucide-react'
+import DecryptedText from '@/components/DecryptedText'
 
 interface Space {
   id: string
@@ -65,15 +66,17 @@ export function PopularSpaces({ type = 'all' }: PopularSpacesProps) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold mb-4">Popular Spaces for Finance Research</h2>
+      <h2 className="text-lg font-semibold mb-4">
+        <DecryptedText text="Popular Spaces for Finance Research" animateOn="view" speed={30} />
+      </h2>
 
-      <div className="neu-card rounded-xl overflow-hidden">
+      <div className="bg-white/30 backdrop-blur-md border border-[#e6ebf3] rounded-xl overflow-hidden">
         {filteredSpaces.map((space, index) => (
           <div key={space.id}>
             <div className="p-5 hover:bg-background/30 transition-all group cursor-pointer">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4 flex-1 min-w-0">
-                <div className="p-3 rounded-lg neu-inset bg-background/50 flex-shrink-0">
+                <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm border border-[#e6ebf3] bg-background/50 flex-shrink-0">
                   {space.icon}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -88,7 +91,7 @@ export function PopularSpaces({ type = 'all' }: PopularSpacesProps) {
 
               <button
                 type="button"
-                className="neu-button px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap hover:neu-raised transition-all flex-shrink-0"
+                className="bg-white/20 backdrop-blur-sm border border-[#e6ebf3] hover:bg-white/30 px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap hover:bg-white/30 transition-all flex-shrink-0"
               >
                 {space.actionText}
               </button>

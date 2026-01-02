@@ -1,26 +1,38 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Globe, DollarSign, Presentation, Briefcase, Newspaper, Search, Target, TrendingUp, Rocket } from 'lucide-react'
+import { 
+  Heart, 
+  Sprout, 
+  GraduationCap, 
+  Home, 
+  ShoppingCart, 
+  Zap, 
+  Utensils, 
+  DollarSign, 
+  Target, 
+  Rocket 
+} from 'lucide-react'
 
 interface ModeSelectionButtonsProps {
   onModeSelect: (mode: string) => void
   onAcknowledgement?: (message: string) => void
-  onFinanceOverlay?: () => void
   onAutopilotDoubleClick?: () => void
 }
 
 const modes = [
-  { id: 'webapp', label: 'Web app', message: 'Ready to webify...', icon: Globe },
+  { id: 'healthcare', label: 'Healthcare', message: 'Ready to healthify...', icon: Heart },
+  { id: 'agriculture', label: 'Agriculture', message: 'Ready to cultivate...', icon: Sprout },
+  { id: 'education', label: 'Education', message: 'Ready to educate...', icon: GraduationCap },
+  { id: 'realestate', label: 'Real Estate', message: 'Ready to propertyfy...', icon: Home },
+  { id: 'ecommerce', label: 'E-commerce', message: 'Ready to commercialize...', icon: ShoppingCart },
+  { id: 'energy', label: 'Energy', message: 'Ready to energize...', icon: Zap },
+  { id: 'foodbeverage', label: 'Food & Beverage', message: 'Ready to serve...', icon: Utensils },
   { id: 'finance', label: 'Finance', message: 'Ready to financialize...', icon: DollarSign },
-  { id: 'slides', label: 'Slides', message: 'Ready to slideify...', icon: Presentation },
-  { id: 'service', label: 'Service', message: 'Ready to servicize...', icon: Briefcase },
-  { id: 'news', label: 'News', message: 'Ready to newsify...', icon: Newspaper },
-  { id: 'research', label: 'Research', message: 'Ready to researchify...', icon: Search },
   { id: 'strategy', label: 'Strategy', message: 'Ready to strategize...', icon: Target },
 ]
 
-export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanceOverlay, onAutopilotDoubleClick }: ModeSelectionButtonsProps) {
+export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onAutopilotDoubleClick }: ModeSelectionButtonsProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [doubleClickTimer, setDoubleClickTimer] = useState<NodeJS.Timeout | null>(null)
 
@@ -47,17 +59,6 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
     }
   }
 
-  const handleFinanceClick = () => {
-    if (onFinanceOverlay) {
-      onFinanceOverlay()
-    } else {
-      window.dispatchEvent(new CustomEvent('browser:navigate', {
-        detail: { url: '/finance' }
-      }))
-    }
-  }
-
-
   return (
     <div 
       className="buttons"
@@ -69,7 +70,7 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
         width: 'fit-content',
         transition: '0.3s',
         borderRadius: '50%',
-        padding: isOpen ? '60px' : '0',
+        padding: isOpen ? '90px' : '0', // Increased padding for better spacing
       }}
     >
       {/* Main Button - Neumorphic with Autopilot Logo when open */}
@@ -83,7 +84,7 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
             placeItems: 'center',
             padding: '10px',
             border: 'none',
-            background: '#e8e8e8',
+            background: '#000000',
             boxShadow: '5px 5px 12px #cacaca, -5px -5px 12px #ffffff',
             borderRadius: '50%',
             transition: '0.2s',
@@ -93,53 +94,23 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
             cursor: 'pointer',
           }}
         >
-          <Rocket className="size-5 text-gray-700" />
+          <Rocket className="size-5 text-white" />
         </button>
       </div>
-        {/* Finance Button */}
-        <button
-          className="button finance-link-button"
-          onClick={handleFinanceClick}
-          style={{
-            position: 'absolute',
-            display: 'grid',
-            placeItems: 'center',
-            padding: '10px',
-            border: 'none',
-            background: '#e8e8e8',
-            boxShadow: isOpen
-              ? '5px 5px 12px #cacaca, -5px -5px 12px #ffffff'
-              : '5px 5px 12px rgba(202, 202, 202, 0), -5px -5px 12px rgba(255, 255, 255, 0)',
-            transition: '0.3s',
-            transitionProperty: 'transform, opacity, background, box-shadow',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
-            cursor: 'pointer',
-            opacity: isOpen ? 1 : 0,
-            pointerEvents: isOpen ? 'auto' : 'none',
-            transform: isOpen ? 'translate(70px, 0px)' : 'translate(0, 0)',
-            transitionDelay: isOpen ? '0.1s, 0s, 0.1s' : '0s',
-          }}
-        >
-          <TrendingUp className="size-5 text-gray-700" />
-        </button>
 
-
-        {/* Mode Buttons - Positioned in circular pattern */}
+        {/* Mode Buttons - Positioned in circular pattern with better spacing */}
         {modes.map((mode, index) => {
-          // Calculate positions based on the CSS pattern from the user
-          const positions = [
-            { x: 47, y: -47 },  // Top-right diagonal
-            { x: 0, y: -70 },   // Top
-            { x: -47, y: -47 }, // Top-left diagonal
-            { x: -70, y: 0 },   // Left
-            { x: -47, y: 47 },  // Bottom-left diagonal
-            { x: 0, y: 70 },    // Bottom
-            { x: 47, y: 47 },   // Bottom-right diagonal
-          ]
+          // Calculate positions for 9 modes in circular pattern with improved spacing
+          // Using larger radius and better angular distribution
+          const radius = 85 // Increased from 70 for better spacing
+          const angleStep = (2 * Math.PI) / modes.length
+          const startAngle = -Math.PI / 2 // Start at top
           
-          const pos = positions[index] || { x: 0, y: 0 }
+          const angle = startAngle + (index * angleStep)
+          const x = Math.round(radius * Math.cos(angle))
+          const y = Math.round(radius * Math.sin(angle))
+          
+          const pos = { x, y }
 
           return (
             <button
@@ -152,7 +123,7 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
                 placeItems: 'center',
                 padding: '10px',
                 border: 'none',
-                background: '#e8e8e8',
+                background: '#000000',
                 boxShadow: isOpen
                   ? '5px 5px 12px #cacaca, -5px -5px 12px #ffffff'
                   : '5px 5px 12px rgba(202, 202, 202, 0), -5px -5px 12px rgba(255, 255, 255, 0)',
@@ -168,7 +139,7 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
                 transitionDelay: isOpen ? `${(index + 3) * 0.1}s, 0s, ${(index + 3) * 0.1}s` : '0s',
               }}
             >
-              <mode.icon className="size-5 text-gray-700" />
+              <mode.icon className="size-5 text-white" />
             </button>
           )
         })}
@@ -186,29 +157,32 @@ export function ModeSelectionButtons({ onModeSelect, onAcknowledgement, onFinanc
         .button:hover {
           box-shadow: 6px 6px 14px #cacaca, -6px -6px 14px #ffffff;
         }
-        .webapp-button:hover {
-          background: #3b82f6;
-        }
-        .finance-button:hover {
-          background: #f59e0b;
-        }
-        .slides-button:hover {
-          background: #8b5cf6;
-        }
-        .service-button:hover {
-          background: #10b981;
-        }
-        .news-button:hover {
+        .healthcare-button:hover {
           background: #ef4444;
         }
-        .research-button:hover {
-          background: #6366f1;
+        .agriculture-button:hover {
+          background: #10b981;
+        }
+        .education-button:hover {
+          background: #3b82f6;
+        }
+        .realestate-button:hover {
+          background: #f59e0b;
+        }
+        .ecommerce-button:hover {
+          background: #8b5cf6;
+        }
+        .energy-button:hover {
+          background: #fbbf24;
+        }
+        .foodbeverage-button:hover {
+          background: #f97316;
+        }
+        .finance-button:hover {
+          background: #06b6d4;
         }
         .strategy-button:hover {
           background: #ec4899;
-        }
-        .finance-link-button:hover {
-          background: #3b82f6;
         }
       `}</style>
     </div>

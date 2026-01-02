@@ -72,7 +72,11 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
     link.style.display = 'none'
     document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    try {
+      document.body.removeChild(link)
+    } catch (error) {
+      // Link may have been removed already, silently ignore
+    }
     URL.revokeObjectURL(url)
   }
 

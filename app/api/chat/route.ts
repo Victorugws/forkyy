@@ -1,84 +1,52 @@
+import { NextRequest } from 'next/server'
+import { getModels } from '@/lib/config/models'
 import { getCurrentUserId } from '@/lib/auth/get-current-user'
-import { createManualToolStreamResponse } from '@/lib/streaming/create-manual-tool-stream'
 import { createToolCallingStreamResponse } from '@/lib/streaming/create-tool-calling-stream'
-import { Model } from '@/lib/types/models'
-import { isProviderEnabled } from '@/lib/utils/registry'
-import { cookies } from 'next/headers'
+import { generateId } from 'ai'
 
-export const maxDuration = 30
+export const dynamic = 'force-static'
+export const revalidate = false
 
-const DEFAULT_MODEL: Model = {
-  id: 'grok-3',
-  name: 'Grok 3',
-  provider: 'xAI',
-  providerId: 'xai',
-  enabled: true,
-  toolCallType: 'native'
-}
+// Use Node.js runtime instead of Edge because Redis client requires Node.js built-in modules
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { messages, id: chatId } = await req.json()
-    const referer = req.headers.get('referer')
-    const isSharePage = referer?.includes('/share/')
+    const { messages, id: chatId, model: modelId } = await req.json()
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response('Messages are required', { status: 400 })
+    }
+
     const userId = await getCurrentUserId()
+    const finalChatId = chatId || generateId()
+    
+    // Get models and find the specified one, or use default (prefer Grok)
+    const models = await getModels()
+    const model = modelId 
+      ? models.find(m => `${m.providerId}:${m.id}` === modelId)
+      : models.find(m => m.enabled && m.providerId === 'xai') || models.find(m => m.enabled) || models[0]
 
-    if (isSharePage) {
-      return new Response('Chat API is not available on share pages', {
-        status: 403,
-        statusText: 'Forbidden'
-      })
+    if (!model) {
+      return new Response('No model available', { status: 500 })
     }
 
-    const cookieStore = await cookies()
-    const modelJson = cookieStore.get('selectedModel')?.value
-    const searchMode = cookieStore.get('search-mode')?.value === 'true'
-
-    let selectedModel = DEFAULT_MODEL
-
-    if (modelJson) {
-      try {
-        selectedModel = JSON.parse(modelJson) as Model
-      } catch (e) {
-        console.error('Failed to parse selected model:', e)
-      }
-    }
-
-    if (
-      !isProviderEnabled(selectedModel.providerId) ||
-      selectedModel.enabled === false
-    ) {
-      return new Response(
-        `Selected provider is not enabled ${selectedModel.providerId}`,
-        {
-          status: 404,
-          statusText: 'Not Found'
-        }
-      )
-    }
-
-    const supportsToolCalling = selectedModel.toolCallType === 'native'
-
-    return supportsToolCalling
-      ? createToolCallingStreamResponse({
-          messages,
-          model: selectedModel,
-          chatId,
-          searchMode,
-          userId
-        })
-      : createManualToolStreamResponse({
-          messages,
-          model: selectedModel,
-          chatId,
-          searchMode,
-          userId
-        })
-  } catch (error) {
-    console.error('API route error:', error)
-    return new Response('Error processing your request', {
-      status: 500,
-      statusText: 'Internal Server Error'
+    // Create streaming response
+    // Enable search mode so Grok can use Tavily to get images, sources, etc.
+    const streamResponse = createToolCallingStreamResponse({
+      messages,
+      model,
+      chatId: finalChatId,
+      searchMode: true, // Enable search mode to allow Grok to use Tavily for images and sources
+      userId
     })
+
+    return streamResponse
+  } catch (error: any) {
+    console.error('Chat API error:', error)
+    return new Response(
+      error.message || 'Internal server error',
+      { status: 500 }
+    )
   }
 }
+

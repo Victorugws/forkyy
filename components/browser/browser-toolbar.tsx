@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Star,
@@ -40,6 +40,7 @@ interface BrowserToolbarProps {
   onFind: () => void
   onOpenDownloads: () => void
   onOpenHistory: () => void
+  onOpenCookies?: () => void
   onOpenBookmarks: () => void
   onOpenDevTools: () => void
   onOpenSettings: () => void
@@ -65,6 +66,15 @@ export function BrowserToolbar({
   isSecure,
   zoom,
 }: BrowserToolbarProps) {
+  const [showEyeTracking, setShowEyeTracking] = useState(false)
+
+  useEffect(() => {
+    // Only check for eyeTracking on the client after mount
+    if (typeof window !== 'undefined' && (window as any).eyeTracking) {
+      setShowEyeTracking(true)
+    }
+  }, [])
+
   return (
     <div className="flex items-center gap-1 px-2 border-l">
       {/* Bookmark */}
@@ -114,7 +124,7 @@ export function BrowserToolbar({
       </DropdownMenu>
 
       {/* Eye Tracking Control */}
-      {typeof window !== 'undefined' && (window as any).eyeTracking && (
+      {showEyeTracking && (
         <EyeTrackingControl />
       )}
 

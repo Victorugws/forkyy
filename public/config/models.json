@@ -1,11 +1,19 @@
 {
   "models": [
     {
+      "id": "grok-2-1212",
+      "name": "Grok 2",
+      "provider": "xAI",
+      "providerId": "xai",
+      "enabled": true,
+      "toolCallType": "native"
+    },
+    {
       "id": "gpt-4.1",
       "name": "GPT-4.1",
       "provider": "OpenAI",
       "providerId": "openai",
-      "enabled": true,
+      "enabled": false,
       "toolCallType": "native"
     },
     {
@@ -189,7 +197,7 @@
       "name": "Grok 2 Vision",
       "provider": "xAI",
       "providerId": "xai",
-      "enabled": true,
+      "enabled": false,
       "toolCallType": "native"
     },
     {
@@ -197,7 +205,7 @@
       "name": "Grok 3 Beta",
       "provider": "xAI",
       "providerId": "xai",
-      "enabled": true,
+      "enabled": false,
       "toolCallType": "native"
     },
     {

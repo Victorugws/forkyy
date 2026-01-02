@@ -156,11 +156,55 @@ export function WebViewBrowser() {
       createTab(e.url)
     })
 
-    // Forward cursor events from webview to parent
+    // Forward cursor events from webview to parent for target cursor tracking
     webview.addEventListener('ipc-message', (e: any) => {
       if (e.channel === 'cursor:move' && typeof window !== 'undefined') {
-        // @ts-ignore
-        window.electronAPI?.syncCursorPosition(e.args[0])
+        const { x, y, clickable, image } = e.args[0] || {};
+        if (typeof x === 'number' && typeof y === 'number') {
+          // Get webview position to convert coordinates
+          // e.clientX/e.clientY from webview are relative to webview's viewport
+          const rect = webview.getBoundingClientRect();
+          
+          // Try to get webview zoom level if available
+          let zoomLevel = 1.0;
+          try {
+            // @ts-ignore - Electron webview API
+            const zoom = webview.getZoomFactor?.();
+            if (typeof zoom === 'number') {
+              zoomLevel = zoom;
+            }
+          } catch (e) {
+            // Zoom not available, use 1.0
+          }
+          
+          // Convert webview-relative coordinates to window coordinates
+          const windowX = rect.left + (x * zoomLevel);
+          const windowY = rect.top + (y * zoomLevel);
+          
+          // Convert clickable element rect if present
+          let clickableRect = null;
+          if (clickable && typeof clickable === 'object') {
+            clickableRect = {
+              left: rect.left + (clickable.x * zoomLevel),
+              top: rect.top + (clickable.y * zoomLevel),
+              right: rect.left + (clickable.right * zoomLevel),
+              bottom: rect.top + (clickable.bottom * zoomLevel),
+              width: clickable.width * zoomLevel,
+              height: clickable.height * zoomLevel
+            };
+          }
+          
+          // Dispatch custom event that TargetCursor can listen to
+          const event = new CustomEvent('cursor:move', {
+            detail: { 
+              x: windowX, 
+              y: windowY,
+              clickable: clickableRect,
+              image: image // Pass image info from webview
+            }
+          });
+          window.dispatchEvent(event);
+        }
       }
     })
   }

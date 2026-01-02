@@ -47,6 +47,9 @@ export default function UserMenu({ user }: UserMenuProps) {
 
   const handleLogout = async () => {
     const supabase = createClient()
+    if (!supabase) {
+      throw new Error('Supabase client not initialized')
+    }
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
